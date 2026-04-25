@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +27,10 @@ Future<void> main() async {
 
   // Anonymous identity for session writes under /sessions/{uid}/records.
   // Parent email+password login (MVP item #2) will later link to this UID.
-  await AuthService(FirebaseAuth.instance).signInAnonymouslyIfNeeded();
+  await AuthService(
+    FirebaseAuth.instance,
+    FirebaseFirestore.instance,
+  ).ensureAnonymousChildSession();
 
   runApp(const ProviderScope(child: DailyLifeApp()));
 }

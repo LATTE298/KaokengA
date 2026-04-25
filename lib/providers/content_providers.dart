@@ -7,7 +7,7 @@ import '../services/content_repository.dart';
 
 // Repository singleton.
 final contentRepositoryProvider = Provider<ContentRepository>(
-  (ref) => const ContentRepository(),
+  (ref) => AssetContentRepository(),
 );
 
 // List of published scenarios — spec 13 §Scenario Providers (scenarioListProvider).
@@ -15,7 +15,8 @@ final contentRepositoryProvider = Provider<ContentRepository>(
 // emit so it swaps in cleanly later.
 final scenarioListProvider = FutureProvider<List<ScenarioSummary>>((ref) async {
   final repo = ref.watch(contentRepositoryProvider);
-  return repo.fetchScenarioIndex();
+  final scenarios = await repo.fetchScenarioIndex();
+  return scenarios.where((scenario) => scenario.published).toList();
 });
 
 // Full config for one scenario, fetched lazily. Spec 13 §Content Providers.
@@ -24,7 +25,7 @@ final scenarioConfigProvider = FutureProvider.family<ScenarioConfig, String>((
   scenarioId,
 ) async {
   final repo = ref.watch(contentRepositoryProvider);
-  final list = await ref.watch(scenarioListProvider.future);
+  final list = await repo.fetchScenarioIndex();
   final summary = findScenarioSummary(list, scenarioId);
   return repo.fetchScenarioConfig(summary.configUrl);
 });

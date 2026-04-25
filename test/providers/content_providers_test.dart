@@ -29,5 +29,25 @@ void main() {
         throwsA(isA<ContentNotFoundException>()),
       );
     });
+
+    test('throws a typed exception for an unpublished scenario id', () {
+      const unpublished = [
+        ScenarioSummary(
+          scenarioId: 'draft_scenario',
+          titleTh: 'ฉบับร่าง',
+          category: 'daily_life',
+          module: 'A',
+          configUrl: 'assets/scenarios/draft_scenario.json',
+          thumbnailUrl: 'assets/images/draft_scenario.webp',
+          version: 1,
+          published: false,
+        ),
+      ];
+
+      expect(
+        () => findScenarioSummary(unpublished, 'draft_scenario'),
+        throwsA(isA<ContentUnpublishedException>()),
+      );
+    });
   });
 }

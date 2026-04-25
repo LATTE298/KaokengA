@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../l10n/tts_strings_th.dart';
-import '../../providers/content_providers.dart';
+import '../../providers/parent_dashboard_providers.dart';
 import '../../providers/tts_provider.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/colors.dart';
@@ -19,7 +19,7 @@ class ModuleAScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncList = ref.watch(scenarioListProvider);
+    final asyncList = ref.watch(enabledScenariosProvider);
 
     return Scaffold(
       backgroundColor: kWarmWhite,

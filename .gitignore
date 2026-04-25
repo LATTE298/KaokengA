@@ -48,3 +48,17 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Node/Bun related
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Firebase local tooling cache
+.firebase/
+
+# Local AI/tooling settings and generated reports
+.claude/settings.local.json
+repomix-output.xml
