@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "865042115500",
+    "project_id": "tenacious-veld-453115-u8",
+    "storage_bucket": "tenacious-veld-453115-u8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:865042115500:android:3eb4414ab11d2739b22809",
+        "android_client_info": {
+          "package_name": "com.kaokeng.daily_life"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0-G72WvA9_tg8xcWjt96bwKyAM7dXRLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

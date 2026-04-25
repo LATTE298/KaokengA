@@ -1,0 +1,37 @@
+{
+  "scenario_id": "food_prep_001",
+  "version": 1,
+  "category": "daily_life",
+  "module": "A",
+  "title_th": "ช่วยจัดผลไม้ใส่จาน",
+  "background_image": "assets/images/bg_kitchen.webp",
+  "tts_instruction": "น้องช่วยวางกล้วยลงบนจานให้หน่อยนะครับ",
+  "tts_celebration": "เก่งมากครับ! จัดผลไม้ได้สวยเลย!",
+  "tts_hint": "ลองหยิบกล้วยใส่จานนะครับ",
+  "interactables": [
+    {
+      "id": "banana",
+      "image": "assets/images/banana.webp",
+      "is_target": true,
+      "start_pos": { "x": 300, "y": 500 }
+    },
+    {
+      "id": "toothbrush",
+      "image": "assets/images/toothbrush.webp",
+      "is_target": false,
+      "start_pos": { "x": 600, "y": 500 }
+    },
+    {
+      "id": "pencil",
+      "image": "assets/images/pencil.webp",
+      "is_target": false,
+      "start_pos": { "x": 900, "y": 500 }
+    }
+  ],
+  "target_zone": {
+    "x": 1400,
+    "y": 700,
+    "width": 320,
+    "height": 240
+  }
+}

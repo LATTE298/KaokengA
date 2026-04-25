@@ -1,0 +1,1468 @@
+// coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'scenario_config.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
+
+GamePosition _$GamePositionFromJson(Map<String, dynamic> json) {
+  return _GamePosition.fromJson(json);
+}
+
+/// @nodoc
+mixin _$GamePosition {
+  double get x => throw _privateConstructorUsedError;
+  double get y => throw _privateConstructorUsedError;
+
+  /// Serializes this GamePosition to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of GamePosition
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $GamePositionCopyWith<GamePosition> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $GamePositionCopyWith<$Res> {
+  factory $GamePositionCopyWith(
+    GamePosition value,
+    $Res Function(GamePosition) then,
+  ) = _$GamePositionCopyWithImpl<$Res, GamePosition>;
+  @useResult
+  $Res call({double x, double y});
+}
+
+/// @nodoc
+class _$GamePositionCopyWithImpl<$Res, $Val extends GamePosition>
+    implements $GamePositionCopyWith<$Res> {
+  _$GamePositionCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of GamePosition
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? x = null, Object? y = null}) {
+    return _then(
+      _value.copyWith(
+            x:
+                null == x
+                    ? _value.x
+                    : x // ignore: cast_nullable_to_non_nullable
+                        as double,
+            y:
+                null == y
+                    ? _value.y
+                    : y // ignore: cast_nullable_to_non_nullable
+                        as double,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$GamePositionImplCopyWith<$Res>
+    implements $GamePositionCopyWith<$Res> {
+  factory _$$GamePositionImplCopyWith(
+    _$GamePositionImpl value,
+    $Res Function(_$GamePositionImpl) then,
+  ) = __$$GamePositionImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({double x, double y});
+}
+
+/// @nodoc
+class __$$GamePositionImplCopyWithImpl<$Res>
+    extends _$GamePositionCopyWithImpl<$Res, _$GamePositionImpl>
+    implements _$$GamePositionImplCopyWith<$Res> {
+  __$$GamePositionImplCopyWithImpl(
+    _$GamePositionImpl _value,
+    $Res Function(_$GamePositionImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of GamePosition
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? x = null, Object? y = null}) {
+    return _then(
+      _$GamePositionImpl(
+        x:
+            null == x
+                ? _value.x
+                : x // ignore: cast_nullable_to_non_nullable
+                    as double,
+        y:
+            null == y
+                ? _value.y
+                : y // ignore: cast_nullable_to_non_nullable
+                    as double,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$GamePositionImpl implements _GamePosition {
+  const _$GamePositionImpl({required this.x, required this.y});
+
+  factory _$GamePositionImpl.fromJson(Map<String, dynamic> json) =>
+      _$$GamePositionImplFromJson(json);
+
+  @override
+  final double x;
+  @override
+  final double y;
+
+  @override
+  String toString() {
+    return 'GamePosition(x: $x, y: $y)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$GamePositionImpl &&
+            (identical(other.x, x) || other.x == x) &&
+            (identical(other.y, y) || other.y == y));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, x, y);
+
+  /// Create a copy of GamePosition
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$GamePositionImplCopyWith<_$GamePositionImpl> get copyWith =>
+      __$$GamePositionImplCopyWithImpl<_$GamePositionImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$GamePositionImplToJson(this);
+  }
+}
+
+abstract class _GamePosition implements GamePosition {
+  const factory _GamePosition({
+    required final double x,
+    required final double y,
+  }) = _$GamePositionImpl;
+
+  factory _GamePosition.fromJson(Map<String, dynamic> json) =
+      _$GamePositionImpl.fromJson;
+
+  @override
+  double get x;
+  @override
+  double get y;
+
+  /// Create a copy of GamePosition
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$GamePositionImplCopyWith<_$GamePositionImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+TargetZone _$TargetZoneFromJson(Map<String, dynamic> json) {
+  return _TargetZone.fromJson(json);
+}
+
+/// @nodoc
+mixin _$TargetZone {
+  double get x => throw _privateConstructorUsedError;
+  double get y => throw _privateConstructorUsedError;
+  double get width => throw _privateConstructorUsedError;
+  double get height => throw _privateConstructorUsedError;
+
+  /// Serializes this TargetZone to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of TargetZone
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $TargetZoneCopyWith<TargetZone> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $TargetZoneCopyWith<$Res> {
+  factory $TargetZoneCopyWith(
+    TargetZone value,
+    $Res Function(TargetZone) then,
+  ) = _$TargetZoneCopyWithImpl<$Res, TargetZone>;
+  @useResult
+  $Res call({double x, double y, double width, double height});
+}
+
+/// @nodoc
+class _$TargetZoneCopyWithImpl<$Res, $Val extends TargetZone>
+    implements $TargetZoneCopyWith<$Res> {
+  _$TargetZoneCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of TargetZone
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? x = null,
+    Object? y = null,
+    Object? width = null,
+    Object? height = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            x:
+                null == x
+                    ? _value.x
+                    : x // ignore: cast_nullable_to_non_nullable
+                        as double,
+            y:
+                null == y
+                    ? _value.y
+                    : y // ignore: cast_nullable_to_non_nullable
+                        as double,
+            width:
+                null == width
+                    ? _value.width
+                    : width // ignore: cast_nullable_to_non_nullable
+                        as double,
+            height:
+                null == height
+                    ? _value.height
+                    : height // ignore: cast_nullable_to_non_nullable
+                        as double,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$TargetZoneImplCopyWith<$Res>
+    implements $TargetZoneCopyWith<$Res> {
+  factory _$$TargetZoneImplCopyWith(
+    _$TargetZoneImpl value,
+    $Res Function(_$TargetZoneImpl) then,
+  ) = __$$TargetZoneImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({double x, double y, double width, double height});
+}
+
+/// @nodoc
+class __$$TargetZoneImplCopyWithImpl<$Res>
+    extends _$TargetZoneCopyWithImpl<$Res, _$TargetZoneImpl>
+    implements _$$TargetZoneImplCopyWith<$Res> {
+  __$$TargetZoneImplCopyWithImpl(
+    _$TargetZoneImpl _value,
+    $Res Function(_$TargetZoneImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of TargetZone
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? x = null,
+    Object? y = null,
+    Object? width = null,
+    Object? height = null,
+  }) {
+    return _then(
+      _$TargetZoneImpl(
+        x:
+            null == x
+                ? _value.x
+                : x // ignore: cast_nullable_to_non_nullable
+                    as double,
+        y:
+            null == y
+                ? _value.y
+                : y // ignore: cast_nullable_to_non_nullable
+                    as double,
+        width:
+            null == width
+                ? _value.width
+                : width // ignore: cast_nullable_to_non_nullable
+                    as double,
+        height:
+            null == height
+                ? _value.height
+                : height // ignore: cast_nullable_to_non_nullable
+                    as double,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$TargetZoneImpl implements _TargetZone {
+  const _$TargetZoneImpl({
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+  });
+
+  factory _$TargetZoneImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TargetZoneImplFromJson(json);
+
+  @override
+  final double x;
+  @override
+  final double y;
+  @override
+  final double width;
+  @override
+  final double height;
+
+  @override
+  String toString() {
+    return 'TargetZone(x: $x, y: $y, width: $width, height: $height)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TargetZoneImpl &&
+            (identical(other.x, x) || other.x == x) &&
+            (identical(other.y, y) || other.y == y) &&
+            (identical(other.width, width) || other.width == width) &&
+            (identical(other.height, height) || other.height == height));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, x, y, width, height);
+
+  /// Create a copy of TargetZone
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TargetZoneImplCopyWith<_$TargetZoneImpl> get copyWith =>
+      __$$TargetZoneImplCopyWithImpl<_$TargetZoneImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$TargetZoneImplToJson(this);
+  }
+}
+
+abstract class _TargetZone implements TargetZone {
+  const factory _TargetZone({
+    required final double x,
+    required final double y,
+    required final double width,
+    required final double height,
+  }) = _$TargetZoneImpl;
+
+  factory _TargetZone.fromJson(Map<String, dynamic> json) =
+      _$TargetZoneImpl.fromJson;
+
+  @override
+  double get x;
+  @override
+  double get y;
+  @override
+  double get width;
+  @override
+  double get height;
+
+  /// Create a copy of TargetZone
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$TargetZoneImplCopyWith<_$TargetZoneImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+InteractableConfig _$InteractableConfigFromJson(Map<String, dynamic> json) {
+  return _InteractableConfig.fromJson(json);
+}
+
+/// @nodoc
+mixin _$InteractableConfig {
+  String get id => throw _privateConstructorUsedError;
+  String get image => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_target')
+  bool get isTarget => throw _privateConstructorUsedError;
+  @JsonKey(name: 'start_pos')
+  GamePosition get startPos => throw _privateConstructorUsedError;
+
+  /// Serializes this InteractableConfig to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of InteractableConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $InteractableConfigCopyWith<InteractableConfig> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $InteractableConfigCopyWith<$Res> {
+  factory $InteractableConfigCopyWith(
+    InteractableConfig value,
+    $Res Function(InteractableConfig) then,
+  ) = _$InteractableConfigCopyWithImpl<$Res, InteractableConfig>;
+  @useResult
+  $Res call({
+    String id,
+    String image,
+    @JsonKey(name: 'is_target') bool isTarget,
+    @JsonKey(name: 'start_pos') GamePosition startPos,
+  });
+
+  $GamePositionCopyWith<$Res> get startPos;
+}
+
+/// @nodoc
+class _$InteractableConfigCopyWithImpl<$Res, $Val extends InteractableConfig>
+    implements $InteractableConfigCopyWith<$Res> {
+  _$InteractableConfigCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of InteractableConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? image = null,
+    Object? isTarget = null,
+    Object? startPos = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            id:
+                null == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String,
+            image:
+                null == image
+                    ? _value.image
+                    : image // ignore: cast_nullable_to_non_nullable
+                        as String,
+            isTarget:
+                null == isTarget
+                    ? _value.isTarget
+                    : isTarget // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            startPos:
+                null == startPos
+                    ? _value.startPos
+                    : startPos // ignore: cast_nullable_to_non_nullable
+                        as GamePosition,
+          )
+          as $Val,
+    );
+  }
+
+  /// Create a copy of InteractableConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GamePositionCopyWith<$Res> get startPos {
+    return $GamePositionCopyWith<$Res>(_value.startPos, (value) {
+      return _then(_value.copyWith(startPos: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$InteractableConfigImplCopyWith<$Res>
+    implements $InteractableConfigCopyWith<$Res> {
+  factory _$$InteractableConfigImplCopyWith(
+    _$InteractableConfigImpl value,
+    $Res Function(_$InteractableConfigImpl) then,
+  ) = __$$InteractableConfigImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String id,
+    String image,
+    @JsonKey(name: 'is_target') bool isTarget,
+    @JsonKey(name: 'start_pos') GamePosition startPos,
+  });
+
+  @override
+  $GamePositionCopyWith<$Res> get startPos;
+}
+
+/// @nodoc
+class __$$InteractableConfigImplCopyWithImpl<$Res>
+    extends _$InteractableConfigCopyWithImpl<$Res, _$InteractableConfigImpl>
+    implements _$$InteractableConfigImplCopyWith<$Res> {
+  __$$InteractableConfigImplCopyWithImpl(
+    _$InteractableConfigImpl _value,
+    $Res Function(_$InteractableConfigImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of InteractableConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? image = null,
+    Object? isTarget = null,
+    Object? startPos = null,
+  }) {
+    return _then(
+      _$InteractableConfigImpl(
+        id:
+            null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String,
+        image:
+            null == image
+                ? _value.image
+                : image // ignore: cast_nullable_to_non_nullable
+                    as String,
+        isTarget:
+            null == isTarget
+                ? _value.isTarget
+                : isTarget // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        startPos:
+            null == startPos
+                ? _value.startPos
+                : startPos // ignore: cast_nullable_to_non_nullable
+                    as GamePosition,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$InteractableConfigImpl implements _InteractableConfig {
+  const _$InteractableConfigImpl({
+    required this.id,
+    required this.image,
+    @JsonKey(name: 'is_target') required this.isTarget,
+    @JsonKey(name: 'start_pos') required this.startPos,
+  });
+
+  factory _$InteractableConfigImpl.fromJson(Map<String, dynamic> json) =>
+      _$$InteractableConfigImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final String image;
+  @override
+  @JsonKey(name: 'is_target')
+  final bool isTarget;
+  @override
+  @JsonKey(name: 'start_pos')
+  final GamePosition startPos;
+
+  @override
+  String toString() {
+    return 'InteractableConfig(id: $id, image: $image, isTarget: $isTarget, startPos: $startPos)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$InteractableConfigImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.image, image) || other.image == image) &&
+            (identical(other.isTarget, isTarget) ||
+                other.isTarget == isTarget) &&
+            (identical(other.startPos, startPos) ||
+                other.startPos == startPos));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, image, isTarget, startPos);
+
+  /// Create a copy of InteractableConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$InteractableConfigImplCopyWith<_$InteractableConfigImpl> get copyWith =>
+      __$$InteractableConfigImplCopyWithImpl<_$InteractableConfigImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$InteractableConfigImplToJson(this);
+  }
+}
+
+abstract class _InteractableConfig implements InteractableConfig {
+  const factory _InteractableConfig({
+    required final String id,
+    required final String image,
+    @JsonKey(name: 'is_target') required final bool isTarget,
+    @JsonKey(name: 'start_pos') required final GamePosition startPos,
+  }) = _$InteractableConfigImpl;
+
+  factory _InteractableConfig.fromJson(Map<String, dynamic> json) =
+      _$InteractableConfigImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get image;
+  @override
+  @JsonKey(name: 'is_target')
+  bool get isTarget;
+  @override
+  @JsonKey(name: 'start_pos')
+  GamePosition get startPos;
+
+  /// Create a copy of InteractableConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$InteractableConfigImplCopyWith<_$InteractableConfigImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+ScenarioConfig _$ScenarioConfigFromJson(Map<String, dynamic> json) {
+  return _ScenarioConfig.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ScenarioConfig {
+  @JsonKey(name: 'scenario_id')
+  String get scenarioId => throw _privateConstructorUsedError;
+  int get version => throw _privateConstructorUsedError;
+  String get category => throw _privateConstructorUsedError;
+  String get module => throw _privateConstructorUsedError;
+  @JsonKey(name: 'title_th')
+  String get titleTh => throw _privateConstructorUsedError;
+  @JsonKey(name: 'background_image')
+  String get backgroundImage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tts_instruction')
+  String get ttsInstruction => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tts_celebration')
+  String get ttsCelebration => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tts_hint')
+  String get ttsHint => throw _privateConstructorUsedError;
+  List<InteractableConfig> get interactables =>
+      throw _privateConstructorUsedError;
+  @JsonKey(name: 'target_zone')
+  TargetZone get targetZone => throw _privateConstructorUsedError;
+
+  /// Serializes this ScenarioConfig to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ScenarioConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ScenarioConfigCopyWith<ScenarioConfig> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ScenarioConfigCopyWith<$Res> {
+  factory $ScenarioConfigCopyWith(
+    ScenarioConfig value,
+    $Res Function(ScenarioConfig) then,
+  ) = _$ScenarioConfigCopyWithImpl<$Res, ScenarioConfig>;
+  @useResult
+  $Res call({
+    @JsonKey(name: 'scenario_id') String scenarioId,
+    int version,
+    String category,
+    String module,
+    @JsonKey(name: 'title_th') String titleTh,
+    @JsonKey(name: 'background_image') String backgroundImage,
+    @JsonKey(name: 'tts_instruction') String ttsInstruction,
+    @JsonKey(name: 'tts_celebration') String ttsCelebration,
+    @JsonKey(name: 'tts_hint') String ttsHint,
+    List<InteractableConfig> interactables,
+    @JsonKey(name: 'target_zone') TargetZone targetZone,
+  });
+
+  $TargetZoneCopyWith<$Res> get targetZone;
+}
+
+/// @nodoc
+class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
+    implements $ScenarioConfigCopyWith<$Res> {
+  _$ScenarioConfigCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ScenarioConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? scenarioId = null,
+    Object? version = null,
+    Object? category = null,
+    Object? module = null,
+    Object? titleTh = null,
+    Object? backgroundImage = null,
+    Object? ttsInstruction = null,
+    Object? ttsCelebration = null,
+    Object? ttsHint = null,
+    Object? interactables = null,
+    Object? targetZone = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            scenarioId:
+                null == scenarioId
+                    ? _value.scenarioId
+                    : scenarioId // ignore: cast_nullable_to_non_nullable
+                        as String,
+            version:
+                null == version
+                    ? _value.version
+                    : version // ignore: cast_nullable_to_non_nullable
+                        as int,
+            category:
+                null == category
+                    ? _value.category
+                    : category // ignore: cast_nullable_to_non_nullable
+                        as String,
+            module:
+                null == module
+                    ? _value.module
+                    : module // ignore: cast_nullable_to_non_nullable
+                        as String,
+            titleTh:
+                null == titleTh
+                    ? _value.titleTh
+                    : titleTh // ignore: cast_nullable_to_non_nullable
+                        as String,
+            backgroundImage:
+                null == backgroundImage
+                    ? _value.backgroundImage
+                    : backgroundImage // ignore: cast_nullable_to_non_nullable
+                        as String,
+            ttsInstruction:
+                null == ttsInstruction
+                    ? _value.ttsInstruction
+                    : ttsInstruction // ignore: cast_nullable_to_non_nullable
+                        as String,
+            ttsCelebration:
+                null == ttsCelebration
+                    ? _value.ttsCelebration
+                    : ttsCelebration // ignore: cast_nullable_to_non_nullable
+                        as String,
+            ttsHint:
+                null == ttsHint
+                    ? _value.ttsHint
+                    : ttsHint // ignore: cast_nullable_to_non_nullable
+                        as String,
+            interactables:
+                null == interactables
+                    ? _value.interactables
+                    : interactables // ignore: cast_nullable_to_non_nullable
+                        as List<InteractableConfig>,
+            targetZone:
+                null == targetZone
+                    ? _value.targetZone
+                    : targetZone // ignore: cast_nullable_to_non_nullable
+                        as TargetZone,
+          )
+          as $Val,
+    );
+  }
+
+  /// Create a copy of ScenarioConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $TargetZoneCopyWith<$Res> get targetZone {
+    return $TargetZoneCopyWith<$Res>(_value.targetZone, (value) {
+      return _then(_value.copyWith(targetZone: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$ScenarioConfigImplCopyWith<$Res>
+    implements $ScenarioConfigCopyWith<$Res> {
+  factory _$$ScenarioConfigImplCopyWith(
+    _$ScenarioConfigImpl value,
+    $Res Function(_$ScenarioConfigImpl) then,
+  ) = __$$ScenarioConfigImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    @JsonKey(name: 'scenario_id') String scenarioId,
+    int version,
+    String category,
+    String module,
+    @JsonKey(name: 'title_th') String titleTh,
+    @JsonKey(name: 'background_image') String backgroundImage,
+    @JsonKey(name: 'tts_instruction') String ttsInstruction,
+    @JsonKey(name: 'tts_celebration') String ttsCelebration,
+    @JsonKey(name: 'tts_hint') String ttsHint,
+    List<InteractableConfig> interactables,
+    @JsonKey(name: 'target_zone') TargetZone targetZone,
+  });
+
+  @override
+  $TargetZoneCopyWith<$Res> get targetZone;
+}
+
+/// @nodoc
+class __$$ScenarioConfigImplCopyWithImpl<$Res>
+    extends _$ScenarioConfigCopyWithImpl<$Res, _$ScenarioConfigImpl>
+    implements _$$ScenarioConfigImplCopyWith<$Res> {
+  __$$ScenarioConfigImplCopyWithImpl(
+    _$ScenarioConfigImpl _value,
+    $Res Function(_$ScenarioConfigImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of ScenarioConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? scenarioId = null,
+    Object? version = null,
+    Object? category = null,
+    Object? module = null,
+    Object? titleTh = null,
+    Object? backgroundImage = null,
+    Object? ttsInstruction = null,
+    Object? ttsCelebration = null,
+    Object? ttsHint = null,
+    Object? interactables = null,
+    Object? targetZone = null,
+  }) {
+    return _then(
+      _$ScenarioConfigImpl(
+        scenarioId:
+            null == scenarioId
+                ? _value.scenarioId
+                : scenarioId // ignore: cast_nullable_to_non_nullable
+                    as String,
+        version:
+            null == version
+                ? _value.version
+                : version // ignore: cast_nullable_to_non_nullable
+                    as int,
+        category:
+            null == category
+                ? _value.category
+                : category // ignore: cast_nullable_to_non_nullable
+                    as String,
+        module:
+            null == module
+                ? _value.module
+                : module // ignore: cast_nullable_to_non_nullable
+                    as String,
+        titleTh:
+            null == titleTh
+                ? _value.titleTh
+                : titleTh // ignore: cast_nullable_to_non_nullable
+                    as String,
+        backgroundImage:
+            null == backgroundImage
+                ? _value.backgroundImage
+                : backgroundImage // ignore: cast_nullable_to_non_nullable
+                    as String,
+        ttsInstruction:
+            null == ttsInstruction
+                ? _value.ttsInstruction
+                : ttsInstruction // ignore: cast_nullable_to_non_nullable
+                    as String,
+        ttsCelebration:
+            null == ttsCelebration
+                ? _value.ttsCelebration
+                : ttsCelebration // ignore: cast_nullable_to_non_nullable
+                    as String,
+        ttsHint:
+            null == ttsHint
+                ? _value.ttsHint
+                : ttsHint // ignore: cast_nullable_to_non_nullable
+                    as String,
+        interactables:
+            null == interactables
+                ? _value._interactables
+                : interactables // ignore: cast_nullable_to_non_nullable
+                    as List<InteractableConfig>,
+        targetZone:
+            null == targetZone
+                ? _value.targetZone
+                : targetZone // ignore: cast_nullable_to_non_nullable
+                    as TargetZone,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ScenarioConfigImpl implements _ScenarioConfig {
+  const _$ScenarioConfigImpl({
+    @JsonKey(name: 'scenario_id') required this.scenarioId,
+    required this.version,
+    required this.category,
+    required this.module,
+    @JsonKey(name: 'title_th') required this.titleTh,
+    @JsonKey(name: 'background_image') required this.backgroundImage,
+    @JsonKey(name: 'tts_instruction') required this.ttsInstruction,
+    @JsonKey(name: 'tts_celebration') required this.ttsCelebration,
+    @JsonKey(name: 'tts_hint') required this.ttsHint,
+    required final List<InteractableConfig> interactables,
+    @JsonKey(name: 'target_zone') required this.targetZone,
+  }) : _interactables = interactables;
+
+  factory _$ScenarioConfigImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ScenarioConfigImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'scenario_id')
+  final String scenarioId;
+  @override
+  final int version;
+  @override
+  final String category;
+  @override
+  final String module;
+  @override
+  @JsonKey(name: 'title_th')
+  final String titleTh;
+  @override
+  @JsonKey(name: 'background_image')
+  final String backgroundImage;
+  @override
+  @JsonKey(name: 'tts_instruction')
+  final String ttsInstruction;
+  @override
+  @JsonKey(name: 'tts_celebration')
+  final String ttsCelebration;
+  @override
+  @JsonKey(name: 'tts_hint')
+  final String ttsHint;
+  final List<InteractableConfig> _interactables;
+  @override
+  List<InteractableConfig> get interactables {
+    if (_interactables is EqualUnmodifiableListView) return _interactables;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_interactables);
+  }
+
+  @override
+  @JsonKey(name: 'target_zone')
+  final TargetZone targetZone;
+
+  @override
+  String toString() {
+    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ScenarioConfigImpl &&
+            (identical(other.scenarioId, scenarioId) ||
+                other.scenarioId == scenarioId) &&
+            (identical(other.version, version) || other.version == version) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.module, module) || other.module == module) &&
+            (identical(other.titleTh, titleTh) || other.titleTh == titleTh) &&
+            (identical(other.backgroundImage, backgroundImage) ||
+                other.backgroundImage == backgroundImage) &&
+            (identical(other.ttsInstruction, ttsInstruction) ||
+                other.ttsInstruction == ttsInstruction) &&
+            (identical(other.ttsCelebration, ttsCelebration) ||
+                other.ttsCelebration == ttsCelebration) &&
+            (identical(other.ttsHint, ttsHint) || other.ttsHint == ttsHint) &&
+            const DeepCollectionEquality().equals(
+              other._interactables,
+              _interactables,
+            ) &&
+            (identical(other.targetZone, targetZone) ||
+                other.targetZone == targetZone));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    scenarioId,
+    version,
+    category,
+    module,
+    titleTh,
+    backgroundImage,
+    ttsInstruction,
+    ttsCelebration,
+    ttsHint,
+    const DeepCollectionEquality().hash(_interactables),
+    targetZone,
+  );
+
+  /// Create a copy of ScenarioConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ScenarioConfigImplCopyWith<_$ScenarioConfigImpl> get copyWith =>
+      __$$ScenarioConfigImplCopyWithImpl<_$ScenarioConfigImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ScenarioConfigImplToJson(this);
+  }
+}
+
+abstract class _ScenarioConfig implements ScenarioConfig {
+  const factory _ScenarioConfig({
+    @JsonKey(name: 'scenario_id') required final String scenarioId,
+    required final int version,
+    required final String category,
+    required final String module,
+    @JsonKey(name: 'title_th') required final String titleTh,
+    @JsonKey(name: 'background_image') required final String backgroundImage,
+    @JsonKey(name: 'tts_instruction') required final String ttsInstruction,
+    @JsonKey(name: 'tts_celebration') required final String ttsCelebration,
+    @JsonKey(name: 'tts_hint') required final String ttsHint,
+    required final List<InteractableConfig> interactables,
+    @JsonKey(name: 'target_zone') required final TargetZone targetZone,
+  }) = _$ScenarioConfigImpl;
+
+  factory _ScenarioConfig.fromJson(Map<String, dynamic> json) =
+      _$ScenarioConfigImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'scenario_id')
+  String get scenarioId;
+  @override
+  int get version;
+  @override
+  String get category;
+  @override
+  String get module;
+  @override
+  @JsonKey(name: 'title_th')
+  String get titleTh;
+  @override
+  @JsonKey(name: 'background_image')
+  String get backgroundImage;
+  @override
+  @JsonKey(name: 'tts_instruction')
+  String get ttsInstruction;
+  @override
+  @JsonKey(name: 'tts_celebration')
+  String get ttsCelebration;
+  @override
+  @JsonKey(name: 'tts_hint')
+  String get ttsHint;
+  @override
+  List<InteractableConfig> get interactables;
+  @override
+  @JsonKey(name: 'target_zone')
+  TargetZone get targetZone;
+
+  /// Create a copy of ScenarioConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ScenarioConfigImplCopyWith<_$ScenarioConfigImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+ScenarioSummary _$ScenarioSummaryFromJson(Map<String, dynamic> json) {
+  return _ScenarioSummary.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ScenarioSummary {
+  @JsonKey(name: 'scenario_id')
+  String get scenarioId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'title_th')
+  String get titleTh => throw _privateConstructorUsedError;
+  String get category => throw _privateConstructorUsedError;
+  String get module => throw _privateConstructorUsedError;
+  @JsonKey(name: 'config_url')
+  String get configUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'thumbnail_url')
+  String get thumbnailUrl => throw _privateConstructorUsedError;
+  int get version => throw _privateConstructorUsedError;
+  bool get published => throw _privateConstructorUsedError;
+
+  /// Serializes this ScenarioSummary to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ScenarioSummary
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ScenarioSummaryCopyWith<ScenarioSummary> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ScenarioSummaryCopyWith<$Res> {
+  factory $ScenarioSummaryCopyWith(
+    ScenarioSummary value,
+    $Res Function(ScenarioSummary) then,
+  ) = _$ScenarioSummaryCopyWithImpl<$Res, ScenarioSummary>;
+  @useResult
+  $Res call({
+    @JsonKey(name: 'scenario_id') String scenarioId,
+    @JsonKey(name: 'title_th') String titleTh,
+    String category,
+    String module,
+    @JsonKey(name: 'config_url') String configUrl,
+    @JsonKey(name: 'thumbnail_url') String thumbnailUrl,
+    int version,
+    bool published,
+  });
+}
+
+/// @nodoc
+class _$ScenarioSummaryCopyWithImpl<$Res, $Val extends ScenarioSummary>
+    implements $ScenarioSummaryCopyWith<$Res> {
+  _$ScenarioSummaryCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ScenarioSummary
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? scenarioId = null,
+    Object? titleTh = null,
+    Object? category = null,
+    Object? module = null,
+    Object? configUrl = null,
+    Object? thumbnailUrl = null,
+    Object? version = null,
+    Object? published = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            scenarioId:
+                null == scenarioId
+                    ? _value.scenarioId
+                    : scenarioId // ignore: cast_nullable_to_non_nullable
+                        as String,
+            titleTh:
+                null == titleTh
+                    ? _value.titleTh
+                    : titleTh // ignore: cast_nullable_to_non_nullable
+                        as String,
+            category:
+                null == category
+                    ? _value.category
+                    : category // ignore: cast_nullable_to_non_nullable
+                        as String,
+            module:
+                null == module
+                    ? _value.module
+                    : module // ignore: cast_nullable_to_non_nullable
+                        as String,
+            configUrl:
+                null == configUrl
+                    ? _value.configUrl
+                    : configUrl // ignore: cast_nullable_to_non_nullable
+                        as String,
+            thumbnailUrl:
+                null == thumbnailUrl
+                    ? _value.thumbnailUrl
+                    : thumbnailUrl // ignore: cast_nullable_to_non_nullable
+                        as String,
+            version:
+                null == version
+                    ? _value.version
+                    : version // ignore: cast_nullable_to_non_nullable
+                        as int,
+            published:
+                null == published
+                    ? _value.published
+                    : published // ignore: cast_nullable_to_non_nullable
+                        as bool,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$ScenarioSummaryImplCopyWith<$Res>
+    implements $ScenarioSummaryCopyWith<$Res> {
+  factory _$$ScenarioSummaryImplCopyWith(
+    _$ScenarioSummaryImpl value,
+    $Res Function(_$ScenarioSummaryImpl) then,
+  ) = __$$ScenarioSummaryImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    @JsonKey(name: 'scenario_id') String scenarioId,
+    @JsonKey(name: 'title_th') String titleTh,
+    String category,
+    String module,
+    @JsonKey(name: 'config_url') String configUrl,
+    @JsonKey(name: 'thumbnail_url') String thumbnailUrl,
+    int version,
+    bool published,
+  });
+}
+
+/// @nodoc
+class __$$ScenarioSummaryImplCopyWithImpl<$Res>
+    extends _$ScenarioSummaryCopyWithImpl<$Res, _$ScenarioSummaryImpl>
+    implements _$$ScenarioSummaryImplCopyWith<$Res> {
+  __$$ScenarioSummaryImplCopyWithImpl(
+    _$ScenarioSummaryImpl _value,
+    $Res Function(_$ScenarioSummaryImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of ScenarioSummary
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? scenarioId = null,
+    Object? titleTh = null,
+    Object? category = null,
+    Object? module = null,
+    Object? configUrl = null,
+    Object? thumbnailUrl = null,
+    Object? version = null,
+    Object? published = null,
+  }) {
+    return _then(
+      _$ScenarioSummaryImpl(
+        scenarioId:
+            null == scenarioId
+                ? _value.scenarioId
+                : scenarioId // ignore: cast_nullable_to_non_nullable
+                    as String,
+        titleTh:
+            null == titleTh
+                ? _value.titleTh
+                : titleTh // ignore: cast_nullable_to_non_nullable
+                    as String,
+        category:
+            null == category
+                ? _value.category
+                : category // ignore: cast_nullable_to_non_nullable
+                    as String,
+        module:
+            null == module
+                ? _value.module
+                : module // ignore: cast_nullable_to_non_nullable
+                    as String,
+        configUrl:
+            null == configUrl
+                ? _value.configUrl
+                : configUrl // ignore: cast_nullable_to_non_nullable
+                    as String,
+        thumbnailUrl:
+            null == thumbnailUrl
+                ? _value.thumbnailUrl
+                : thumbnailUrl // ignore: cast_nullable_to_non_nullable
+                    as String,
+        version:
+            null == version
+                ? _value.version
+                : version // ignore: cast_nullable_to_non_nullable
+                    as int,
+        published:
+            null == published
+                ? _value.published
+                : published // ignore: cast_nullable_to_non_nullable
+                    as bool,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ScenarioSummaryImpl implements _ScenarioSummary {
+  const _$ScenarioSummaryImpl({
+    @JsonKey(name: 'scenario_id') required this.scenarioId,
+    @JsonKey(name: 'title_th') required this.titleTh,
+    required this.category,
+    required this.module,
+    @JsonKey(name: 'config_url') required this.configUrl,
+    @JsonKey(name: 'thumbnail_url') required this.thumbnailUrl,
+    required this.version,
+    required this.published,
+  });
+
+  factory _$ScenarioSummaryImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ScenarioSummaryImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'scenario_id')
+  final String scenarioId;
+  @override
+  @JsonKey(name: 'title_th')
+  final String titleTh;
+  @override
+  final String category;
+  @override
+  final String module;
+  @override
+  @JsonKey(name: 'config_url')
+  final String configUrl;
+  @override
+  @JsonKey(name: 'thumbnail_url')
+  final String thumbnailUrl;
+  @override
+  final int version;
+  @override
+  final bool published;
+
+  @override
+  String toString() {
+    return 'ScenarioSummary(scenarioId: $scenarioId, titleTh: $titleTh, category: $category, module: $module, configUrl: $configUrl, thumbnailUrl: $thumbnailUrl, version: $version, published: $published)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ScenarioSummaryImpl &&
+            (identical(other.scenarioId, scenarioId) ||
+                other.scenarioId == scenarioId) &&
+            (identical(other.titleTh, titleTh) || other.titleTh == titleTh) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.module, module) || other.module == module) &&
+            (identical(other.configUrl, configUrl) ||
+                other.configUrl == configUrl) &&
+            (identical(other.thumbnailUrl, thumbnailUrl) ||
+                other.thumbnailUrl == thumbnailUrl) &&
+            (identical(other.version, version) || other.version == version) &&
+            (identical(other.published, published) ||
+                other.published == published));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    scenarioId,
+    titleTh,
+    category,
+    module,
+    configUrl,
+    thumbnailUrl,
+    version,
+    published,
+  );
+
+  /// Create a copy of ScenarioSummary
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ScenarioSummaryImplCopyWith<_$ScenarioSummaryImpl> get copyWith =>
+      __$$ScenarioSummaryImplCopyWithImpl<_$ScenarioSummaryImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ScenarioSummaryImplToJson(this);
+  }
+}
+
+abstract class _ScenarioSummary implements ScenarioSummary {
+  const factory _ScenarioSummary({
+    @JsonKey(name: 'scenario_id') required final String scenarioId,
+    @JsonKey(name: 'title_th') required final String titleTh,
+    required final String category,
+    required final String module,
+    @JsonKey(name: 'config_url') required final String configUrl,
+    @JsonKey(name: 'thumbnail_url') required final String thumbnailUrl,
+    required final int version,
+    required final bool published,
+  }) = _$ScenarioSummaryImpl;
+
+  factory _ScenarioSummary.fromJson(Map<String, dynamic> json) =
+      _$ScenarioSummaryImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'scenario_id')
+  String get scenarioId;
+  @override
+  @JsonKey(name: 'title_th')
+  String get titleTh;
+  @override
+  String get category;
+  @override
+  String get module;
+  @override
+  @JsonKey(name: 'config_url')
+  String get configUrl;
+  @override
+  @JsonKey(name: 'thumbnail_url')
+  String get thumbnailUrl;
+  @override
+  int get version;
+  @override
+  bool get published;
+
+  /// Create a copy of ScenarioSummary
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ScenarioSummaryImplCopyWith<_$ScenarioSummaryImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}

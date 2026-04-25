@@ -1,0 +1,38 @@
+{
+  "items": [
+    { "item_id": "cat",      "image": "assets/images/cat.webp",      "tts_word": "แมว",    "category": "animals" },
+    { "item_id": "dog",      "image": "assets/images/dog.webp",      "tts_word": "หมา",    "category": "animals" },
+    { "item_id": "elephant", "image": "assets/images/elephant.webp", "tts_word": "ช้าง",   "category": "animals" },
+    { "item_id": "tiger",    "image": "assets/images/tiger.webp",    "tts_word": "เสือ",   "category": "animals" },
+    { "item_id": "fish",     "image": "assets/images/fish.webp",     "tts_word": "ปลา",    "category": "animals" },
+    { "item_id": "bird",     "image": "assets/images/bird.webp",     "tts_word": "นก",     "category": "animals" },
+
+    { "item_id": "rice",     "image": "assets/images/rice.webp",     "tts_word": "ข้าว",   "category": "food" },
+    { "item_id": "banana",   "image": "assets/images/banana.webp",   "tts_word": "กล้วย",  "category": "food" },
+    { "item_id": "milk",     "image": "assets/images/milk_blue.webp","tts_word": "นม",     "category": "food" },
+    { "item_id": "water",    "image": "assets/images/water.webp",    "tts_word": "น้ำ",    "category": "food" },
+    { "item_id": "mango",    "image": "assets/images/mango.webp",    "tts_word": "มะม่วง", "category": "food" },
+    { "item_id": "egg",      "image": "assets/images/egg.webp",      "tts_word": "ไข่",    "category": "food" },
+
+    { "item_id": "red",      "image": "assets/images/color_red.webp",     "tts_word": "สีแดง",   "category": "colours" },
+    { "item_id": "blue",     "image": "assets/images/color_blue.webp",    "tts_word": "สีน้ำเงิน","category": "colours" },
+    { "item_id": "yellow",   "image": "assets/images/color_yellow.webp",  "tts_word": "สีเหลือง", "category": "colours" },
+    { "item_id": "green",    "image": "assets/images/color_green.webp",   "tts_word": "สีเขียว",  "category": "colours" },
+    { "item_id": "white",    "image": "assets/images/color_white.webp",   "tts_word": "สีขาว",    "category": "colours" },
+    { "item_id": "black",    "image": "assets/images/color_black.webp",   "tts_word": "สีดำ",     "category": "colours" },
+
+    { "item_id": "hand",     "image": "assets/images/hand.webp",     "tts_word": "มือ",    "category": "body" },
+    { "item_id": "foot",     "image": "assets/images/foot.webp",     "tts_word": "เท้า",   "category": "body" },
+    { "item_id": "eye",      "image": "assets/images/eye.webp",      "tts_word": "ตา",     "category": "body" },
+    { "item_id": "ear",      "image": "assets/images/ear.webp",      "tts_word": "หู",     "category": "body" },
+    { "item_id": "mouth",    "image": "assets/images/mouth.webp",    "tts_word": "ปาก",    "category": "body" },
+    { "item_id": "nose",     "image": "assets/images/nose.webp",     "tts_word": "จมูก",   "category": "body" },
+
+    { "item_id": "chair",    "image": "assets/images/chair.webp",    "tts_word": "เก้าอี้","category": "household" },
+    { "item_id": "table",    "image": "assets/images/table.webp",    "tts_word": "โต๊ะ",   "category": "household" },
+    { "item_id": "bed",      "image": "assets/images/bed.webp",      "tts_word": "เตียง",  "category": "household" },
+    { "item_id": "door",     "image": "assets/images/door.webp",     "tts_word": "ประตู",  "category": "household" },
+    { "item_id": "window",   "image": "assets/images/window.webp",   "tts_word": "หน้าต่าง","category": "household" },
+    { "item_id": "lamp",     "image": "assets/images/lamp.webp",     "tts_word": "โคมไฟ",  "category": "household" }
+  ]
+}

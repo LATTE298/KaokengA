@@ -1,0 +1,37 @@
+{
+  "scenario_id": "trash_sort_001",
+  "version": 1,
+  "category": "daily_life",
+  "module": "A",
+  "title_th": "ช่วยแยกขยะให้ถูกถัง",
+  "background_image": "assets/images/bg_home.webp",
+  "tts_instruction": "น้องช่วยทิ้งขวดพลาสติกลงในถังรีไซเคิลให้หน่อยนะครับ",
+  "tts_celebration": "เยี่ยมมากเลยครับ! ขอบคุณที่ช่วยดูแลโลก!",
+  "tts_hint": "ลองหยิบขวดพลาสติกใส่ถังสีเขียวนะครับ",
+  "interactables": [
+    {
+      "id": "plastic_bottle",
+      "image": "assets/images/plastic_bottle.webp",
+      "is_target": true,
+      "start_pos": { "x": 300, "y": 500 }
+    },
+    {
+      "id": "banana_peel",
+      "image": "assets/images/banana_peel.webp",
+      "is_target": false,
+      "start_pos": { "x": 600, "y": 500 }
+    },
+    {
+      "id": "paper_ball",
+      "image": "assets/images/paper_ball.webp",
+      "is_target": false,
+      "start_pos": { "x": 900, "y": 500 }
+    }
+  ],
+  "target_zone": {
+    "x": 1400,
+    "y": 700,
+    "width": 320,
+    "height": 240
+  }
+}
