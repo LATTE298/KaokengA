@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../game/daily_life_game.dart';
+import '../../features/sessions/session_recorder.dart';
+import '../../models/app_types.dart';
 import '../../models/scenario_config.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
@@ -41,7 +43,14 @@ class ScenarioGameScreen extends ConsumerWidget {
               ),
             ),
         data: (ScenarioConfig config) {
-          final startedAt = DateTime.now().toUtc();
+          final session = ref.watch(
+            activeSessionProvider(
+              ActiveSessionKey(
+                module: kModuleDailyLife,
+                contentId: config.scenarioId,
+              ),
+            ),
+          );
           final game = DailyLifeGame(
             config: config,
             tts: tts,
@@ -50,10 +59,12 @@ class ScenarioGameScreen extends ConsumerWidget {
               // Fire-and-forget: Firestore's offline cache handles retry.
               ref
                   .read(sessionRecorderProvider)
-                  .recordDailyLifeCompletion(
-                    config: config,
-                    startedAt: startedAt,
-                    dragPath: dragPath,
+                  .recordDailyLifeCompleted(
+                    DailyLifeCompletedEvent(
+                      session: session,
+                      config: config,
+                      dragPath: dragPath,
+                    ),
                   );
               if (context.mounted && context.canPop()) context.pop();
             },

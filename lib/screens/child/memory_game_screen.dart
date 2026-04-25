@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/memory/memory_game_controller.dart';
+import '../../features/sessions/session_recorder.dart';
 import '../../l10n/tts_strings_th.dart';
+import '../../models/app_types.dart';
 import '../../models/memory_pack.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
@@ -55,16 +57,25 @@ class _MemoryBoard extends ConsumerStatefulWidget {
 
 class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
   late final MemoryGameController _controller;
-  late final DateTime _startedAt;
+  late final ActiveSession _session;
 
   @override
   void initState() {
     super.initState();
-    _startedAt = DateTime.now().toUtc();
+    _session = ref.read(
+      activeSessionProvider(
+        ActiveSessionKey(module: kModuleMemory, contentId: widget.pack.packId),
+      ),
+    );
     _controller = MemoryGameController(
       pack: widget.pack,
       elapsedMs:
-          () => DateTime.now().toUtc().difference(_startedAt).inMilliseconds,
+          () =>
+              ref
+                  .read(clockProvider)()
+                  .toUtc()
+                  .difference(_session.startedAt)
+                  .inMilliseconds,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -103,10 +114,12 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
 
     ref
         .read(sessionRecorderProvider)
-        .recordMemoryCompletion(
-          pack: widget.pack,
-          startedAt: _startedAt,
-          matchEvents: _controller.matchEvents,
+        .recordMemoryCompleted(
+          MemoryCompletedEvent(
+            session: _session,
+            pack: widget.pack,
+            matchEvents: _controller.matchEvents,
+          ),
         );
 
     await Future<void>.delayed(const Duration(seconds: 4));

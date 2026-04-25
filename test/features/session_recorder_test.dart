@@ -12,15 +12,22 @@ void main() {
       final writer = _FakeSessionWriter();
       final recorder = SessionRecorder(
         repository: writer,
-        uid: 'uid-1',
         clock: () => DateTime.utc(2026, 4, 20, 10, 0, 42),
-        uuidFactory: _uuidSequence(['session-1', 'interaction-1']),
+        uuidFactory: _uuidSequence(['interaction-1']),
       );
 
-      await recorder.recordDailyLifeCompletion(
-        config: _scenario(),
-        startedAt: DateTime.utc(2026, 4, 20, 10),
-        dragPath: const [GamePosition(x: 1, y: 2), GamePosition(x: 3, y: 4)],
+      await recorder.recordDailyLifeCompleted(
+        DailyLifeCompletedEvent(
+          session: ActiveSession(
+            sessionId: 'session-1',
+            uid: 'uid-1',
+            module: kModuleDailyLife,
+            contentId: '711_milk_001',
+            startedAt: DateTime.utc(2026, 4, 20, 10),
+          ),
+          config: _scenario(),
+          dragPath: const [GamePosition(x: 1, y: 2), GamePosition(x: 3, y: 4)],
+        ),
       );
 
       final record = writer.records.single;
@@ -40,19 +47,26 @@ void main() {
       final writer = _FakeSessionWriter();
       final recorder = SessionRecorder(
         repository: writer,
-        uid: 'uid-1',
         clock: () => DateTime.utc(2026, 4, 20, 10, 2, 30),
-        uuidFactory: _uuidSequence(['session-2']),
+        uuidFactory: () => 'unused',
       );
       const events = [
         MatchEvent(pairId: 'cat', matched: false, atMs: 1000),
         MatchEvent(pairId: 'cat', matched: true, atMs: 3000),
       ];
 
-      await recorder.recordMemoryCompletion(
-        pack: _memoryPack(),
-        startedAt: DateTime.utc(2026, 4, 20, 10),
-        matchEvents: events,
+      await recorder.recordMemoryCompleted(
+        MemoryCompletedEvent(
+          session: ActiveSession(
+            sessionId: 'session-2',
+            uid: 'uid-1',
+            module: kModuleMemory,
+            contentId: 'thai_animals',
+            startedAt: DateTime.utc(2026, 4, 20, 10),
+          ),
+          pack: _memoryPack(),
+          matchEvents: events,
+        ),
       );
 
       final record = writer.records.single;
@@ -69,15 +83,22 @@ void main() {
       final writer = _FakeSessionWriter();
       final recorder = SessionRecorder(
         repository: writer,
-        uid: null,
         clock: DateTime.now,
         uuidFactory: () => 'unused',
       );
 
-      await recorder.recordMemoryCompletion(
-        pack: _memoryPack(),
-        startedAt: DateTime.utc(2026, 4, 20),
-        matchEvents: const [],
+      await recorder.recordMemoryCompleted(
+        MemoryCompletedEvent(
+          session: ActiveSession(
+            sessionId: 'session-3',
+            uid: null,
+            module: kModuleMemory,
+            contentId: 'thai_animals',
+            startedAt: DateTime.utc(2026, 4, 20),
+          ),
+          pack: _memoryPack(),
+          matchEvents: const [],
+        ),
       );
 
       expect(writer.records, isEmpty);
