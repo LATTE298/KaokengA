@@ -10,6 +10,8 @@ import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child_back_button.dart';
+import '../../widgets/child/child_async_view.dart';
+import '../../widgets/child/pressable_child_card.dart';
 
 // Module B hub (spec 02 §ModuleBScreen). MVP has a single pack.
 class ModuleBScreen extends ConsumerWidget {
@@ -25,12 +27,12 @@ class ModuleBScreen extends ConsumerWidget {
         child: Stack(
           children: [
             Center(
-              child: asyncPack.when(
-                loading: () => const CircularProgressIndicator(),
+              child: ChildAsyncView(
+                value: asyncPack,
+                loading: const CircularProgressIndicator(),
                 error: (_, __) => Text('โหลดเกมไม่สำเร็จ', style: kTextLg),
                 data:
-                    (pack) => GestureDetector(
-                      behavior: HitTestBehavior.opaque,
+                    (pack) => PressableChildCard(
                       onTap: () {
                         ref.read(ttsServiceProvider).speak(kTtsMemoryStart);
                         context.push(kRouteMemoryGame);

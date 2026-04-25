@@ -2,12 +2,9 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../game/daily_life_game.dart';
 import '../../models/scenario_config.dart';
-import '../../models/session_record.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
 import '../../providers/tts_provider.dart';
@@ -50,35 +47,14 @@ class ScenarioGameScreen extends ConsumerWidget {
             tts: tts,
             reduceMotion: reduceMotion,
             onComplete: (dragPath) async {
-              final uid = ref.read(uidProvider);
-              if (uid != null) {
-                final endedAt = DateTime.now().toUtc();
-                final targetId =
-                    config.interactables.firstWhere((i) => i.isTarget).id;
-                final record = SessionRecord(
-                  sessionId: const Uuid().v4(),
-                  uid: uid,
-                  scenarioId: config.scenarioId,
-                  module: 'daily_life',
-                  startedAt: startedAt.toIso8601String(),
-                  endedAt: endedAt.toIso8601String(),
-                  durationMs: endedAt.difference(startedAt).inMilliseconds,
-                  completed: true,
-                  dragInteractions: [
-                    DragInteraction(
-                      interactionId: const Uuid().v4(),
-                      objectId: targetId,
-                      wasTarget: true,
-                      wasSuccessful: true,
-                      durationMs: endedAt.difference(startedAt).inMilliseconds,
-                      straightnessScore: 0,
-                      pathPoints: dragPath,
-                    ),
-                  ],
-                );
-                // Fire-and-forget: Firestore's offline cache handles retry.
-                ref.read(sessionRepositoryProvider).writeSession(record);
-              }
+              // Fire-and-forget: Firestore's offline cache handles retry.
+              ref
+                  .read(sessionRecorderProvider)
+                  .recordDailyLifeCompletion(
+                    config: config,
+                    startedAt: startedAt,
+                    dragPath: dragPath,
+                  );
               if (context.mounted && context.canPop()) context.pop();
             },
           );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,7 +8,7 @@ import '../../routes/app_routes.dart';
 import '../../services/haptic_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
-import '../../theme/typography.dart';
+import '../../widgets/child/module_card.dart';
 
 // Child home screen (spec 02 §ModeSelectScreen).
 // Three module cards + hidden logo long-press gate to parent side.
@@ -38,7 +37,7 @@ class ModeSelectScreen extends ConsumerWidget {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _ModuleCard(
+                        ModuleCard(
                           label: kLabelModuleA,
                           description: 'ลองทำกิจกรรม',
                           icon: Icons.home_rounded,
@@ -48,7 +47,7 @@ class ModeSelectScreen extends ConsumerWidget {
                             context.push(kRouteModuleA);
                           },
                         ),
-                        _ModuleCard(
+                        ModuleCard(
                           label: kLabelModuleB,
                           description: 'จับคู่รูปภาพ',
                           icon: Icons.grid_view_rounded,
@@ -58,7 +57,7 @@ class ModeSelectScreen extends ConsumerWidget {
                             context.push(kRouteModuleB);
                           },
                         ),
-                        _ModuleCard(
+                        ModuleCard(
                           label: kLabelModuleC,
                           description: 'เรียนคำศัพท์',
                           icon: Icons.record_voice_over_rounded,
@@ -161,78 +160,6 @@ class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// Module card per spec 10 §ModuleCard.
-class _ModuleCard extends StatefulWidget {
-  const _ModuleCard({
-    required this.label,
-    required this.description,
-    required this.icon,
-    required this.background,
-    required this.onTap,
-  });
-
-  final String label;
-  final String description;
-  final IconData icon;
-  final Color background;
-  final VoidCallback onTap;
-
-  @override
-  State<_ModuleCard> createState() => _ModuleCardState();
-}
-
-class _ModuleCardState extends State<_ModuleCard> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final cardSize = (width / 3 - kSpace8).clamp(120.0, 240.0);
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        SystemSound.play(SystemSoundType.click);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 1.04 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        child: Container(
-          width: cardSize,
-          height: cardSize * 1.2,
-          padding: const EdgeInsets.all(kSpace4),
-          decoration: BoxDecoration(
-            color: widget.background,
-            borderRadius: kRadiusLg,
-            boxShadow: const [kShadowMd],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(widget.icon, size: 80, color: kTextPrimary),
-              const SizedBox(height: kSpace4),
-              Text(widget.label, style: kTextLg, textAlign: TextAlign.center),
-              const SizedBox(height: kSpace2),
-              Text(
-                widget.description,
-                style: kTextSm,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
