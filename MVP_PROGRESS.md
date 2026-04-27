@@ -64,6 +64,7 @@
 ## Priority Queue (Next Up)
 1. Add animated hint arrow to Module A (15s)
 2. Add real `.webp` artwork for scenario backgrounds/interactables, memory cards, vocabulary, and thumbnails
+   - [x] `711_milk_001` scenario (bg, thumb, interactables)
 3. Use image caching/preloading for scenario/memory/vocab images
 4. Harden Firestore rules with validation and emulator-backed tests
 5. Replace string module/category/timestamps with typed values/converters

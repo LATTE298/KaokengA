@@ -27,10 +27,18 @@ Future<void> main() async {
 
   // Anonymous identity for session writes under /sessions/{uid}/records.
   // Parent email+password login (MVP item #2) will later link to this UID.
-  await AuthService(
-    FirebaseAuth.instance,
-    FirebaseFirestore.instance,
-  ).ensureAnonymousChildSession();
+  try {
+    await AuthService(
+      FirebaseAuth.instance,
+      FirebaseFirestore.instance,
+    ).ensureAnonymousChildSession();
+  } catch (e) {
+    if (kIsWeb) {
+      debugPrint('Skipping Firebase Auth due to Web config issue: $e');
+    } else {
+      rethrow;
+    }
+  }
 
   runApp(const ProviderScope(child: DailyLifeApp()));
 }

@@ -31,16 +31,22 @@ class ScenarioCard extends StatelessWidget {
           children: [
             Expanded(
               flex: 3,
-              child: Container(
-                color: kYellowLight,
-                child: const Center(
-                  child: Icon(
-                    Icons.image_rounded,
-                    size: 72,
-                    color: kYellowDark,
+                child: Container(
+                  color: kYellowLight,
+                  child: Image.asset(
+                    summary.thumbnailUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(
+                          Icons.image_rounded,
+                          size: 72,
+                          color: kYellowDark,
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ),
             ),
             Expanded(
               flex: 2,
