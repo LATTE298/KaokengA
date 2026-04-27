@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../models/memory_pack.dart';
+import '../models/loaded_scenario_config.dart';
 import '../models/scenario_config.dart';
 import '../models/vocabulary_item.dart';
 
@@ -15,6 +16,15 @@ abstract class ContentRepository {
   Future<List<ScenarioSummary>> fetchScenarioIndex();
 
   Future<ScenarioConfig> fetchScenarioConfig(String assetOrUrl);
+
+  Future<LoadedScenarioConfig> fetchLoadedScenarioConfig(
+    String assetOrUrl,
+  ) async {
+    return LoadedScenarioConfig(
+      config: await fetchScenarioConfig(assetOrUrl),
+      placeholderImagePaths: const {},
+    );
+  }
 
   Future<MemoryPack> fetchDefaultMemoryPack();
 
@@ -44,6 +54,10 @@ class ContentUnpublishedException extends ContentException {
 
 class ContentRemoteUrlNotSupportedException extends ContentException {
   const ContentRemoteUrlNotSupportedException(super.message);
+}
+
+class ContentAssetLoadException extends ContentException {
+  const ContentAssetLoadException(super.message);
 }
 
 ScenarioSummary findScenarioSummary(
@@ -93,6 +107,19 @@ class AssetContentRepository extends ContentRepository {
   }
 
   @override
+  Future<LoadedScenarioConfig> fetchLoadedScenarioConfig(
+    String assetOrUrl,
+  ) async {
+    final config = await fetchScenarioConfig(assetOrUrl);
+    final placeholderPaths = await _fetchPlaceholderImagePaths();
+    await _validateScenarioImages(config, placeholderPaths);
+    return LoadedScenarioConfig(
+      config: config,
+      placeholderImagePaths: placeholderPaths,
+    );
+  }
+
+  @override
   Future<MemoryPack> fetchDefaultMemoryPack() async {
     const path = 'assets/memory_packs/thai_animals_001.json';
     final raw = await _loadAssetJson(path);
@@ -125,6 +152,56 @@ class AssetContentRepository extends ContentRepository {
       throw ContentNotFoundException('Content asset not found: $path ($e)');
     }
   }
+
+  Future<Set<String>> _fetchPlaceholderImagePaths() async {
+    const path = 'assets/images/placeholder_manifest.json';
+    final raw = await _loadAssetJson(path);
+    final list = raw['placeholder_images'];
+    if (list is! List) {
+      throw const ContentMalformedJsonException(
+        'Expected "placeholder_images" to be a list at '
+        'assets/images/placeholder_manifest.json',
+      );
+    }
+    try {
+      return list.cast<String>().toSet();
+    } on TypeError catch (e) {
+      throw ContentMalformedJsonException(
+        'Expected "placeholder_images" to contain strings at $path: $e',
+      );
+    }
+  }
+
+  Future<void> _validateScenarioImages(
+    ScenarioConfig config,
+    Set<String> placeholderPaths,
+  ) async {
+    final imagePaths = <String>{
+      config.backgroundImage,
+      for (final item in config.interactables) item.image,
+    };
+
+    for (final path in imagePaths) {
+      if (placeholderPaths.contains(path)) continue;
+      await _ensureAssetExists(path);
+    }
+  }
+
+  Future<void> _ensureAssetExists(String path) async {
+    if (_isRemoteUrl(path)) {
+      throw ContentRemoteUrlNotSupportedException(
+        'Remote image URLs are not supported by AssetContentRepository: $path',
+      );
+    }
+    try {
+      await _bundle.load(path);
+    } on FlutterError catch (e) {
+      throw ContentAssetLoadException(
+        'Scenario image asset is missing and is not declared as a placeholder: '
+        '$path ($e)',
+      );
+    }
+  }
 }
 
 // Optional remote/cache implementation. It is not the MVP default provider yet,
@@ -152,6 +229,14 @@ class CachedRemoteContentRepository extends ContentRepository {
 
     final raw = await _loadRemoteJson(assetOrUrl);
     return _parseObject(raw, ScenarioConfig.fromJson, assetOrUrl);
+  }
+
+  @override
+  Future<LoadedScenarioConfig> fetchLoadedScenarioConfig(String assetOrUrl) {
+    if (!_isRemoteUrl(assetOrUrl)) {
+      return _assetFallback.fetchLoadedScenarioConfig(assetOrUrl);
+    }
+    return super.fetchLoadedScenarioConfig(assetOrUrl);
   }
 
   @override

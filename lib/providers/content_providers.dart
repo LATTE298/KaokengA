@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/memory_pack.dart';
+import '../models/loaded_scenario_config.dart';
 import '../models/scenario_config.dart';
 import '../models/vocabulary_item.dart';
 import '../services/content_repository.dart';
@@ -24,11 +25,22 @@ final scenarioConfigProvider = FutureProvider.family<ScenarioConfig, String>((
   ref,
   scenarioId,
 ) async {
-  final repo = ref.watch(contentRepositoryProvider);
-  final list = await repo.fetchScenarioIndex();
-  final summary = findScenarioSummary(list, scenarioId);
-  return repo.fetchScenarioConfig(summary.configUrl);
+  final loaded = await ref.watch(
+    loadedScenarioConfigProvider(scenarioId).future,
+  );
+  return loaded.config;
 });
+
+final loadedScenarioConfigProvider =
+    FutureProvider.family<LoadedScenarioConfig, String>((
+      ref,
+      scenarioId,
+    ) async {
+      final repo = ref.watch(contentRepositoryProvider);
+      final list = await repo.fetchScenarioIndex();
+      final summary = findScenarioSummary(list, scenarioId);
+      return repo.fetchLoadedScenarioConfig(summary.configUrl);
+    });
 
 final memoryPackProvider = FutureProvider<MemoryPack>((ref) async {
   final repo = ref.watch(contentRepositoryProvider);

@@ -65,6 +65,48 @@ void main() {
         throwsA(isA<ContentRemoteUrlNotSupportedException>()),
       );
     });
+
+    test('loaded scenario accepts images declared as placeholders', () async {
+      final repo = AssetContentRepository(
+        bundle: _FakeAssetBundle({
+          'assets/scenarios/known_scenario.json': jsonEncode(
+            _scenarioConfigJson(imagePath: 'assets/images/missing.webp'),
+          ),
+          'assets/images/placeholder_manifest.json': jsonEncode({
+            'placeholder_images': ['assets/images/missing.webp'],
+          }),
+        }),
+      );
+
+      final loaded = await repo.fetchLoadedScenarioConfig(
+        'assets/scenarios/known_scenario.json',
+      );
+
+      expect(loaded.usesPlaceholder('assets/images/missing.webp'), isTrue);
+    });
+
+    test(
+      'loaded scenario rejects missing images outside the placeholder manifest',
+      () async {
+        final repo = AssetContentRepository(
+          bundle: _FakeAssetBundle({
+            'assets/scenarios/known_scenario.json': jsonEncode(
+              _scenarioConfigJson(imagePath: 'assets/images/missing.webp'),
+            ),
+            'assets/images/placeholder_manifest.json': jsonEncode({
+              'placeholder_images': <String>[],
+            }),
+          }),
+        );
+
+        await expectLater(
+          repo.fetchLoadedScenarioConfig(
+            'assets/scenarios/known_scenario.json',
+          ),
+          throwsA(isA<ContentAssetLoadException>()),
+        );
+      },
+    );
   });
 }
 
@@ -78,6 +120,29 @@ Map<String, Object?> _scenarioSummaryJson() {
     'thumbnail_url': 'assets/images/known_scenario.webp',
     'version': 1,
     'published': true,
+  };
+}
+
+Map<String, Object?> _scenarioConfigJson({required String imagePath}) {
+  return {
+    'scenario_id': 'known_scenario',
+    'version': 1,
+    'category': 'daily_life',
+    'module': 'A',
+    'title_th': 'สถานการณ์ทดสอบ',
+    'background_image': imagePath,
+    'tts_instruction': 'หยิบของ',
+    'tts_celebration': 'เก่งมาก',
+    'tts_hint': 'ลองหยิบของ',
+    'interactables': [
+      {
+        'id': 'item',
+        'image': imagePath,
+        'is_target': true,
+        'start_pos': {'x': 100, 'y': 100},
+      },
+    ],
+    'target_zone': {'x': 500, 'y': 500, 'width': 100, 'height': 100},
   };
 }
 

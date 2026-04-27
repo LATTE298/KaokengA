@@ -3,9 +3,11 @@ import 'dart:async' as async;
 import 'package:flame/game.dart';
 
 import '../l10n/tts_strings_th.dart';
+import '../models/loaded_scenario_config.dart';
 import '../models/scenario_config.dart';
 import '../services/haptic_service.dart';
 import '../services/tts_service.dart';
+import 'background_component.dart';
 import 'drop_zone_component.dart';
 import 'interactable_component.dart';
 import 'success_overlay.dart';
@@ -16,16 +18,20 @@ import 'success_overlay.dart';
 // via `_toCanvas` (spec 04 §Device Adaptation).
 class DailyLifeGame extends FlameGame with HasCollisionDetection {
   DailyLifeGame({
-    required this.config,
+    required LoadedScenarioConfig loadedScenario,
     required this.tts,
     required this.reduceMotion,
     required this.onComplete,
-  });
+    this.enablePromptTimers = true,
+  }) : config = loadedScenario.config,
+       _placeholderImagePaths = loadedScenario.placeholderImagePaths;
 
   final ScenarioConfig config;
   final TtsService tts;
   final bool reduceMotion;
   final async.FutureOr<void> Function(List<GamePosition> dragPath) onComplete;
+  final bool enablePromptTimers;
+  final Set<String> _placeholderImagePaths;
 
   static final Vector2 _authoringSpace = Vector2(1920, 1080);
 
@@ -36,6 +42,13 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
   @override
   Future<void> onLoad() async {
+    await add(
+      BackgroundComponent(
+        imagePath: config.backgroundImage,
+        placeholderImagePaths: _placeholderImagePaths,
+      ),
+    );
+
     // Drop zone is placed first so interactables can detect collisions.
     final zone = DropZoneComponent(
       position: _toCanvas(Vector2(config.targetZone.x, config.targetZone.y)),
@@ -53,6 +66,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
           config: item,
           position: pos,
           reduceMotion: reduceMotion,
+          placeholderImagePaths: _placeholderImagePaths,
           onPathSample: (p) {
             _dragPath.add(GamePosition(x: p.x, y: p.y));
             _resetIdleTimer();
@@ -61,12 +75,14 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
       );
     }
 
-    // Fire the instruction TTS once the scene has mounted (spec 03 Flow 1 §7).
-    Future<void>.delayed(const Duration(seconds: 1), () {
-      if (_completed) return;
-      tts.speak(config.ttsInstruction);
-    });
-    _startIdleTimer();
+    if (enablePromptTimers) {
+      // Fire the instruction TTS once the scene has mounted (spec 03 Flow 1 §7).
+      Future<void>.delayed(const Duration(seconds: 1), () {
+        if (_completed) return;
+        tts.speak(config.ttsInstruction);
+      });
+      _startIdleTimer();
+    }
   }
 
   @override

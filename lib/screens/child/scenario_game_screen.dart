@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../game/daily_life_game.dart';
 import '../../features/sessions/session_recorder.dart';
 import '../../models/app_types.dart';
-import '../../models/scenario_config.dart';
+import '../../models/loaded_scenario_config.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
 import '../../providers/tts_provider.dart';
@@ -23,7 +23,7 @@ class ScenarioGameScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncConfig = ref.watch(scenarioConfigProvider(scenarioId));
+    final asyncConfig = ref.watch(loadedScenarioConfigProvider(scenarioId));
     final tts = ref.watch(ttsServiceProvider);
     final reduceMotion = MediaQuery.of(context).disableAnimations;
 
@@ -42,7 +42,8 @@ class ScenarioGameScreen extends ConsumerWidget {
                 ),
               ),
             ),
-        data: (ScenarioConfig config) {
+        data: (LoadedScenarioConfig loadedScenario) {
+          final config = loadedScenario.config;
           final session = ref.watch(
             activeSessionProvider(
               ActiveSessionKey(
@@ -52,7 +53,7 @@ class ScenarioGameScreen extends ConsumerWidget {
             ),
           );
           final game = DailyLifeGame(
-            config: config,
+            loadedScenario: loadedScenario,
             tts: tts,
             reduceMotion: reduceMotion,
             onComplete: (dragPath) async {

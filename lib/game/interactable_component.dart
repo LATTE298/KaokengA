@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' show Curves;
 import '../models/scenario_config.dart';
 import '../services/haptic_service.dart';
 import 'drop_zone_component.dart';
+import 'game_asset_paths.dart';
 import 'placeholder_renderer.dart';
 
 // A draggable scene object (spec 04 §InteractableComponent).
@@ -17,6 +18,7 @@ class InteractableComponent extends PositionComponent
     required this.config,
     required Vector2 position,
     required this.reduceMotion,
+    required this.placeholderImagePaths,
     this.onPathSample,
   }) : _startPosition = position.clone(),
        super(
@@ -28,6 +30,7 @@ class InteractableComponent extends PositionComponent
 
   final InteractableConfig config;
   final bool reduceMotion;
+  final Set<String> placeholderImagePaths;
   final void Function(Vector2 point)? onPathSample;
 
   final Vector2 _startPosition;
@@ -38,13 +41,16 @@ class InteractableComponent extends PositionComponent
 
   @override
   Future<void> onLoad() async {
-    // Placeholder visual until real sprites are available. The ID doubles as
-    // a human-readable label for debugging.
-    final label = _labelFor(config.id);
-    add(PlaceholderComponent(size: size, label: label));
+    if (placeholderImagePaths.contains(config.image)) {
+      final label = _labelFor(config.id);
+      await add(PlaceholderComponent(size: size, label: label));
+    } else {
+      final image = await findGame()!.images.load(flameImageKey(config.image));
+      await add(SpriteComponent(sprite: Sprite(image), size: size));
+    }
 
     // 80% hitbox (spec 04 §Hitbox).
-    add(
+    await add(
       RectangleHitbox(
         size: size * 0.8,
         position: size * 0.1,

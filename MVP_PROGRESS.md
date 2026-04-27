@@ -4,7 +4,7 @@
 > Aligned with `specs/14-mvp-scope.md`. Update as items ship.
 > **Legend:** [x] done · [~] partial · [ ] not started
 
-**Last audited:** 2026-04-18 · **Overall:** ~65%
+**Last audited:** 2026-04-25 · **Overall:** ~85%
 
 ---
 
@@ -18,6 +18,8 @@
 - [ ] Animated hint arrow after 15s  ← only TTS exists today
 - [x] Return tween on missed drop
 - [x] Session data logging to Firestore
+- [x] Sprite-backed background/interactables with explicit placeholder fallback
+- [x] Bundled scenario Flame render smoke tests
 
 ## Module B — Memory
 - [x] Thai animals pack (8 pairs / 16 tiles)
@@ -34,18 +36,21 @@
 - [x] Categories: animals, food, colours, body parts, household items
 
 ## Parent Dashboard
-- [ ] Firebase Auth (email + password)
-- [ ] Activity log — 20 most recent sessions
-- [ ] Scenario toggle (Module A only)
-- [ ] Logout flow
+- [x] Firebase Auth (email + password, anonymous child account linking)
+- [x] Activity log — 20 most recent sessions, with load-more pagination
+- [x] Scenario toggle (Module A only)
+- [x] Logout flow
+- [x] Progress summary tab
 
 ## Infrastructure
 - [x] Firestore configured, writes wired end-to-end (anonymous auth; `/sessions/{uid}/records`)
-- [ ] Neural TTS API integration (`tts_service.dart` is no-op)
+- [x] Neural TTS API integration (`GoogleTtsClient` behind `GOOGLE_TTS_API_KEY`)
+- [x] Local SHA-256 TTS audio cache + cancellable playback
 - [~] Firebase Storage (Blaze required; bundled assets used)
-- [~] `flutter_cache_manager` declared, not yet used for images
+- [~] `flutter_cache_manager` used for optional remote JSON cache, not yet image caching
 - [x] Riverpod state management
 - [x] Flame engine
+- [x] Typed content repository errors for missing/malformed/unpublished content
 
 ## Design
 - [x] Yellow + Blue theme (`lib/theme/colors.dart`)
@@ -57,11 +62,11 @@
 ---
 
 ## Priority Queue (Next Up)
-1. Implement Firebase Auth (parent email+password) — child app already signs in anonymously; parent auth should `linkWithCredential` to preserve history
-2. Build parent dashboard tabs (activity log, scenario toggle, logout)
-3. Integrate Neural TTS (Google Cloud TTS) + cache audio
-4. Add animated hint arrow to Module A (15s)
-5. Use `flutter_cache_manager` for scenario/memory/vocab image caching
+1. Add animated hint arrow to Module A (15s)
+2. Add real `.webp` artwork for scenario backgrounds/interactables, memory cards, vocabulary, and thumbnails
+3. Use image caching/preloading for scenario/memory/vocab images
+4. Harden Firestore rules with validation and emulator-backed tests
+5. Replace string module/category/timestamps with typed values/converters
 
 ---
 
