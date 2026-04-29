@@ -1,8 +1,33 @@
-Yeah, this README is missing the beginner entry step.
+# Kaokeng — Daily Life
 
-Just change **Quick Start** to this:
+_Last checked: 2026-04-29_
 
-````md
+A neuro-inclusive sandbox app for Thai children, built with Flutter and the Flame game engine.  
+The app primarily targets Android tablets in landscape orientation.
+
+## Features
+
+- **Module A — Daily Life:** Drag-and-drop scenario gameplay, such as buying milk at 7-Eleven, with Thai TTS celebration and encouragement audio
+- **Module B — Memory Game:** Tile-matching card game with Thai animal vocabulary
+- **Module C — Sound Board:** 30 vocabulary items across 5 categories with TTS playback
+- **Parent Dashboard:** Email/password registration and login, activity log, and per-scenario access controls
+- **Anonymous child sessions** through Firebase Auth — no child account required
+- **JSON-driven content:** New scenarios can be added without changing app code
+
+## Tech Stack
+
+| Layer | Library |
+|---|---|
+| UI framework | Flutter |
+| Game engine | Flame 1.22 |
+| State management | Riverpod 2 |
+| Data models | Freezed + json_serializable |
+| Routing | go_router |
+| Backend | Firebase Auth + Cloud Firestore |
+| Audio | just_audio |
+| Fonts | Google Fonts |
+| Icons | Phosphor Flutter |
+
 ## Quick Start
 
 Clone the project:
@@ -10,7 +35,7 @@ Clone the project:
 ```bash
 git clone https://github.com/Kenjeaw/Kaokeng.git
 cd Kaokeng
-````
+```
 
 Install dependencies:
 
@@ -24,74 +49,43 @@ Run the app:
 flutter run
 ```
 
-> Full prerequisites, Firebase setup, and build commands are in [BUILD.md](BUILD.md).
+> Full prerequisites, Firebase setup, and build commands are available in [BUILD.md](BUILD.md).
 
-````
-
-But because your project is Android-tablet landscape focused, I’d make it slightly better:
-
-```md
-## Quick Start
-
-Clone the project:
-
-```bash
-git clone <REPO_URL>
-cd <PROJECT_FOLDER>
-````
-
-Install dependencies:
-
-```bash
-flutter pub get
-```
-
-Run on a connected Android device or emulator:
-
-```bash
-flutter run
-```
-
-> Full prerequisites, Firebase setup, Android tablet notes, Firebase setup, and build commands are in [BUILD.md](BUILD.md).
-
-````
-
-Also small fix: you wrote **Firebase setup** twice in the last line. Use this instead:
-
-```md
-> Full prerequisites, Firebase setup, Android tablet notes, and build commands are in [BUILD.md](BUILD.md).
-````
-
-So the final replacement should be:
-
-````md
-## Quick Start
-
-Clone the project:
-
-```bash
-git clone <REPO_URL>
-cd <PROJECT_FOLDER>
-````
-
-Install dependencies:
-
-```bash
-flutter pub get
-```
-
-Run on a connected Android device or emulator:
-
-```bash
-flutter run
-```
-
-> Full prerequisites, Firebase setup, Android tablet notes, and build commands are in [BUILD.md](BUILD.md).
-
-````
-
-For your agent prompt, add:
+## Project Structure
 
 ```text
-Update README.md Quick Start to include beginner-friendly git clone and cd steps before flutter pub get. Use <REPO_URL> and <PROJECT_FOLDER> placeholders if the real repo URL/folder cannot be inferred.
-````
+lib/
+├── main.dart                  # App entry point
+├── firebase_options.dart      # Firebase SDK config (generated)
+├── features/                  # Feature-level controllers
+├── game/                      # Flame game components
+├── l10n/                      # Thai TTS strings
+├── models/                    # Freezed data models
+├── providers/                 # Riverpod providers
+├── routes/                    # go_router configuration
+├── screens/
+│   ├── child/                 # Child-facing screens
+│   └── parent/                # Parent dashboard screens
+├── services/                  # Business logic and repositories
+├── theme/                     # Design tokens: colors, typography, spacing
+└── widgets/                   # Shared UI components
+
+assets/
+├── scenarios/                 # Scenario JSON definitions
+├── images/                    # Scene and item images
+├── memory_packs/              # Memory game card sets
+└── vocabulary/                # Sound board vocabulary
+
+specs/                         # Product and design specification documents
+test/                          # Unit, widget, and game tests
+```
+
+## Testing
+
+```bash
+flutter test
+```
+
+## License
+
+Not specified.
