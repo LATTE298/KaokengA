@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
-import 'package:just_audio/just_audio.dart';
-import 'package:path_provider/path_provider.dart';
 
 const int kTtsMaxCacheBytes = 50 * 1024 * 1024;
 
@@ -24,12 +21,17 @@ class TtsException implements Exception {
   String toString() => 'TtsException: $message';
 }
 
+// ---------------------------------------------------------------------------
+// Abstract interfaces
+// ---------------------------------------------------------------------------
+
 abstract class TtsClient {
   Future<Uint8List> synthesize(String text);
 }
 
 abstract class TtsAudioPlayer {
-  Future<void> playFile(String path);
+  /// Play audio from raw OGG/OPUS [bytes].
+  Future<void> playBytes(Uint8List bytes);
 
   Future<void> stop();
 
@@ -37,14 +39,16 @@ abstract class TtsAudioPlayer {
 }
 
 abstract class TtsAudioCache {
-  Future<File?> get(String key);
+  Future<Uint8List?> get(String key);
 
-  Future<File> put(String key, Uint8List bytes);
+  Future<void> put(String key, Uint8List bytes);
 
   Future<void> enforceMaxSize();
 }
 
-typedef TtsCacheDirectoryProvider = Future<Directory> Function();
+// ---------------------------------------------------------------------------
+// TtsClient implementations (no dart:io needed)
+// ---------------------------------------------------------------------------
 
 class GoogleTtsClient implements TtsClient {
   GoogleTtsClient({required http.Client httpClient, required String apiKey})
@@ -75,7 +79,7 @@ class GoogleTtsClient implements TtsClient {
       }),
     );
 
-    if (response.statusCode != HttpStatus.ok) {
+    if (response.statusCode != 200) {
       throw TtsException(
         'Google TTS failed with ${response.statusCode}: ${response.body}',
       );
@@ -110,121 +114,9 @@ class NoOpTtsClient implements TtsClient {
   Future<Uint8List> synthesize(String text) async => Uint8List(0);
 }
 
-class LocalTtsAudioCache implements TtsAudioCache {
-  LocalTtsAudioCache({
-    TtsCacheDirectoryProvider? directoryProvider,
-    int maxBytes = kTtsMaxCacheBytes,
-  }) : _directoryProvider = directoryProvider ?? _defaultDirectoryProvider,
-       _maxBytes = maxBytes;
-
-  final TtsCacheDirectoryProvider _directoryProvider;
-  final int _maxBytes;
-
-  @override
-  Future<File?> get(String key) async {
-    final file = await _fileFor(key);
-    if (!await file.exists()) return null;
-
-    final length = await file.length();
-    if (length <= 0) {
-      await file.delete();
-      return null;
-    }
-
-    final now = DateTime.now();
-    await file.setLastModified(now);
-    return file;
-  }
-
-  @override
-  Future<File> put(String key, Uint8List bytes) async {
-    final directory = await _cacheDirectory();
-    await directory.create(recursive: true);
-    final file = File(_joinPath(directory.path, key));
-    await file.writeAsBytes(bytes, flush: true);
-    await file.setLastModified(DateTime.now());
-    return file;
-  }
-
-  @override
-  Future<void> enforceMaxSize() async {
-    final directory = await _cacheDirectory();
-    if (!await directory.exists()) return;
-
-    final files = <File>[];
-    await for (final entity in directory.list()) {
-      if (entity is File && _basename(entity.path).startsWith('tts_')) {
-        files.add(entity);
-      }
-    }
-
-    var totalBytes = 0;
-    final stats = <({File file, DateTime modified, int bytes})>[];
-    for (final file in files) {
-      final stat = await file.stat();
-      totalBytes += stat.size;
-      stats.add((file: file, modified: stat.modified, bytes: stat.size));
-    }
-    if (totalBytes <= _maxBytes) return;
-
-    stats.sort((a, b) => a.modified.compareTo(b.modified));
-    for (final entry in stats) {
-      if (totalBytes <= _maxBytes) break;
-      try {
-        await entry.file.delete();
-        totalBytes -= entry.bytes;
-      } on FileSystemException {
-        // Best-effort eviction; future calls can retry.
-      }
-    }
-  }
-
-  Future<File> _fileFor(String key) async {
-    final directory = await _cacheDirectory();
-    return File(_joinPath(directory.path, key));
-  }
-
-  Future<Directory> _cacheDirectory() async {
-    final root = await _directoryProvider();
-    return Directory(_joinPath(root.path, 'tts_cache'));
-  }
-
-  static Future<Directory> _defaultDirectoryProvider() {
-    return getApplicationDocumentsDirectory();
-  }
-}
-
-String _joinPath(String directory, String child) {
-  return '$directory${Platform.pathSeparator}$child';
-}
-
-String _basename(String path) {
-  return path.split(Platform.pathSeparator).last;
-}
-
-class JustAudioTtsPlayer implements TtsAudioPlayer {
-  JustAudioTtsPlayer({AudioPlayer? player}) : _player = player ?? AudioPlayer();
-
-  final AudioPlayer _player;
-
-  @override
-  Future<void> playFile(String path) async {
-    await _player.stop();
-    await _player.setVolume(0.8);
-    await _player.setFilePath(path);
-    await _player.play();
-  }
-
-  @override
-  Future<void> stop() {
-    return _player.stop();
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _player.dispose();
-  }
-}
+// ---------------------------------------------------------------------------
+// TtsService — orchestrates client + cache + player
+// ---------------------------------------------------------------------------
 
 class TtsService {
   TtsService({
@@ -245,9 +137,9 @@ class TtsService {
   Future<void> speak(String text) async {
     try {
       final generation = await _beginNewRequest();
-      final file = await _getAudioFile(text);
-      if (file == null || !_isCurrent(generation)) return;
-      await _player.playFile(file.path);
+      final bytes = await _getAudioBytes(text);
+      if (bytes == null || bytes.isEmpty || !_isCurrent(generation)) return;
+      await _player.playBytes(bytes);
     } on Object catch (e, st) {
       developer.log(
         'TtsService.speak failed',
@@ -272,10 +164,11 @@ class TtsService {
     }
   }
 
+  /// Synthesise [text] and return the raw audio bytes (cached).
   Future<Uint8List> synth(String text) async {
     final key = ttsCacheKey(text);
     final cached = await _cache.get(key);
-    if (cached != null) return cached.readAsBytes();
+    if (cached != null) return cached;
 
     final bytes = await _client.synthesize(text);
     if (bytes.isEmpty) return bytes;
@@ -313,7 +206,7 @@ class TtsService {
     return !_disposed && generation == _generation;
   }
 
-  Future<File?> _getAudioFile(String text) async {
+  Future<Uint8List?> _getAudioBytes(String text) async {
     final key = ttsCacheKey(text);
     final cached = await _cache.get(key);
     if (cached != null) return cached;
@@ -321,8 +214,8 @@ class TtsService {
     final bytes = await _client.synthesize(text);
     if (bytes.isEmpty) return null;
 
-    final file = await _cache.put(key, bytes);
+    await _cache.put(key, bytes);
     await _cache.enforceMaxSize();
-    return file;
+    return bytes;
   }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:daily_life/services/tts_service.dart';
+import 'package:daily_life/services/tts_io.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,12 +31,11 @@ void main() {
       final cache = LocalTtsAudioCache(directoryProvider: () async => tempDir);
       final key = ttsCacheKey('หมา');
 
-      final written = await cache.put(key, Uint8List.fromList([1, 2]));
+      await cache.put(key, Uint8List.fromList([1, 2]));
       final cached = await cache.get(key);
 
       expect(cached, isNotNull);
-      expect(cached!.path, written.path);
-      expect(await cached.readAsBytes(), [1, 2]);
+      expect(cached, [1, 2]);
     });
 
     test('missing and empty cache files are treated as misses', () async {
@@ -44,9 +44,8 @@ void main() {
       final emptyKey = ttsCacheKey('ว่าง');
 
       expect(await cache.get(missingKey), isNull);
-      final empty = await cache.put(emptyKey, Uint8List(0));
+      await cache.put(emptyKey, Uint8List(0));
       expect(await cache.get(emptyKey), isNull);
-      expect(await empty.exists(), isFalse);
     });
 
     test('LRU eviction removes oldest files until under max size', () async {
@@ -54,21 +53,24 @@ void main() {
         directoryProvider: () async => tempDir,
         maxBytes: 5,
       );
-      final old = await cache.put(
-        ttsCacheKey('เก่า'),
-        Uint8List.fromList([1, 1, 1]),
-      );
-      await old.setLastModified(DateTime.utc(2026, 1, 1));
-      final newest = await cache.put(
-        ttsCacheKey('ใหม่'),
-        Uint8List.fromList([2, 2, 2]),
-      );
-      await newest.setLastModified(DateTime.utc(2026, 1, 2));
+
+      final oldKey = ttsCacheKey('เก่า');
+      final newKey = ttsCacheKey('ใหม่');
+
+      await cache.put(oldKey, Uint8List.fromList([1, 1, 1]));
+      // Touch the mtime manually via the underlying file so eviction order is deterministic.
+      final cacheDir = Directory('${tempDir.path}${Platform.pathSeparator}tts_cache');
+      final oldFile = File('${cacheDir.path}${Platform.pathSeparator}$oldKey');
+      await oldFile.setLastModified(DateTime.utc(2026, 1, 1));
+
+      await cache.put(newKey, Uint8List.fromList([2, 2, 2]));
+      final newFile = File('${cacheDir.path}${Platform.pathSeparator}$newKey');
+      await newFile.setLastModified(DateTime.utc(2026, 1, 2));
 
       await cache.enforceMaxSize();
 
-      expect(await old.exists(), isFalse);
-      expect(await newest.exists(), isTrue);
+      expect(await oldFile.exists(), isFalse);
+      expect(await newFile.exists(), isTrue);
     });
   });
 }

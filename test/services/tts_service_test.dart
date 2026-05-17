@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:daily_life/services/tts_service.dart';
+import 'package:daily_life/services/tts_io.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,8 +31,8 @@ void main() {
       await service.speak('สวัสดี');
 
       expect(client.requests, ['สวัสดี']);
-      expect(player.playedPaths, hasLength(1));
-      expect(await File(player.playedPaths.single).readAsBytes(), [1, 2, 3]);
+      expect(player.playedBytes, hasLength(1));
+      expect(player.playedBytes.single, [1, 2, 3]);
     });
 
     test('cache hit does not call client', () async {
@@ -44,8 +45,8 @@ void main() {
       await service.speak('แมว');
 
       expect(client.requests, isEmpty);
-      expect(player.playedPaths, hasLength(1));
-      expect(await File(player.playedPaths.single).readAsBytes(), [7, 8]);
+      expect(player.playedBytes, hasLength(1));
+      expect(player.playedBytes.single, [7, 8]);
     });
 
     test(
@@ -73,8 +74,8 @@ void main() {
         await first;
 
         expect(player.stopCount, greaterThanOrEqualTo(2));
-        expect(player.playedPaths, hasLength(1));
-        expect(await File(player.playedPaths.single).readAsBytes(), [2]);
+        expect(player.playedBytes, hasLength(1));
+        expect(player.playedBytes.single, [2]);
       },
     );
 
@@ -98,7 +99,7 @@ void main() {
         client.complete('หยุด', Uint8List.fromList([1]));
         await speak;
 
-        expect(player.playedPaths, isEmpty);
+        expect(player.playedBytes, isEmpty);
       },
     );
 
@@ -158,13 +159,13 @@ class _QueuedTtsClient implements TtsClient {
 }
 
 class _FakeTtsAudioPlayer implements TtsAudioPlayer {
-  final playedPaths = <String>[];
+  final playedBytes = <Uint8List>[];
   var stopCount = 0;
   var disposed = false;
 
   @override
-  Future<void> playFile(String path) async {
-    playedPaths.add(path);
+  Future<void> playBytes(Uint8List bytes) async {
+    playedBytes.add(bytes);
   }
 
   @override

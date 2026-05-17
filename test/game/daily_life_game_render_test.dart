@@ -74,12 +74,12 @@ class _NoOpTtsCache implements TtsAudioCache {
   Future<void> enforceMaxSize() async {}
 
   @override
-  Future<Never> get(String key) async {
+  Future<Uint8List?> get(String key) async {
     throw StateError('The render smoke test should not request TTS audio.');
   }
 
   @override
-  Future<Never> put(String key, Uint8List bytes) async {
+  Future<void> put(String key, Uint8List bytes) async {
     throw StateError('The render smoke test should not cache TTS audio.');
   }
 }
@@ -89,7 +89,7 @@ class _NoOpTtsAudioPlayer implements TtsAudioPlayer {
   Future<void> dispose() async {}
 
   @override
-  Future<void> playFile(String path) async {}
+  Future<void> playBytes(Uint8List bytes) async {}
 
   @override
   Future<void> stop() async {}

@@ -57,20 +57,63 @@ Download a replacement `android/app/google-services.json` from the Firebase cons
 
 ## Run Locally
 
-Connect an Android device or start an emulator, then:
+### 1. View Available Devices
+First, list the available devices (including emulator/phone, desktop, and web browsers):
 
 ```bash
-flutter run
+flutter devices
 ```
 
-To target a specific device:
+### 2. Run on Android (Primary Target)
+Connect an Android device or start a 10" tablet emulator, then target it specifically:
 
 ```bash
-flutter devices          # list available devices
 flutter run -d <device-id>
 ```
 
-The app is locked to landscape orientation; run it on a tablet emulator (10") for the intended layout.
+> [!NOTE]
+> The app is locked to landscape orientation; run it on a tablet emulator (10") for the intended layout.
+
+### 3. Run on Web (Preview & Testing)
+Although Android is the primary target, the app is fully compatible with Web for local testing and developer preview.
+
+* **Incorrect attempts:** Flutter's CLI does not accept options like `--web`, `-web`, or `-w` for running (e.g., `flutter run -w` will fail). Instead, you target the specific browser device using the `-d` (device) flag.
+* **Run in Chrome:**
+  ```bash
+  flutter run -d chrome
+  ```
+* **Run in Microsoft Edge:**
+  ```bash
+  flutter run -d edge
+  ```
+
+#### Web Renderer Options
+Flutter supports different renderers for the web. CanvasKit is recommended for complex Flame game components:
+* **CanvasKit (Recommended):** Uses WebAssembly and WebGL to render graphics. It offers pixel-perfect alignment and smooth performance for Flame, but has a larger download size.
+  ```bash
+  flutter run -d chrome --web-renderer canvaskit
+  ```
+* **HTML:** Uses standard HTML, CSS, Canvas elements, and SVG. Fast load time but might show slight visual discrepancies in high-performance games.
+  ```bash
+  flutter run -d chrome --web-renderer html
+  ```
+
+#### Simulating the Tablet Layout in the Browser
+Since the application layout is optimized for landscape tablets:
+1. Open the web preview (e.g., in Chrome).
+2. Press `F12` (or right-click -> **Inspect**) to open Developer Tools.
+3. Click the **Device Toolbar** icon (toggle device emulation).
+4. Choose a tablet viewport (e.g., iPad, Kindle Fire, or custom dimensions) and click the **Rotate** button to switch it to **Landscape** orientation.
+
+## Build for Web
+
+To compile a production release of the web app:
+
+```bash
+flutter build web --release --web-renderer canvaskit
+```
+
+The output build files will be placed in the `build/web/` directory and are ready to be hosted on any web server (or Firebase Hosting).
 
 ## Android Build
 
