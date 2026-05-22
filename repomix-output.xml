@@ -9892,73 +9892,6 @@ flutter test
 ยังไม่ได้ระบุ
 </file>
 
-<file path=".gitignore">
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# Local credentials / service accounts
-*-firebase-adminsdk*.json
-*service-account*.json
-tenacious-veld-*.json
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Node/Bun related
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Firebase local tooling cache
-.firebase/
-
-# Local AI/tooling settings and generated reports
-.claude/settings.local.json
-repomix-output.xml
-</file>
-
 <file path="lib/features/sessions/session_recorder.dart">
 import '../../models/app_types.dart';
 import '../../models/memory_pack.dart';
@@ -13768,6 +13701,72 @@ SessionRecord _record(String sessionId, String scenarioId, String module) {
     completed: true,
   );
 }
+</file>
+
+<file path=".gitignore">
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# Local credentials / service accounts
+*-firebase-adminsdk*.json
+*service-account*.json
+tenacious-veld-*.json
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Node/Bun related
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Firebase local tooling cache
+.firebase/
+
+# Local AI/tooling settings and generated reports
+.claude/settings.local.json
 </file>
 
 <file path="lib/main.dart">
