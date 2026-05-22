@@ -61,4 +61,3 @@ pnpm-debug.log*
 
 # Local AI/tooling settings and generated reports
 .claude/settings.local.json
-repomix-output.xml
