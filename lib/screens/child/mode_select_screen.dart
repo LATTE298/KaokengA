@@ -8,10 +8,12 @@ import '../../routes/app_routes.dart';
 import '../../services/haptic_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
+import '../../theme/typography.dart';
 import '../../widgets/child/module_card.dart';
 
 // Child home screen (spec 02 §ModeSelectScreen).
-// Three module cards + hidden logo long-press gate to parent side.
+// Simplified to fit iPhone 12 Pro without overflowing.
+// Three module cards centered + hidden logo gate on top right.
 class ModeSelectScreen extends ConsumerWidget {
   const ModeSelectScreen({super.key});
 
@@ -20,60 +22,82 @@ class ModeSelectScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: kWarmWhite,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(kSpace6),
-          child: Column(
-            children: [
-              _Logo(
+        child: Stack(
+          children: [
+            // --- โลโก้พระอาทิตย์ปุ่มจิ๋ว อยู่ขวาบนสุด ---
+            Positioned(
+              top: kSpace4,
+              right: kSpace4,
+              child: _LogoSmall(
                 onLongPressComplete: () {
                   HapticService.parentGateComplete();
                   context.push(kRouteParentGate);
                 },
               ),
-              const SizedBox(height: kSpace10),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ModuleCard(
-                          label: kLabelModuleA,
-                          description: 'ลองทำกิจกรรม',
-                          icon: Icons.home_rounded,
-                          background: kYellowLight,
-                          onTap: () {
-                            ref.read(ttsServiceProvider).speak(kTtsModuleADesc);
-                            context.push(kRouteModuleA);
-                          },
-                        ),
-                        ModuleCard(
-                          label: kLabelModuleB,
-                          description: 'จับคู่รูปภาพ',
-                          icon: Icons.grid_view_rounded,
-                          background: kBlueLight,
-                          onTap: () {
-                            ref.read(ttsServiceProvider).speak(kTtsModuleBDesc);
-                            context.push(kRouteModuleB);
-                          },
-                        ),
-                        ModuleCard(
-                          label: kLabelModuleC,
-                          description: 'เรียนคำศัพท์',
-                          icon: Icons.record_voice_over_rounded,
-                          background: kYellowAccent,
-                          onTap: () {
-                            ref.read(ttsServiceProvider).speak(kTtsModuleCDesc);
-                            context.push(kRouteModuleC);
-                          },
-                        ),
-                      ],
-                    );
-                  },
+            ),
+            
+            // --- องค์ประกอบเนื้อหาหลัก (3 ปุ่ม) จัดกึ่งกลางหน้าจอ ---
+            Center(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: kSpace6, vertical: kSpace12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: kSpace12), 
+                      
+                      // แก้บั๊กนิ้วเบียดเรียบร้อย: เปลี่ยนเป็น mainAxisSize แล้วมึง
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: kSpace2),
+                            child: ModuleCard(
+                              label: kLabelModuleA,
+                              description: 'ลองทำกิจกรรม',
+                              icon: Icons.home_rounded,
+                              background: kYellowLight,
+                              onTap: () {
+                                ref.read(ttsServiceProvider).speak(kTtsModuleADesc);
+                                context.push(kRouteModuleA);
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: kSpace2),
+                            child: ModuleCard(
+                              label: kLabelModuleB,
+                              description: 'จับคู่รูปภาพ',
+                              icon: Icons.grid_view_rounded,
+                              background: kBlueLight,
+                              onTap: () {
+                                ref.read(ttsServiceProvider).speak(kTtsModuleBDesc);
+                                context.push(kRouteModuleB);
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: kSpace2),
+                            child: ModuleCard(
+                              label: kLabelModuleC,
+                              description: 'เรียนคำศัพท์',
+                              icon: Icons.record_voice_over_rounded,
+                              background: kYellowAccent,
+                              onTap: () {
+                                ref.read(ttsServiceProvider).speak(kTtsModuleCDesc);
+                                context.push(kRouteModuleC);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -81,15 +105,16 @@ class ModeSelectScreen extends ConsumerWidget {
 }
 
 // Logo with 3s long-press gate to parent mode (spec 03 Flow 4 step 1).
-class _Logo extends StatefulWidget {
-  const _Logo({required this.onLongPressComplete});
+// Miniaturized to act as a hidden corner button.
+class _LogoSmall extends StatefulWidget {
+  const _LogoSmall({required this.onLongPressComplete});
   final VoidCallback onLongPressComplete;
 
   @override
-  State<_Logo> createState() => _LogoState();
+  State<_LogoSmall> createState() => _LogoSmallState();
 }
 
-class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
+class _LogoSmallState extends State<_LogoSmall> with SingleTickerProviderStateMixin {
   late final AnimationController _ringController;
 
   @override
@@ -135,11 +160,11 @@ class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
             animation: _ringController,
             builder: (context, _) {
               return SizedBox(
-                width: 96,
-                height: 96,
+                width: 58,
+                height: 58,
                 child: CircularProgressIndicator(
                   value: _ringController.value,
-                  strokeWidth: 4,
+                  strokeWidth: 3,
                   backgroundColor: Colors.transparent,
                   valueColor: const AlwaysStoppedAnimation<Color>(kBluePrimary),
                 ),
@@ -147,15 +172,15 @@ class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
             },
           ),
           Container(
-            width: 80,
-            height: 80,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: kYellowPrimary,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
               Icons.wb_sunny_rounded,
-              size: 48,
+              size: 28,
               color: kTextPrimary,
             ),
           ),
