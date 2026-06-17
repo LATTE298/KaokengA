@@ -11,17 +11,11 @@ import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child/module_card.dart';
 
-// Child home screen (spec 02 §ModeSelectScreen).
-// Simplified to fit iPhone 12 Pro without overflowing.
-// Three module cards centered + hidden logo gate on top right.
 class ModeSelectScreen extends ConsumerWidget {
   const ModeSelectScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-
     return Scaffold(
       backgroundColor: kWarmWhite,
       body: SafeArea(
@@ -39,79 +33,53 @@ class ModeSelectScreen extends ConsumerWidget {
             ),
             Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isLandscape ? kSpace8 : kSpace6,
-                  vertical: isLandscape ? kSpace4 : kSpace12,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: kSpace8,
+                  vertical: kSpace4,
                 ),
-                child: isLandscape
-                    ? _buildLandscape(context, ref)
-                    : _buildPortrait(context, ref),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ModuleCard(
+                      label: kLabelModuleA,
+                      description: 'ลองทำกิจกรรม',
+                      icon: Icons.home_rounded,
+                      background: kYellowLight,
+                      onTap: () {
+                        ref.read(ttsServiceProvider).speak(kTtsModuleADesc);
+                        context.push(kRouteModuleA);
+                      },
+                    ),
+                    const SizedBox(width: kSpace4),
+                    ModuleCard(
+                      label: kLabelModuleB,
+                      description: 'จับคู่รูปภาพ',
+                      icon: Icons.grid_view_rounded,
+                      background: kBlueLight,
+                      onTap: () {
+                        ref.read(ttsServiceProvider).speak(kTtsModuleBDesc);
+                        context.push(kRouteModuleB);
+                      },
+                    ),
+                    const SizedBox(width: kSpace4),
+                    ModuleCard(
+                      label: kLabelModuleC,
+                      description: 'เรียนคำศัพท์',
+                      icon: Icons.record_voice_over_rounded,
+                      background: kYellowAccent,
+                      onTap: () {
+                        ref.read(ttsServiceProvider).speak(kTtsModuleCDesc);
+                        context.push(kRouteModuleC);
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  List<Widget> _cards(BuildContext context, WidgetRef ref) => [
-        ModuleCard(
-          label: kLabelModuleA,
-          description: 'ลองทำกิจกรรม',
-          icon: Icons.home_rounded,
-          background: kYellowLight,
-          onTap: () {
-            ref.read(ttsServiceProvider).speak(kTtsModuleADesc);
-            context.push(kRouteModuleA);
-          },
-        ),
-        ModuleCard(
-          label: kLabelModuleB,
-          description: 'จับคู่รูปภาพ',
-          icon: Icons.grid_view_rounded,
-          background: kBlueLight,
-          onTap: () {
-            ref.read(ttsServiceProvider).speak(kTtsModuleBDesc);
-            context.push(kRouteModuleB);
-          },
-        ),
-        ModuleCard(
-          label: kLabelModuleC,
-          description: 'เรียนคำศัพท์',
-          icon: Icons.record_voice_over_rounded,
-          background: kYellowAccent,
-          onTap: () {
-            ref.read(ttsServiceProvider).speak(kTtsModuleCDesc);
-            context.push(kRouteModuleC);
-          },
-        ),
-      ];
-
-  Widget _buildPortrait(BuildContext context, WidgetRef ref) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: kSpace12),
-        for (final card in _cards(context, ref))
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: kSpace2),
-            child: card,
-          ),
-      ],
-    );
-  }
-
-  Widget _buildLandscape(BuildContext context, WidgetRef ref) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        for (final card in _cards(context, ref))
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: kSpace3),
-            child: card,
-          ),
-      ],
     );
   }
 }
