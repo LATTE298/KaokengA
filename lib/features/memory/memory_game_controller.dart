@@ -46,6 +46,9 @@ class MemoryGameController {
   int? lastFirstIndex;
   int? lastSecondIndex;
 
+  // จำนวนครั้งทั้งหมดที่ผู้เล่นเปิดการ์ด (นับทุกใบที่ถูกเปิด ไม่ใช่แค่คู่)
+  int totalFlips = 0;
+
   bool get allMatched => tiles.every((t) => t.matched);
 
   MemoryTapResult tapTile(int index) {
@@ -57,6 +60,7 @@ class MemoryGameController {
     }
 
     tile.faceUp = true;
+    totalFlips++;
 
     if (_firstFlippedIndex == null) {
       _firstFlippedIndex = index;
@@ -129,5 +133,28 @@ class MemoryGameController {
     }
     doubled.shuffle(random);
     return doubled;
+  }
+
+  /// คิดคะแนนจากจำนวนครั้งที่เปิดการ์ดทั้งหมด (spec 1.1).
+  /// ≤30 ครั้ง = 10 คะแนน, 31-40 = 8, 41-49 = 6, ≥50 = 4.
+  int get score {
+    if (totalFlips <= 30) return 10;
+    if (totalFlips <= 40) return 8;
+    if (totalFlips <= 49) return 6;
+    return 4;
+  }
+
+  /// แปลงคะแนนเป็นจำนวนดาว (0-3 ดวง) สำหรับแสดงผลตอนจบเกม.
+  int get starRating {
+    switch (score) {
+      case 10:
+        return 3;
+      case 8:
+        return 2;
+      case 6:
+        return 1;
+      default:
+        return 0;
+    }
   }
 }

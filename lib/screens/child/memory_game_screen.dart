@@ -58,6 +58,7 @@ class _MemoryBoard extends ConsumerStatefulWidget {
 class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
   late final MemoryGameController _controller;
   late final ActiveSession _session;
+  bool _resultShown = false;
 
   @override
   void initState() {
@@ -122,27 +123,93 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
           ),
         );
 
-    await Future<void>.delayed(const Duration(seconds: 4));
-    if (mounted && context.canPop()) context.pop();
+    // หน่วงเล็กน้อยให้ TTS คำว่า "จับคู่ครบแล้ว" เล่นจบก่อนเด้ง popup
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    if (!mounted || _resultShown) return;
+    _resultShown = true;
+    _showResultDialog();
+  }
+
+  void _showResultDialog() {
+    final stars = _controller.starRating;
+    final score = _controller.score;
+
+    HapticService.success();
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _MemoryResultDialog(
+        stars: stars,
+        score: score,
+        totalFlips: _controller.totalFlips,
+        onClose: () {
+          Navigator.of(context).pop(); // ปิด dialog
+          if (context.mounted && context.canPop()) context.pop(); // กลับหน้าหลัก
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(kSpace12, kSpace10, kSpace8, kSpace6),
-      child: GridView.builder(
-        itemCount: _controller.tiles.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          mainAxisSpacing: kSpace3,
-          crossAxisSpacing: kSpace3,
-        ),
-        itemBuilder:
-            (context, i) => _MemoryTileView(
-              tile: _controller.tiles[i],
-              onTap: () => _onTileTap(i),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // เผื่อพื้นที่ปุ่มย้อนกลับด้านบนซ้าย (60dp) และ padding รอบขอบเล็กน้อย
+        const horizontalPadding = kSpace4;
+        const topPadding = kSpace2;
+        const bottomPadding = kSpace2;
+        const crossAxisCount = 4;
+        const rowCount = 4;
+        const spacing = kSpace2;
+
+        final availableWidth = constraints.maxWidth - (horizontalPadding * 2);
+        final availableHeight =
+            constraints.maxHeight - topPadding - bottomPadding;
+
+        // คำนวณขนาดการ์ดให้พอดีทั้งความกว้างและความสูงของจอเสมอ
+        // ป้องกันปัญหาการ์ดล้นจอจนต้องเลื่อนดู (spec 1.3 — ปรับ UI ให้เหมาะเด็ก).
+        final tileWidth =
+            (availableWidth - spacing * (crossAxisCount - 1)) /
+            crossAxisCount;
+        final tileHeight =
+            (availableHeight - spacing * (rowCount - 1)) / rowCount;
+        final tileSize = tileWidth < tileHeight ? tileWidth : tileHeight;
+
+        final gridWidth =
+            tileSize * crossAxisCount + spacing * (crossAxisCount - 1);
+        final gridHeight = tileSize * rowCount + spacing * (rowCount - 1);
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            horizontalPadding,
+            topPadding,
+            horizontalPadding,
+            bottomPadding,
+          ),
+          child: Center(
+            child: SizedBox(
+              width: gridWidth,
+              height: gridHeight,
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _controller.tiles.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: spacing,
+                  crossAxisSpacing: spacing,
+                  childAspectRatio: 1,
+                ),
+                itemBuilder:
+                    (context, i) => _MemoryTileView(
+                      tile: _controller.tiles[i],
+                      onTap: () => _onTileTap(i),
+                    ),
+              ),
             ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -154,6 +221,7 @@ class _MemoryTileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isFaceUp = tile.faceUp || tile.matched;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -169,13 +237,139 @@ class _MemoryTileView extends StatelessWidget {
         ),
         child: Center(
           child:
-              tile.faceUp || tile.matched
-                  ? Text(tile.pair.ttsName, style: kChildLabel)
+              isFaceUp
+                  ? Text(
+                    emojiForPair(tile.pair.id),
+                    style: const TextStyle(fontSize: 40),
+                  )
                   : Icon(
                     Icons.star_rounded,
-                    size: 48,
+                    size: 40,
                     color: kYellowPrimary.withValues(alpha: 0.8),
                   ),
+        ),
+      ),
+    );
+  }
+}
+
+// แทนชื่อสัตว์ด้วยอิโมจิ ให้เด็กดูง่ายขึ้นกว่าตัวหนังสือ (spec 1.3).
+// อิงจาก id ของ pair ในชุดคำศัพท์สัตว์ไทย หากไม่พบ id จะ fallback เป็น 🐾.
+String emojiForPair(String pairId) {
+  const map = {
+    'cat': '🐱',
+    'dog': '🐶',
+    'frog': '🐸',
+    'fish': '🐟',
+    'bird': '🐦',
+    'duck': '🦆',
+    'cow': '🐮',
+    'pig': '🐷',
+    'elephant': '🐘',
+    'rabbit': '🐰',
+    'tiger': '🐯',
+    'lion': '🦁',
+    'bear': '🐻',
+    'monkey': '🐵',
+    'chicken': '🐔',
+    'horse': '🐴',
+    'sheep': '🐑',
+    'butterfly': '🦋',
+    'bee': '🐝',
+    'snail': '🐌',
+    'turtle': '🐢',
+    'snake': '🐍',
+    'crab': '🦀',
+    'octopus': '🐙',
+  };
+  return map[pairId] ?? '🐾';
+}
+
+// Popup สรุปผลตอนจบเกม — แสดงดาว 0-3 ดวง + คะแนน + ปุ่มปิดกลับหน้าหลัก.
+// Popup สรุปผลตอนจบเกม — แสดงดาว 0-3 ดวง + คะแนน + ปุ่มปิดกลับหน้าหลัก.
+class _MemoryResultDialog extends StatelessWidget {
+  const _MemoryResultDialog({
+    required this.stars,
+    required this.score,
+    required this.totalFlips,
+    required this.onClose,
+  });
+
+  final int stars;
+  final int score;
+  final int totalFlips;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: kSpace6,
+        vertical: kSpace4,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpace8,
+            vertical: kSpace5,
+          ),
+          decoration: BoxDecoration(
+            color: kWarmWhite,
+            borderRadius: kRadiusLg,
+            boxShadow: const [kShadowLg],
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('เก่งมากเลย!', style: kTextXL),
+                const SizedBox(height: kSpace4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(3, (i) {
+                    final filled = i < stars;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kSpace1,
+                      ),
+                      child: Icon(
+                        Icons.star_rounded,
+                        size: 48,
+                        color: filled
+                            ? kYellowPrimary
+                            : kYellowPrimary.withValues(alpha: 0.2),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: kSpace4),
+                Text('คะแนน $score เต็ม 10', style: kTextLg),
+                const SizedBox(height: kSpace2),
+                Text(
+                  'เปิดการ์ดทั้งหมด $totalFlips ครั้ง',
+                  style: kTextSm.copyWith(color: kTextSecondary),
+                ),
+                const SizedBox(height: kSpace5),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: onClose,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: kYellowPrimary,
+                      foregroundColor: kTextPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: kSpace3),
+                      shape: RoundedRectangleBorder(borderRadius: kRadiusMd),
+                    ),
+                    child: Text('ปิด', style: kTextLg),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
