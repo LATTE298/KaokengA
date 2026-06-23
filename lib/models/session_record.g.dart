@@ -68,6 +68,8 @@ _$SessionRecordImpl _$$SessionRecordImplFromJson(Map<String, dynamic> json) =>
           (json['match_events'] as List<dynamic>?)
               ?.map((e) => MatchEvent.fromJson(e as Map<String, dynamic>))
               .toList(),
+      score: (json['score'] as num?)?.toInt(),
+      stars: (json['stars'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$$SessionRecordImplToJson(
@@ -87,4 +89,6 @@ Map<String, dynamic> _$$SessionRecordImplToJson(
   if (instance.totalPairs case final value?) 'total_pairs': value,
   if (instance.matchEvents?.map((e) => e.toJson()).toList() case final value?)
     'match_events': value,
+  if (instance.score case final value?) 'score': value,
+  if (instance.stars case final value?) 'stars': value,
 };

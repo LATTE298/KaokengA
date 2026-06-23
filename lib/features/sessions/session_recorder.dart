@@ -45,11 +45,15 @@ class DailyLifeCompletedEvent {
     required this.session,
     required this.config,
     required this.dragPath,
+    required this.score,
+    required this.stars,
   });
 
   final ActiveSession session;
   final ScenarioConfig config;
   final List<GamePosition> dragPath;
+  final int score;
+  final int stars;
 }
 
 class MemoryCompletedEvent {
@@ -95,6 +99,8 @@ class SessionRecorder {
       endedAt: endedAt.toIso8601String(),
       durationMs: durationMs,
       completed: true,
+      score: event.score,
+      stars: event.stars,
       dragInteractions: [
         DragInteraction(
           interactionId: _uuidFactory(),

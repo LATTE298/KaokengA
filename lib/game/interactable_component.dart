@@ -20,6 +20,7 @@ class InteractableComponent extends PositionComponent
     required this.reduceMotion,
     required this.placeholderImagePaths,
     this.onPathSample,
+    this.onMistake,
   }) : _startPosition = position.clone(),
        super(
          position: position,
@@ -32,6 +33,7 @@ class InteractableComponent extends PositionComponent
   final bool reduceMotion;
   final Set<String> placeholderImagePaths;
   final void Function(Vector2 point)? onPathSample;
+  final void Function()? onMistake;   // เพิ่ม
 
   final Vector2 _startPosition;
   bool _isBeingDragged = false;
@@ -90,6 +92,8 @@ class InteractableComponent extends PositionComponent
     // after a one-frame grace.
     Future<void>.delayed(const Duration(milliseconds: 50), () {
       if (_settledInZone || _isBeingDragged) return;
+      // วางไม่ถูก zone — นับเป็นความผิดพลาด 1 ครั้ง
+      onMistake?.call();
       if (reduceMotion) {
         position = _startPosition.clone();
       } else {

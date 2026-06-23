@@ -606,6 +606,10 @@ mixin _$SessionRecord {
   int? get totalPairs => throw _privateConstructorUsedError;
   @JsonKey(name: 'match_events', includeIfNull: false)
   List<MatchEvent>? get matchEvents => throw _privateConstructorUsedError;
+  @JsonKey(name: 'score', includeIfNull: false)
+  int? get score => throw _privateConstructorUsedError;
+  @JsonKey(name: 'stars', includeIfNull: false)
+  int? get stars => throw _privateConstructorUsedError;
 
   /// Serializes this SessionRecord to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -638,6 +642,8 @@ abstract class $SessionRecordCopyWith<$Res> {
     @JsonKey(name: 'total_pairs', includeIfNull: false) int? totalPairs,
     @JsonKey(name: 'match_events', includeIfNull: false)
     List<MatchEvent>? matchEvents,
+    @JsonKey(name: 'score', includeIfNull: false) int? score,
+    @JsonKey(name: 'stars', includeIfNull: false) int? stars,
   });
 }
 
@@ -668,6 +674,8 @@ class _$SessionRecordCopyWithImpl<$Res, $Val extends SessionRecord>
     Object? pairsMatched = freezed,
     Object? totalPairs = freezed,
     Object? matchEvents = freezed,
+    Object? score = freezed,
+    Object? stars = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -731,6 +739,16 @@ class _$SessionRecordCopyWithImpl<$Res, $Val extends SessionRecord>
                     ? _value.matchEvents
                     : matchEvents // ignore: cast_nullable_to_non_nullable
                         as List<MatchEvent>?,
+            score:
+                freezed == score
+                    ? _value.score
+                    : score // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            stars:
+                freezed == stars
+                    ? _value.stars
+                    : stars // ignore: cast_nullable_to_non_nullable
+                        as int?,
           )
           as $Val,
     );
@@ -760,6 +778,8 @@ abstract class _$$SessionRecordImplCopyWith<$Res>
     @JsonKey(name: 'total_pairs', includeIfNull: false) int? totalPairs,
     @JsonKey(name: 'match_events', includeIfNull: false)
     List<MatchEvent>? matchEvents,
+    @JsonKey(name: 'score', includeIfNull: false) int? score,
+    @JsonKey(name: 'stars', includeIfNull: false) int? stars,
   });
 }
 
@@ -789,6 +809,8 @@ class __$$SessionRecordImplCopyWithImpl<$Res>
     Object? pairsMatched = freezed,
     Object? totalPairs = freezed,
     Object? matchEvents = freezed,
+    Object? score = freezed,
+    Object? stars = freezed,
   }) {
     return _then(
       _$SessionRecordImpl(
@@ -852,6 +874,16 @@ class __$$SessionRecordImplCopyWithImpl<$Res>
                 ? _value._matchEvents
                 : matchEvents // ignore: cast_nullable_to_non_nullable
                     as List<MatchEvent>?,
+        score:
+            freezed == score
+                ? _value.score
+                : score // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        stars:
+            freezed == stars
+                ? _value.stars
+                : stars // ignore: cast_nullable_to_non_nullable
+                    as int?,
       ),
     );
   }
@@ -875,6 +907,8 @@ class _$SessionRecordImpl implements _SessionRecord {
     @JsonKey(name: 'total_pairs', includeIfNull: false) this.totalPairs,
     @JsonKey(name: 'match_events', includeIfNull: false)
     final List<MatchEvent>? matchEvents,
+    @JsonKey(name: 'score', includeIfNull: false) this.score,
+    @JsonKey(name: 'stars', includeIfNull: false) this.stars,
   }) : _dragInteractions = dragInteractions,
        _matchEvents = matchEvents;
 
@@ -930,8 +964,15 @@ class _$SessionRecordImpl implements _SessionRecord {
   }
 
   @override
+  @JsonKey(name: 'score', includeIfNull: false)
+  final int? score;
+  @override
+  @JsonKey(name: 'stars', includeIfNull: false)
+  final int? stars;
+
+  @override
   String toString() {
-    return 'SessionRecord(sessionId: $sessionId, uid: $uid, scenarioId: $scenarioId, module: $module, startedAt: $startedAt, endedAt: $endedAt, durationMs: $durationMs, completed: $completed, dragInteractions: $dragInteractions, pairsMatched: $pairsMatched, totalPairs: $totalPairs, matchEvents: $matchEvents)';
+    return 'SessionRecord(sessionId: $sessionId, uid: $uid, scenarioId: $scenarioId, module: $module, startedAt: $startedAt, endedAt: $endedAt, durationMs: $durationMs, completed: $completed, dragInteractions: $dragInteractions, pairsMatched: $pairsMatched, totalPairs: $totalPairs, matchEvents: $matchEvents, score: $score, stars: $stars)';
   }
 
   @override
@@ -963,7 +1004,9 @@ class _$SessionRecordImpl implements _SessionRecord {
             const DeepCollectionEquality().equals(
               other._matchEvents,
               _matchEvents,
-            ));
+            ) &&
+            (identical(other.score, score) || other.score == score) &&
+            (identical(other.stars, stars) || other.stars == stars));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -982,6 +1025,8 @@ class _$SessionRecordImpl implements _SessionRecord {
     pairsMatched,
     totalPairs,
     const DeepCollectionEquality().hash(_matchEvents),
+    score,
+    stars,
   );
 
   /// Create a copy of SessionRecord
@@ -1015,6 +1060,8 @@ abstract class _SessionRecord implements SessionRecord {
     @JsonKey(name: 'total_pairs', includeIfNull: false) final int? totalPairs,
     @JsonKey(name: 'match_events', includeIfNull: false)
     final List<MatchEvent>? matchEvents,
+    @JsonKey(name: 'score', includeIfNull: false) final int? score,
+    @JsonKey(name: 'stars', includeIfNull: false) final int? stars,
   }) = _$SessionRecordImpl;
 
   factory _SessionRecord.fromJson(Map<String, dynamic> json) =
@@ -1053,6 +1100,12 @@ abstract class _SessionRecord implements SessionRecord {
   @override
   @JsonKey(name: 'match_events', includeIfNull: false)
   List<MatchEvent>? get matchEvents;
+  @override
+  @JsonKey(name: 'score', includeIfNull: false)
+  int? get score;
+  @override
+  @JsonKey(name: 'stars', includeIfNull: false)
+  int? get stars;
 
   /// Create a copy of SessionRecord
   /// with the given fields replaced by the non-null parameter values.

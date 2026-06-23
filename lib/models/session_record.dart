@@ -52,6 +52,8 @@ class SessionRecord with _$SessionRecord {
     @JsonKey(name: 'total_pairs', includeIfNull: false) int? totalPairs,
     @JsonKey(name: 'match_events', includeIfNull: false)
     List<MatchEvent>? matchEvents,
+    @JsonKey(name: 'score', includeIfNull: false) int? score,
+    @JsonKey(name: 'stars', includeIfNull: false) int? stars,
   }) = _SessionRecord;
 
   factory SessionRecord.fromJson(Map<String, dynamic> json) =>

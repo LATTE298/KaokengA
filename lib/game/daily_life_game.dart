@@ -13,9 +13,6 @@ import 'interactable_component.dart';
 import 'success_overlay.dart';
 
 // Root game class for Module A scenarios (spec 04 §DailyLifeGame).
-//
-// Scenario positions are authored at 1920×1080 and scaled to the device canvas
-// via `_toCanvas` (spec 04 §Device Adaptation).
 class DailyLifeGame extends FlameGame with HasCollisionDetection {
   DailyLifeGame({
     required LoadedScenarioConfig loadedScenario,
@@ -29,7 +26,11 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
   final ScenarioConfig config;
   final TtsService tts;
   final bool reduceMotion;
-  final async.FutureOr<void> Function(List<GamePosition> dragPath) onComplete;
+  final async.FutureOr<void> Function(
+    List<GamePosition> dragPath,
+    int score,
+    int stars,
+  ) onComplete;
   final bool enablePromptTimers;
   final Set<String> _placeholderImagePaths;
 
@@ -40,6 +41,9 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
   final List<GamePosition> _dragPath = [];
 
+  // นับครั้งที่วางผิด (spec 1.2 — เกณฑ์คะแนน Module A).
+  int mistakeCount = 0;
+
   @override
   Future<void> onLoad() async {
     await add(
@@ -49,7 +53,6 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
       ),
     );
 
-    // Drop zone is placed first so interactables can detect collisions.
     final zone = DropZoneComponent(
       position: _toCanvas(Vector2(config.targetZone.x, config.targetZone.y)),
       size: _toCanvasSize(
@@ -71,12 +74,15 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
             _dragPath.add(GamePosition(x: p.x, y: p.y));
             _resetIdleTimer();
           },
+          onMistake: () {
+            // เรียกเมื่อวางผิดตำแหน่ง (ไม่ใช่ target zone) แล้วเด้งกลับ
+            mistakeCount++;
+          },
         ),
       );
     }
 
     if (enablePromptTimers) {
-      // Fire the instruction TTS once the scene has mounted (spec 03 Flow 1 §7).
       Future<void>.delayed(const Duration(seconds: 1), () {
         if (_completed) return;
         tts.speak(config.ttsInstruction);
@@ -118,8 +124,29 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
   void _onIdle() {
     if (_completed) return;
     tts.speak(config.ttsHint);
-    // After the first 8s prompt, re-prompt every 15s (spec 04 §Idle Timer).
     _idleTimer = async.Timer(const Duration(seconds: 15), _onIdle);
+  }
+
+  /// คิดคะแนนจากจำนวนครั้งที่วางผิด (spec 1.2).
+  /// ถูกทุกครั้ง=10, ผิด1=8, ผิด2=6, ผิด≥3=4.
+  int get score {
+    if (mistakeCount == 0) return 10;
+    if (mistakeCount == 1) return 8;
+    if (mistakeCount == 2) return 6;
+    return 4;
+  }
+
+  int get starRating {
+    switch (score) {
+      case 10:
+        return 3;
+      case 8:
+        return 2;
+      case 6:
+        return 1;
+      default:
+        return 0;
+    }
   }
 
   Future<void> _handleSuccess(InteractableComponent target) async {
@@ -136,8 +163,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
     await add(SuccessOverlayComponent(gameSize: size));
 
-    // Hold the celebration for 2.5s (spec 03 Flow 1 §9f) before bubbling up.
     await Future<void>.delayed(const Duration(milliseconds: 2500));
-    await onComplete(List.unmodifiable(_dragPath));
+    await onComplete(List.unmodifiable(_dragPath), score, starRating);
   }
 }
