@@ -44,7 +44,11 @@ class ModuleAScreen extends ConsumerWidget {
                   return ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: scenarios.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: kSpace4),
+                    // เดิม kSpace4 (16) — ขยับเป็น kInteractiveGapMin (24) ให้สอดคล้องกับ
+                    // หน้าเลือกโหมด (mode_select_screen.dart) เพราะการ์ดพวกนี้ก็กดแยกอิสระ
+                    // จากกันเหมือนกัน (spec 1.3) — รอบที่แล้วลืมแก้ไฟล์นี้ไปจริงๆ
+                    separatorBuilder:
+                        (_, __) => const SizedBox(width: kInteractiveGapMin),
                     itemBuilder: (context, i) {
                       final s = scenarios[i];
                       return ScenarioCard(

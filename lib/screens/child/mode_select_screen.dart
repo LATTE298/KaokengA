@@ -51,7 +51,9 @@ class ModeSelectScreen extends ConsumerWidget {
                         context.push(kRouteModuleA);
                       },
                     ),
-                    const SizedBox(width: kSpace4),
+                    // ระยะห่างระหว่างการ์ดเพิ่มจาก kSpace4 (16) เป็น kInteractiveGapMin (24)
+                    // เพื่อลดโอกาสกดโดนการ์ดข้างเคียงโดยไม่ตั้งใจ (spec 1.3)
+                    const SizedBox(width: kInteractiveGapMin),
                     ModuleCard(
                       label: kLabelModuleB,
                       description: 'จับคู่รูปภาพ',
@@ -62,7 +64,7 @@ class ModeSelectScreen extends ConsumerWidget {
                         context.push(kRouteModuleB);
                       },
                     ),
-                    const SizedBox(width: kSpace4),
+                    const SizedBox(width: kInteractiveGapMin),
                     ModuleCard(
                       label: kLabelModuleC,
                       description: 'เรียนคำศัพท์',
@@ -83,8 +85,11 @@ class ModeSelectScreen extends ConsumerWidget {
     );
   }
 }
+
 // Logo with 3s long-press gate to parent mode (spec 03 Flow 4 step 1).
-// Miniaturized to act as a hidden corner button.
+// Miniaturized to act as a hidden corner button — ตั้งใจปล่อยขนาดเดิมไว้ ไม่ขยายตาม
+// มาตรฐาน 64dp ของปุ่มฝั่งเด็ก เพราะนี่คือปุ่มลับสำหรับผู้ปกครองเท่านั้น ยิ่งเด่นเกินไปยิ่งขัด
+// จุดประสงค์ที่อยากให้เด็กไม่สังเกตเห็น/ไม่กดเจอโดยบังเอิญ
 class _LogoSmall extends StatefulWidget {
   const _LogoSmall({required this.onLongPressComplete});
   final VoidCallback onLongPressComplete;
@@ -93,7 +98,8 @@ class _LogoSmall extends StatefulWidget {
   State<_LogoSmall> createState() => _LogoSmallState();
 }
 
-class _LogoSmallState extends State<_LogoSmall> with SingleTickerProviderStateMixin {
+class _LogoSmallState extends State<_LogoSmall>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ringController;
 
   @override
@@ -145,7 +151,9 @@ class _LogoSmallState extends State<_LogoSmall> with SingleTickerProviderStateMi
                   value: _ringController.value,
                   strokeWidth: 3,
                   backgroundColor: Colors.transparent,
-                  valueColor: const AlwaysStoppedAnimation<Color>(kBluePrimary),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    kBluePrimary,
+                  ),
                 ),
               );
             },

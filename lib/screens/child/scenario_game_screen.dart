@@ -269,17 +269,15 @@ class _DailyLifeResultDialog extends StatelessWidget {
                 SizedBox(height: kSpace4),
                 Text('คะแนน $score เต็ม 10', style: kTextLg),
                 SizedBox(height: kSpace5),
+                // เอา style: FilledButton.styleFrom(...) ที่เคยเซ็ตซ้ำเองตรงนี้ออก เพราะ
+                // app_theme.dart ตั้งค่ากลางให้ทุกปุ่มในแอปแล้ว เหมือนกับใน
+                // memory_game_screen.dart — ปุ่ม "ปิด" ของทั้งสองโมดูลจะหน้าตาเหมือนกัน
+                // เป๊ะโดยไม่ต้องก็อปสไตล์มาวางซ้ำ (spec 1.3)
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: kYellowPrimary,
-                      foregroundColor: kTextPrimary,
-                      padding: EdgeInsets.symmetric(vertical: kSpace3),
-                      shape: RoundedRectangleBorder(borderRadius: kRadiusMd),
-                    ),
-                    child: Text('ปิด', style: kTextLg),
+                    child: const Text('ปิด'),
                   ),
                 ),
               ],

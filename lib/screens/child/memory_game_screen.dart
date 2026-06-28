@@ -18,6 +18,7 @@ import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child_back_button.dart';
 import '../../widgets/child/child_async_view.dart';
+import '../../widgets/child/pressable_child_card.dart';
 
 // Memory game — 4×4 grid, 8 pairs (spec 03 Flow 2).
 class MemoryGameScreen extends ConsumerWidget {
@@ -89,7 +90,8 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
     if (!result.accepted) {
       return;
     }
-    HapticService.tapLight();
+    // หมายเหตุ: ไม่ต้องเรียก HapticService.tapLight() ซ้ำที่นี่แล้ว เพราะ PressableChildCard
+    // ที่ครอบการ์ดแต่ละใบใน _MemoryTileView สั่นให้แล้วตั้งแต่ตอนแตะติด (spec 1.3)
     setState(() {});
 
     final pairName = result.pairName;
@@ -155,7 +157,7 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // เผื่อพื้นที่ปุ่มย้อนกลับด้านบนซ้าย (60dp) และ padding รอบขอบเล็กน้อย
+        // เผื่อพื้นที่ปุ่มย้อนกลับด้านบนซ้าย (64dp) และ padding รอบขอบเล็กน้อย
         const horizontalPadding = kSpace4;
         const topPadding = kSpace2;
         const bottomPadding = kSpace2;
@@ -222,9 +224,14 @@ class _MemoryTileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFaceUp = tile.faceUp || tile.matched;
-    return GestureDetector(
+    // เปลี่ยนจาก GestureDetector ตรงๆ มาใช้ PressableChildCard (spec 1.3) เพื่อให้การ์ด
+    // ทุกใบในกระดานมี press feedback (ขยาย+หรี่แสงเล็กน้อยตอนกดค้าง) และ haptic ที่สม่ำเสมอ
+    // กับการ์ดอื่นๆทั้งแอป โดยไม่ต้องเขียน animation feedback ซ้ำเอง — ปิด min-tap-target
+    // เพราะตัวการ์ดเองคำนวณขนาดให้เต็มช่อง grid อยู่แล้วเสมอ ใหญ่กว่า 64dp อยู่แล้วทุกกรณี
+    return PressableChildCard(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+      enforceMinTapTarget: false,
+      scale: 1.03,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         decoration: BoxDecoration(
@@ -285,7 +292,6 @@ String emojiForPair(String pairId) {
   return map[pairId] ?? '🐾';
 }
 
-// Popup สรุปผลตอนจบเกม — แสดงดาว 0-3 ดวง + คะแนน + ปุ่มปิดกลับหน้าหลัก.
 // Popup สรุปผลตอนจบเกม — แสดงดาว 0-3 ดวง + คะแนน + ปุ่มปิดกลับหน้าหลัก.
 class _MemoryResultDialog extends StatelessWidget {
   const _MemoryResultDialog({
@@ -354,17 +360,14 @@ class _MemoryResultDialog extends StatelessWidget {
                   style: kTextSm.copyWith(color: kTextSecondary),
                 ),
                 const SizedBox(height: kSpace5),
+                // เอา style: FilledButton.styleFrom(...) ที่เคยเซ็ตซ้ำเองตรงนี้ออก เพราะ
+                // app_theme.dart ตั้งค่ากลางให้ทุกปุ่มในแอปแล้ว (ขนาด-สี-ฟอนต์เดียวกันทุกที่
+                // โดยไม่ต้องก็อปสไตล์มาวางซ้ำทุกหน้าจอ — spec 1.3)
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: onClose,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: kYellowPrimary,
-                      foregroundColor: kTextPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: kSpace3),
-                      shape: RoundedRectangleBorder(borderRadius: kRadiusMd),
-                    ),
-                    child: Text('ปิด', style: kTextLg),
+                    child: const Text('ปิด'),
                   ),
                 ),
               ],
