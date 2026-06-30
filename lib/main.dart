@@ -10,6 +10,7 @@ import 'firebase_options.dart';
 import 'routes/app_router.dart';
 import 'services/auth_service.dart';
 import 'theme/app_theme.dart';
+import 'widgets/usage_timer_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +54,12 @@ class DailyLifeApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       routerConfig: buildAppRouter(),
+      // ครอบทุกหน้าด้วย UsageTimerGate (spec 1.4 — เตือนพักสายตาทุก 15 นาที)
+      // ตั้งที่ระดับ MaterialApp.router(builder:) เพื่อให้ gate อยู่เหนือ Navigator แต่อยู่
+      // ใต้ MaterialApp — มี Theme/Localizations/Overlay ให้ showDialog ใช้ได้ และ state ของ
+      // gate ไม่ถูกทำลายเมื่อเปลี่ยนเส้นทาง (route)
+      builder: (context, child) =>
+          UsageTimerGate(child: child ?? const SizedBox.shrink()),
     );
   }
 }
