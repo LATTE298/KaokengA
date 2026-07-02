@@ -8,7 +8,6 @@ import '../../routes/app_routes.dart';
 import '../../services/haptic_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
-import '../../theme/typography.dart';
 import '../../widgets/child/module_card.dart';
 
 class ModeSelectScreen extends ConsumerWidget {
@@ -34,48 +33,70 @@ class ModeSelectScreen extends ConsumerWidget {
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: kSpace8,
+                  horizontal: kSpace6,
                   vertical: kSpace4,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ModuleCard(
-                      label: kLabelModuleA,
-                      description: 'ลองทำกิจกรรม',
-                      icon: Icons.home_rounded,
-                      background: kYellowLight,
-                      onTap: () {
-                        ref.read(ttsServiceProvider).speak(kTtsModuleADesc);
-                        context.push(kRouteModuleA);
-                      },
-                    ),
-                    // ระยะห่างระหว่างการ์ดเพิ่มจาก kSpace4 (16) เป็น kInteractiveGapMin (24)
-                    // เพื่อลดโอกาสกดโดนการ์ดข้างเคียงโดยไม่ตั้งใจ (spec 1.3)
-                    const SizedBox(width: kInteractiveGapMin),
-                    ModuleCard(
-                      label: kLabelModuleB,
-                      description: 'จับคู่รูปภาพ',
-                      icon: Icons.grid_view_rounded,
-                      background: kBlueLight,
-                      onTap: () {
-                        ref.read(ttsServiceProvider).speak(kTtsModuleBDesc);
-                        context.push(kRouteModuleB);
-                      },
-                    ),
-                    const SizedBox(width: kInteractiveGapMin),
-                    ModuleCard(
-                      label: kLabelModuleC,
-                      description: 'เรียนคำศัพท์',
-                      icon: Icons.record_voice_over_rounded,
-                      background: kYellowAccent,
-                      onTap: () {
-                        ref.read(ttsServiceProvider).speak(kTtsModuleCDesc);
-                        context.push(kRouteModuleC);
-                      },
-                    ),
-                  ],
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // แบ่งความกว้างที่มีจริงให้การ์ด 3 ใบเท่าๆกัน หลังหักช่องว่าง 2 ช่อง
+                    // (spec 1.3) — เดิมการ์ดใช้ minWidth 140 ตายตัว รวมกันเกินจอแคบแล้วล้น
+                    // ตอนนี้การ์ดจะพอดีจอเสมอ ไม่ว่าจะ iPhone 12 Pro (390) หรือจออื่น
+                    const gap = kInteractiveGapMin;
+                    final totalGap = gap * 2;
+                    // จำกัดความกว้างรวมไม่ให้เกิน 900 บนแท็บเล็ตใหญ่ (การ์ดจะได้ไม่กว้างเวอร์)
+                    final usableWidth =
+                        constraints.maxWidth.clamp(0.0, 900.0);
+                    final cardWidth = (usableWidth - totalGap) / 3;
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ModuleCard(
+                          label: kLabelModuleA,
+                          description: 'ลองทำกิจกรรม',
+                          icon: Icons.home_rounded,
+                          background: kYellowLight,
+                          cardWidth: cardWidth,
+                          onTap: () {
+                            ref
+                                .read(ttsServiceProvider)
+                                .speak(kTtsModuleADesc);
+                            context.push(kRouteModuleA);
+                          },
+                        ),
+                        const SizedBox(width: gap),
+                        ModuleCard(
+                          label: kLabelModuleB,
+                          description: 'จับคู่รูปภาพ',
+                          icon: Icons.grid_view_rounded,
+                          background: kBlueLight,
+                          cardWidth: cardWidth,
+                          onTap: () {
+                            ref
+                                .read(ttsServiceProvider)
+                                .speak(kTtsModuleBDesc);
+                            context.push(kRouteModuleB);
+                          },
+                        ),
+                        const SizedBox(width: gap),
+                        ModuleCard(
+                          label: kLabelModuleC,
+                          description: 'เรียนคำศัพท์',
+                          icon: Icons.record_voice_over_rounded,
+                          background: kYellowAccent,
+                          cardWidth: cardWidth,
+                          onTap: () {
+                            ref
+                                .read(ttsServiceProvider)
+                                .speak(kTtsModuleCDesc);
+                            context.push(kRouteModuleC);
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -87,9 +108,6 @@ class ModeSelectScreen extends ConsumerWidget {
 }
 
 // Logo with 3s long-press gate to parent mode (spec 03 Flow 4 step 1).
-// Miniaturized to act as a hidden corner button — ตั้งใจปล่อยขนาดเดิมไว้ ไม่ขยายตาม
-// มาตรฐาน 64dp ของปุ่มฝั่งเด็ก เพราะนี่คือปุ่มลับสำหรับผู้ปกครองเท่านั้น ยิ่งเด่นเกินไปยิ่งขัด
-// จุดประสงค์ที่อยากให้เด็กไม่สังเกตเห็น/ไม่กดเจอโดยบังเอิญ
 class _LogoSmall extends StatefulWidget {
   const _LogoSmall({required this.onLongPressComplete});
   final VoidCallback onLongPressComplete;

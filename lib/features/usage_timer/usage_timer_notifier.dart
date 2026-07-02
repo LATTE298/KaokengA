@@ -5,16 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Time-Limiter (spec 1.4 — เด็กใช้งานต่อเนื่อง 15 นาที → เตือนพักสายตา).
 //
-// เก็บเวลาเล่นสะสมต่อเนื่องของผู้ใช้ ออกแบบเป็น state กลางของแอปผ่าน Riverpod (ไม่ใช่ state
-// ในวิดเจ็ตเดี่ยวๆ) เพื่อให้ข้อมูลอยู่รอดข้ามการเปลี่ยนเส้นทาง (navigate) และข้ามการ rebuild
-// ของ MaterialApp — เป็นเหตุผลเดียวกับที่ session recorder/auth ใช้ provider ระดับแอป
+// เก็บเวลาเล่นสะสมต่อเนื่องของผู้ใช้ ออกแบบเป็น state กลางของแอปผ่าน Riverpod เพื่อให้ข้อมูล
+// อยู่รอดข้ามการเปลี่ยนเส้นทาง (navigate) และข้ามการ rebuild ของ MaterialApp
 //
-// แนวคิดสำคัญ: pause/resume ต้องเก็บเวลาสะสมไว้ ห้ามรีเซ็ตเป็นศูนย์ มิฉะนั้นการที่เด็กวาง
-// แท็บเล็ตทิ้งไว้ชั่วครู่แล้วกลับมาเปิดใหม่ จะกลายเป็น "นับ 15 นาทีใหม่ทุกครั้ง" ซึ่งทำให้
-// การเตือนพักไม่ทำงานตามวัตถุประสงค์เลย
+// หัวใจของการนับเวลา: คำนวณจาก DateTime นาฬิกาจริงเสมอ (ไม่ใช่นับจำนวนครั้งที่ Timer ยิง)
+// ทำให้ทนต่อการ pause/resume ถี่ๆ ได้ — โดยเฉพาะบน Chrome web ที่ยิง lifecycle event
+// (focus/blur) บ่อยมาก ทุก delta เวลาจริงจะถูกเก็บสะสมครบผ่าน _commitElapsed() ที่เรียกทั้ง
+// ตอน tick และตอน pause ไม่มีทางหาย
 //
-// ตั้งใจไม่ persist ข้ามการเปิด-ปิดแอป (ปิดแอป = พักโดยปริยาย) ตามแผนเฟส 1 — ถ้าจะให้
-// เคร่งกว่านี้ (ปิดแอปหลบไปเล่นใหม่ก็ยังเตือนอยู่) ต้องใช้ SharedPreferences ในเฟสถัดไป
+// pause/resume เก็บเวลาสะสมไว้เสมอ ห้ามรีเซ็ตเป็นศูนย์ มิฉะนั้นการที่เด็กวางแท็บเล็ตทิ้งไว้
+// ชั่วครู่แล้วกลับมา จะกลายเป็น "นับ 15 นาทีใหม่ทุกครั้ง" ซึ่งทำให้การเตือนพักไม่ทำงานตาม
+// วัตถุประสงค์ ตั้งใจไม่ persist ข้ามการเปิด-ปิดแอป (ปิดแอป = พักโดยปริยาย) ตามแผนเฟส 1
 
 @immutable
 class UsageTimerState {
@@ -27,12 +28,11 @@ class UsageTimerState {
   /// เวลาเล่นต่อเนื่องสะสมตั้งแต่ครั้งล่าสุดที่ reset
   final Duration elapsed;
 
-  /// ตอนนี้กำลังนับเวลาอยู่หรือไม่ (true เมื่ออยู่ในแอปและไม่ถึงขีดจำกัด)
+  /// ตอนนี้กำลังนับเวลาอยู่หรือไม่
   final bool running;
 
-  /// ครบขีดจำกัดแล้ว ควรแสดง popup เตือนพัก
-  /// ตั้งใจเป็นแฟล็กแยกจาก (elapsed >= limit) เพื่อให้ UI ทราบเฉพาะ "ขอบเข้ามาใหม่"
-  /// (rising edge) ไม่ใช่ "อยู่ค้างที่ขอบ" — listener จึงโชว์ popup ครั้งเดียวต่อรอบ
+  /// ครบขีดจำกัดแล้ว ควรแสดง popup เตือนพัก — เป็นแฟล็กแยกเพื่อให้ UI จับ rising edge
+  /// (false→true) แล้วโชว์ popup ครั้งเดียวต่อรอบ
   final bool breakDue;
 
   factory UsageTimerState.initial() => const UsageTimerState(
@@ -63,21 +63,17 @@ class UsageTimerNotifier extends StateNotifier<UsageTimerState> {
   /// ขีดจำกัดเวลาใช้งานต่อเนื่อง (ค่ามาตรฐาน 15 นาทีตามแผนเฟส 1.4)
   final Duration limit;
 
-  /// ความถี่ในการเช็คขีดจำกัด — ตั้งเป็น 5 วินาทีเพราะ UI ไม่ได้แสดง countdown แบบวินาที
-  /// per วินาที ดังนั้นไม่จำเป็นต้อง tick ถี่ ลด rebuild ของ provider listener
-  /// (เวลา elapsed คำนวณจาก DateTime จริง ไม่ใช่จากจำนวน tick — ความแม่นยำไม่กระทบ)
+  /// ความถี่ในการเช็คขีดจำกัด — 5 วินาทีเพียงพอเพราะ UI ไม่ได้แสดง countdown แบบวินาที
+  /// (เวลา elapsed คำนวณจาก DateTime จริง ไม่ใช่จากจำนวน tick ความแม่นยำจึงไม่กระทบ)
   final Duration tickInterval;
 
   Timer? _timer;
 
-  /// เวลาที่เริ่ม resume ครั้งล่าสุด — ใช้คำนวณ delta เวลาสะสมตอน pause/tick
-  /// เก็บแยกจาก state.elapsed เพื่อให้ tick คำนวณแบบ "เวลาจริง" จาก DateTime ได้
-  /// ไม่ขึ้นกับความถี่ของ Timer (ถ้าระบบ busy แล้ว tick มาช้า ก็ยังนับถูก)
+  /// เวลาที่เริ่ม resume ครั้งล่าสุด — ใช้คำนวณ delta เวลาจริงตอน tick/pause
   DateTime? _resumeAt;
 
   void resume() {
-    // กันการ resume ซ้ำ (เช่น lifecycle เรียก resume() สองครั้งติดกันจาก
-    // .inactive → .resumed) และห้าม resume หลังครบขีดจำกัดแล้ว (ต้อง ack ก่อน)
+    // กัน resume ซ้ำ และห้าม resume หลังครบขีดจำกัด (ต้อง ack ก่อน)
     if (state.running || state.breakDue) return;
 
     _resumeAt = DateTime.now();
@@ -89,22 +85,15 @@ class UsageTimerNotifier extends StateNotifier<UsageTimerState> {
   void pause() {
     if (!state.running) return;
 
-    // หยุดและสะสมเวลาที่ผ่านมาตั้งแต่ resume ครั้งล่าสุดไว้ใน elapsed
-    final delta = _resumeAt != null
-        ? DateTime.now().difference(_resumeAt!)
-        : Duration.zero;
+    _commitElapsed();
     _resumeAt = null;
     _timer?.cancel();
     _timer = null;
-    state = state.copyWith(
-      running: false,
-      elapsed: state.elapsed + delta,
-    );
+    state = state.copyWith(running: false);
   }
 
-  /// เคลียร์เวลาสะสมและแฟล็ก breakDue กลับเป็นศูนย์ — เรียกหลังผู้ใช้กดยืนยันว่าพักแล้ว
-  /// ไม่ resume เองหลัง reset เพราะ gate widget จะเป็นคน resume ใหม่ตามสถานะแอป
-  /// (เช่น ถ้าแอปอยู่ background ระหว่างที่ ack จะยัง resume ไม่ได้จนกว่าจะกลับมา)
+  /// เคลียร์เวลาสะสมกลับเป็นศูนย์ — เรียกหลังผู้ใช้กดยืนยันว่าพักแล้ว
+  /// ไม่ resume เองหลัง reset เพราะ gate widget เป็นคน resume ใหม่ตามสถานะแอป
   void reset() {
     _timer?.cancel();
     _timer = null;
@@ -112,13 +101,20 @@ class UsageTimerNotifier extends StateNotifier<UsageTimerState> {
     state = UsageTimerState.initial();
   }
 
-  void _tick() {
+  // ย้ายเวลาจริงที่ผ่านไปตั้งแต่ _resumeAt ล่าสุด เข้าไปสะสมใน state.elapsed แล้วรีเซ็ต
+  // _resumeAt เป็นตอนนี้ เพื่อไม่ให้นับ delta ซ้ำในรอบถัดไป
+  void _commitElapsed() {
     if (_resumeAt == null) return;
-    final delta = DateTime.now().difference(_resumeAt!);
-    final currentElapsed = state.elapsed + delta;
+    final now = DateTime.now();
+    final delta = now.difference(_resumeAt!);
+    _resumeAt = now;
+    state = state.copyWith(elapsed: state.elapsed + delta);
+  }
 
-    if (currentElapsed >= limit) {
-      // ครบขีดจำกัด — snap เป็น limit พอดี (ไม่ใช่ค่าที่เกิน) ปิด Timer และจุดแฟล็ก
+  void _tick() {
+    _commitElapsed();
+
+    if (state.elapsed >= limit) {
       _timer?.cancel();
       _timer = null;
       _resumeAt = null;
@@ -127,10 +123,6 @@ class UsageTimerNotifier extends StateNotifier<UsageTimerState> {
         running: false,
         breakDue: true,
       );
-    } else {
-      // ยังไม่ครบ — อัปเดต elapsed (ไม่ commit เข้า state ก็ได้เพราะไม่มี UI แสดงผล
-      // แต่ commit ไว้เผื่ออนาคตอยากเพิ่ม progress bar ในเฟสถัดไป)
-      state = state.copyWith(elapsed: currentElapsed);
     }
   }
 

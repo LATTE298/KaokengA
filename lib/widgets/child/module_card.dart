@@ -13,6 +13,7 @@ class ModuleCard extends StatelessWidget {
     required this.icon,
     required this.background,
     required this.onTap,
+    this.cardWidth,
   });
 
   final String label;
@@ -21,19 +22,32 @@ class ModuleCard extends StatelessWidget {
   final Color background;
   final VoidCallback onTap;
 
+  /// ความกว้างที่กำหนดจากหน้าจอ (แบ่งพื้นที่จริงเท่าๆกัน) — ถ้าไม่ส่งมา จะใช้ constraints
+  /// ยืดหยุ่นแบบเดิม เดิมใช้ minWidth 140 ตายตัว ทำให้การ์ด 3 ใบรวมกันกว้างเกินจอแคบ
+  /// (เช่น iPhone 12 Pro 390px) แล้วล้น 186px — การรับความกว้างจากหน้าจอแก้ที่ต้นเหตุ
+  /// (spec 1.3)
+  final double? cardWidth;
+
   @override
   Widget build(BuildContext context) {
-    // ปรับโครงสร้างให้ยืดหยุ่น ยึดตามความกว้างหน้าจอ แต่ไม่ล็อกความสูงตายตัวจนของล้น
+    // ย่อไอคอน/ฟอนต์ลงเมื่อการ์ดแคบมาก (< 130px) กันเนื้อหาเบียดจนล้น
+    final isNarrow = cardWidth != null && cardWidth! < 130;
+    final iconSize = isNarrow ? 42.0 : 56.0;
+    final labelStyle = (isNarrow ? kTextMd : kTextLg)
+        .copyWith(fontWeight: FontWeight.bold);
+
     return PressableChildCard(
       onTap: onTap,
       playClickSound: true,
       child: Container(
-        // บังคับความกว้างขั้นต่ำ-ขั้นสูงให้พอดีจอมือถือ ส่วนความสูงปล่อยให้ยืดหยุ่นตามเนื้อหาข้างใน
-        constraints: const BoxConstraints(
-          minWidth: 140,
-          maxWidth: 340,
+        width: cardWidth,
+        constraints: cardWidth == null
+            ? const BoxConstraints(minWidth: 140, maxWidth: 340)
+            : null,
+        padding: EdgeInsets.symmetric(
+          horizontal: isNarrow ? kSpace2 : kSpace4,
+          vertical: kSpace5,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: kSpace4, vertical: kSpace5),
         decoration: BoxDecoration(
           color: background,
           borderRadius: kRadiusLg,
@@ -41,22 +55,23 @@ class ModuleCard extends StatelessWidget {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min, // ให้ Column หดขนาดเท่าเนื้อหาจริง ไม่ยืดจนล้น
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // ปรับขนาดไอคอนลงมานิดนึง จาก 80 เหลือ 56 เพื่อความสบายตาและไม่เบียดตัวหนังสือ
-            Icon(icon, size: 56, color: kTextPrimary),
+            Icon(icon, size: iconSize, color: kTextPrimary),
             const SizedBox(height: kSpace3),
             Text(
-              label, 
-              style: kTextLg.copyWith(fontWeight: FontWeight.bold), 
-              textAlign: TextAlign.center
+              label,
+              style: labelStyle,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: kSpace1),
             Text(
               description,
               style: kTextSm,
               textAlign: TextAlign.center,
-              maxLines: 2, // เผื่อข้อความยาวให้ขึ้นได้ 2 บรรทัด
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],

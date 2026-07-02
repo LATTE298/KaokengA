@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'break_reminder_dialog.dart';
 import '../features/usage_timer/usage_timer_notifier.dart';
+import '../routes/app_router.dart';
 
 // วิดเจ็ตครอบทั้งแอป (เสียบผ่าน MaterialApp.router(builder: ...)) ที่ทำหน้าที่:
 //   1) ผูก UsageTimerNotifier เข้ากับ app lifecycle — pause เมื่อแอปถูกย่อ/สลับไปแอปอื่น
@@ -24,16 +25,12 @@ class UsageTimerGate extends ConsumerStatefulWidget {
 
 class _UsageTimerGateState extends ConsumerState<UsageTimerGate>
     with WidgetsBindingObserver {
-  // กันการเปิด dialog ซ้อนกัน 2 ครั้ง — listen อาจ fire ซ้ำได้ถ้า state รีบเสริฟ rebuild
   bool _dialogShowing = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // เริ่มนับเวลาเมื่อ gate ขึ้นมาเป็นครั้งแรก (หลัง splash) — ใช้ post-frame เพื่อกัน
-    // การแก้ provider ระหว่าง build (ทำใน build/initState ตรงๆ จะ trigger warning ของ
-    // Riverpod ว่ามี side-effect ระหว่าง widget tree build)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(usageTimerProvider.notifier).resume();
@@ -57,9 +54,6 @@ class _UsageTimerGateState extends ConsumerState<UsageTimerGate>
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
       case AppLifecycleState.detached:
-        // pause ในทุกสถานะที่ไม่ใช่ resumed — เด็กไม่ได้มองจอแล้วก็ไม่ควรนับเวลาต่อ
-        // โดยเฉพาะ .paused (กดปุ่ม home/สลับแอป) เป็นเคสที่สำคัญที่สุด เพราะถ้าไม่ pause
-        // เด็กที่วางแท็บเล็ตทิ้งไว้ 10 นาทีแล้วกลับมาเปิด จะโดน popup ทันทีโดยไม่สมเหตุสมผล
         notifier.pause();
         break;
     }
@@ -67,21 +61,23 @@ class _UsageTimerGateState extends ConsumerState<UsageTimerGate>
 
   Future<void> _showBreakDialog() async {
     if (_dialogShowing) return;
+
+    // ใช้ context ของ root navigator (ไม่ใช่ context ของ gate เอง) เพราะ gate อยู่เหนือ
+    // Navigator ใน widget tree — showDialog ต้องการ context ที่อยู่ใต้ Navigator (spec 1.4)
+    // ถ้า navigator ยังไม่พร้อม (เช่น ช่วง transition) ให้ข้ามรอบนี้ไป breakDue ยังคงค้าง
+    // เป็น true อยู่ ไว้ค่อยลองใหม่ก็ได้ แต่ในทางปฏิบัติ navigator พร้อมเสมอ ณ จุดนี้
+    final navContext = rootNavigatorKey.currentContext;
+    if (navContext == null) return;
+
     _dialogShowing = true;
-    // ตอน popup กำลังแสดง เราถือว่าเด็กไม่ได้เล่นเกมแล้ว (popup บังอยู่) จึง pause ตัวจับ
-    // เวลาไว้ก่อน — ถ้าไม่ทำ และ tick interval มาตรงตอน dialog เปิด ค่าจะข้ามขีดจำกัด
-    // ไปเรื่อยๆไม่หยุด พอ ack ก็ reset ก็จริง แต่ระหว่างเปิด dialog นานๆเวลายังเดิน
     ref.read(usageTimerProvider.notifier).pause();
 
     await showDialog<void>(
-      context: context,
+      context: navContext,
       barrierDismissible: false,
-      // ผู้ใช้ปุ่ม back ระบบจะปิดไม่ได้ — ต้องกดปุ่มในกล่องเอง
       builder: (_) => BreakReminderDialog(
         onAcknowledged: () {
           ref.read(usageTimerProvider.notifier).reset();
-          // หลัง reset ให้ resume ใหม่อัตโนมัติ เพื่อเริ่มนับรอบถัดไป — ใช้ post-frame
-          // กันการ trigger provider rebuild กลางการปิด dialog
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               ref.read(usageTimerProvider.notifier).resume();
@@ -96,8 +92,6 @@ class _UsageTimerGateState extends ConsumerState<UsageTimerGate>
 
   @override
   Widget build(BuildContext context) {
-    // ฟังเฉพาะการเปลี่ยน breakDue (false→true) — ใช้ listen ไม่ใช่ watch เพราะไม่อยาก
-    // ให้วิดเจ็ตทั้งหน้าแอป rebuild ทุกครั้งที่ elapsed ขยับ (ทุก tickInterval = 5s)
     ref.listen<UsageTimerState>(usageTimerProvider, (previous, next) {
       final wasFlagged = previous?.breakDue ?? false;
       if (!wasFlagged && next.breakDue) {
