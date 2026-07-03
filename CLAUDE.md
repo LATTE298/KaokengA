@@ -1,0 +1,174 @@
+# CLAUDE.md — Kaokeng (ก้าวเก่ง)
+
+> ไฟล์นี้เป็นบริบทหลักของโปรเจกต์สำหรับ Claude Code อ่านก่อนเริ่มงานทุกครั้ง
+> เขียนขึ้นเพื่อส่งต่อบริบทจาก session งานก่อนหน้า (เฟส 1 ทั้งหมด + bug เสถียรภาพ/TTS + responsive B/C ทำเสร็จแล้ว — เหลือ asset 404 กับเฟส 2)
+
+---
+
+## 1. ภาพรวมโปรเจกต์
+
+**Kaokeng (ก้าวเก่ง)** — แอปพลิเคชันช่วยเหลือเด็กพิเศษ (เน้นกลุ่มอาการดาวน์ซินโดรม) ในการเรียนรู้ทักษะการใช้ชีวิตประจำวันและการสื่อสาร ผ่านเกมแบบ Gamification + Visual/Interactive Learning
+
+- **แพลตฟอร์มหลัก:** แท็บเล็ต/มือถือ Android (**ล็อกแนวนอนเสมอ** — landscape only)
+- **สถานะ PC port:** พักไว้ก่อน โฟกัส Mobile/Tablet ให้เสถียร 100% ก่อน
+- **เอกสารอ้างอิง:** ข้อเสนอโครงการการแข่งขันพัฒนาโปรแกรมคอมพิวเตอร์แห่งประเทศไทย (รหัส 28P22N00903) — ทีม 3 คน โรงเรียนยุพราชวิทยาลัย
+
+### Tech Stack
+- Flutter + Dart
+- **Flame** (game engine — ใช้ใน Module A drag & drop)
+- **Riverpod 2** (state management)
+- **Freezed** + json_serializable (models)
+- **go_router** (navigation)
+- **Firebase** Auth (anonymous สำหรับเด็ก + email/password สำหรับผู้ปกครอง) + Firestore
+- **just_audio** + Google Cloud TTS (เสียงพูดภาษาไทย)
+
+### โครงสร้าง lib/ (ย่อ)
+```
+lib/
+├── main.dart
+├── firebase_options.dart
+├── features/
+│   ├── memory/          # logic เกมจับคู่ (pure, testable)
+│   ├── sessions/        # session recorder
+│   └── usage_timer/     # ★ เฟส 1.4 — ตัวจับเวลาเตือนพัก
+├── game/                # Flame components (Module A)
+├── models/              # Freezed models
+├── providers/           # Riverpod providers
+├── routes/              # app_router.dart, app_routes.dart
+├── screens/
+│   ├── child/           # หน้าจอฝั่งเด็ก
+│   └── parent/          # หน้าจอฝั่งผู้ปกครอง (dashboard)
+├── services/            # tts, haptic, auth, content_repository
+├── theme/               # ★ colors, spacing, typography, app_theme, responsive
+├── widgets/             # ★ shared widgets
+└── l10n/                # tts_strings_th.dart
+```
+
+### 3 โมดูลหลัก
+- **Module A (ชีวิตประจำวัน):** drag & drop ผ่าน Flame — 3 สถานการณ์ (ซื้อของเซเว่น / คัดแยกขยะ / จัดจานผลไม้). Scoring: ถูกทุกครั้ง=10, ผิด1=8, ผิด2=6, >3=4
+- **Module B (จับคู่ภาพ):** memory game 4×4 (8 คู่). Scoring: ≤30 flips=10, 31-40=8, 41-49=6, ≥50=4
+- **Module C (คำศัพท์):** ปัจจุบันเป็น **sound board** (แตะรูป→ฟังเสียง) — ⚠️ **ไม่ตรงกับเอกสารข้อเสนอ** (ดูข้อ 5)
+
+---
+
+## 2. งานที่ทำเสร็จแล้ว (เฟส 1.3 + 1.4 + bug เสถียรภาพ)
+
+### เฟส 1.3 — ปรับ UI/UX สำหรับเด็กดาวน์ซินโดรม
+แก้ที่ **ชั้น theme + widget กลาง** เพื่อให้กระทบทั้งแอปอัตโนมัติ:
+
+- **`theme/colors.dart`** — ปรับ `kError` จากแดงสด → แดงอมส้ม (ลดความเครียด), เพิ่ม token: `kSuccessLight`, `kErrorLight`, `kPressOverlay`, `kDisabledSurface/Text`
+- **`theme/spacing.dart`** — เพิ่ม `kTouchTargetMin = 64.0` (พื้นที่กดขั้นต่ำทั้งแอป, สูงกว่ามาตรฐานเพื่อรองรับ hypotonia), `kInteractiveGapMin = 24`, `kTapCooldown`
+- **`theme/typography.dart`** — ขยายฟอนต์ทุกระดับ, เพิ่ม `kButtonLabel`. **จงใจไม่เพิ่ม letterSpacing** เพราะภาษาไทยมีสระ/วรรณยุกต์วางซ้อน ถ่างมากจะอ่านยากขึ้น
+- **`theme/app_theme.dart`** — เพิ่ม FilledButton/OutlinedButton/TextButton theme กลาง (ทุกปุ่มได้ 64dp + สไตล์เดียวกันอัตโนมัติ ไม่ต้องเซ็ตซ้ำทุกหน้า)
+- **`widgets/child/pressable_child_card.dart`** — building block กลาง เพิ่ม: บังคับ tap target 64dp, haptic รวมศูนย์, กันกดซ้ำ (cooldown), press feedback (scale + opacity)
+- **`widgets/child_back_button.dart`** — 60→64dp + พื้นวงกลมให้เห็นชัด
+- แก้หน้าจอที่ใช้ token ใหม่: `mode_select_screen`, `memory_game_screen`, `scenario_game_screen`, `module_a_screen`, `scenario_card`
+
+### เฟส 1.4 — Time-Limiter (เตือนพักสายตา) ✅ เสร็จสมบูรณ์
+เตือนพักทุก 15 นาทีของการเล่นต่อเนื่อง
+
+**สถาปัตยกรรม 3 ชั้น (แยก concern — สำคัญ):**
+1. **`features/usage_timer/usage_timer_notifier.dart`** — pure state (ไม่ผูก BuildContext/Navigator), นับเวลาจาก `DateTime` จริง ทนต่อ pause/resume ถี่ๆ บน web
+2. **`widgets/usage_timer_gate.dart`** — สะพานเข้าโลกจริง: ผูก `WidgetsBindingObserver` (pause เมื่อ background) + เปิด dialog ผ่าน `rootNavigatorKey`
+3. **`widgets/break_reminder_dialog.dart`** — UI popup (responsive, ไม่มี scroll, พอดีจอแนวนอนทุกขนาด)
+
+**จุดที่แก้ยากและต้องระวังถ้าแตะโค้ดนี้:**
+- Gate อยู่ที่ `MaterialApp.router(builder:)` ซึ่ง **context อยู่เหนือ Navigator** → ต้องเปิด dialog ผ่าน `rootNavigatorKey.currentContext` (ผูก key ไว้ใน `app_router.dart` แล้ว) ห้ามใช้ context ของ gate ตรงๆ
+- นับเวลาจาก wall-clock ไม่ใช่นับ tick → ห้ามเปลี่ยนกลับไปนับจำนวนรอบ Timer
+- pause ต้องเก็บ elapsed สะสมไว้ ห้ามรีเซ็ตเป็น 0
+
+**การทดสอบโดยไม่รอ 15 นาที (ไม่แตะโค้ด):** เลื่อนเวลาเครื่องไปข้างหน้า 16 นาทีระหว่างแอปเปิดอยู่ → popup เด้งใน 5 วิ (ระวัง Firebase token หมดอายุ — ปรับเวลากลับแล้ว reload)
+**หรือ (แตะโค้ดชั่วคราว):** override `usageTimerLimitProvider` ใน `ProviderScope` เป็น `Duration(seconds: 30)`
+
+### แก้ bug เสถียรภาพ 4.1 + 4.2 ✅ เสร็จ (2026-07-03, commit 091e357 / e72a2b7 / 8078a34)
+- **bug 4.1 เดิม — crash ตอนเปิดโดยไม่มีเน็ต:** `main.dart` ไม่ `rethrow` แล้ว — ล็อกอิน anonymous ล้มเหลว → เปิดแอปแบบ **guest** (uid = null ซึ่งทุกจุดรองรับอยู่แล้ว: `SessionRecorder` ข้ามการเขียน, provider ฝั่ง parent คืน stream ว่าง) แล้ว **retry เบื้องหลังแบบ backoff** (5 วิ → เพดาน 5 นาที) จนสำเร็จเมื่อเน็ตกลับมา. ปลอดภัยต่อการเรียกซ้ำเพราะ `signInAnonymouslyIfNeeded` คืน user เดิมถ้ามี — ไม่ทับบัญชีผู้ปกครองที่ login ระหว่างรอ
+- **bug 4.2 เดิม — session cache ซ้ำ:** `activeSessionProvider` เป็น `Provider.autoDispose.family` แล้ว — เล่นเนื้อหาเดิมซ้ำได้ `sessionId`/`startedAt` ใหม่ทุกรอบ ไม่เขียนทับ doc เก่า. **ห้ามถอด `autoDispose` ออก** — มี regression test คุมใน `session_provider_test.dart`
+- **test suite กลับมาเขียวครบ (60 ตัว):** test 3 ไฟล์คอมไพล์ไม่ผ่านค้างมาจาก API เปลี่ยนช่วงเฟส 1.1–1.3 แก้แล้ว: เติม `score`/`stars` (DailyLifeCompletedEvent), ลายเซ็น `onComplete(dragPath, score, stars)`, ส่ง `cardHeight`/`cardWidth` + ตรึงจอ test 900×600 + `pump(kTapCooldown)` หลัง tap (ไม่งั้น timer cooldown ของ `PressableChildCard` ค้าง → "A Timer is still pending"). render test นับ `PlaceholderComponent` ตาม placeholder manifest จริงแล้ว (ฉากเซเว่นมีรูปจริง → เป็น Sprite)
+
+### แก้ TTS ซ้อน + responsive B/C + เอกสาร TTS key ✅ เสร็จ (2026-07-03, commit 90a78da / 6832cc4 / 343afb6)
+- **TTS พูดซ้อน:** กติกาใหม่ — **หนึ่งเหตุการณ์พูดครั้งเดียว** เพราะ `speak()` ตัดเสียงก่อนหน้าเสมอ. จับคู่สำเร็จใช้ `ttsMemoryMatchNamed(pairName)` รวมชื่อคู่+คำชมเป็น utterance เดียว ("แมว จับคู่ได้แล้ว!"), จบเกมพูดเฉพาะ `kTtsMemoryComplete` ใน `_onComplete`, และตัด `speak(kTtsMemoryStart)` ตอนกดการ์ดใน `module_b_screen` (หน้าเกมประกาศเองอยู่แล้ว — สองที่ติดกันทำให้เสียงกระตุก). **ห้ามยิง speak สองครั้งติดกันในเหตุการณ์เดียว** — ถ้าต้องพูดสองอย่าง ให้รวมเป็นประโยคเดียวใน `l10n/tts_strings_th.dart`
+- **responsive Module B:** การ์ดแพ็คใน `module_b_screen` คิดสูง 85% ของพื้นที่จริง (clamp 200–320) กว้าง/ไอคอนตามสัดส่วน — เลิก fix 260×320
+- **responsive Module C:** `vocab_card` ย่อไอคอน/ฟอนต์ตามขนาดช่อง grid จริง + `FittedBox` scaleDown กันคำยาวโดนตัด (เดิมล้น 71px เมื่อช่อง < ~100px — มี regression test ช่อง 80×80 คุมแล้ว) และขยับ padding ซ้าย grid 48→80 ให้พ้นปุ่มย้อนกลับที่ลอยทับมุมการ์ดคอลัมน์แรก
+- **เอกสาร BUILD (EN+TH):** เพิ่ม section คีย์ `GOOGLE_TTS_API_KEY` แบบเต็ม + Troubleshooting "แอปรันได้แต่ไม่มีเสียง" — ตัว fallback เงียบใน `ttsClientProvider` ยังอยู่เหมือนเดิม (อาจเพิ่ม warning ตอน debug ทีหลังได้ แต่เอกสารครอบคลุมแล้ว)
+
+---
+
+## 3. หลักการ Responsive (ต้องใช้กับทุกหน้าจอใหม่)
+
+**ปัญหาที่เจอซ้ำ:** การ์ด/องค์ประกอบใช้ค่า pixel ตายตัว → พอดีบน iPhone 12 Pro แต่ล้นบน Samsung S8+ (จอเตี้ยกว่า) การไล่ขยับตัวเลขทีละเครื่องไม่มีวันจบ
+
+**กฎเหล็ก:** อย่า hardcode ขนาด pixel ตายตัวกับองค์ประกอบที่ต้องพอดีจอ ให้ **วัดพื้นที่จริงด้วย `LayoutBuilder` แล้วคำนวณขนาดเป็นสัดส่วน**
+
+**ตัวอย่างที่ทำแล้ว (ใช้เป็นแม่แบบ):**
+- `memory_game_screen.dart` `_MemoryBoard` — คำนวณขนาด tile จาก constraints จริง (ดีที่สุด ใช้อ้างอิงได้)
+- `mode_select_screen.dart` — แบ่งความกว้างจอ /3 ให้การ์ด (แก้ overflow 186px)
+- `module_a_screen.dart` + `scenario_card.dart` — รับ `cardHeight` จาก LayoutBuilder แล้วแบ่งสัดส่วนรูป:ข้อความ = 62:38
+
+**helper กลาง:** `theme/responsive.dart` — มี `Breakpoints`, `context.deviceSize`, `context.responsive(phone: x, tablet: y)` ใช้เลือกค่าตามประเภทจอได้สั้นๆ
+
+**หมายเหตุ dialog:** แอปล็อกแนวนอน → dialog ต้อง "พอดีจอครั้งเดียว ไม่มี scroll" ห้ามพึ่ง `SingleChildScrollView` เป็น fallback (มันโผล่ scrollbar มาแม้จอปกติ) ให้ตรวจ `screenHeight` แล้วสลับ compact layout แทน (ดู `break_reminder_dialog.dart`)
+
+---
+
+## 4. ⚠️ Bug/ความเสี่ยงที่ต้องรู้ (พบตอนรีวิว ยังไม่ได้แก้)
+
+bug เดิมข้อ crash ไม่มีเน็ต / session cache / TTS ซ้อน / เอกสาร TTS key **แก้เสร็จหมดแล้ว** (ดูข้อ 2) เหลือ:
+
+1. **asset 404** — `thumb_home.webp`, `thumb_kitchen.webp` ฯลฯ ยังไม่มีไฟล์จริงใน `assets/images/` → แสดง placeholder ไอคอนแทน (ไม่ crash แต่สแปม console). ต้องใส่รูปจริงหรือลบการอ้างอิง (ทีมต้องเตรียมรูปเอง — โค้ดรองรับผ่าน placeholder manifest อยู่แล้ว)
+
+2. **TTS เงียบถ้าลืม dart-define (ความเสี่ยงคงเหลือ)** — เอกสาร BUILD เขียนครอบคลุมแล้ว แต่ตัวโค้ด `ttsClientProvider` ยัง fallback เงียบเหมือนเดิม ถ้าอยากกันพลาดเพิ่ม ให้แสดง warning/assert ตอน debug build เมื่อ key ว่าง
+
+---
+
+## 5. ความไม่ตรงกันระหว่างเอกสารข้อเสนอ vs โค้ดจริง
+
+สำคัญเพราะเป็นเอกสารประกอบการแข่งขัน — ต้องตัดสินใจว่าจะแก้โค้ดตามเอกสาร หรือแก้เอกสารตามโค้ด:
+
+1. **Module C** — เอกสารบอกเป็น "เกมตอบคำถาม" (multiple choice: โชว์รูป→ถาม→เลือก ก/ข/ค→ให้คะแนน) แต่โค้ดจริงเป็น **sound board เฉยๆ** ไม่มีคำถาม/คะแนน. **ช่องว่างใหญ่สุด**
+2. **Dashboard พัฒนาการ** — เอกสารโชว์ skill breakdown 4 ด้าน (%) + กราฟ 14 วัน + คำแนะนำ. โค้ดจริงมีแค่ตัวเลขนับ 4 ก้อน ไม่มีกราฟ/คำแนะนำ/การคำนวณระดับคะแนน
+3. **หมวดคำศัพท์** — เอกสาร 6 หมวด (อาหาร/อาชีพ/สถานที่/ความรู้สึก...) โค้ดจริง 5 หมวด (`animals, body, colours, food, household`) ทับกันแค่ food
+4. **จับคู่ภาพ** — เอกสารบอก 20 ใบ (10 คู่) โค้ดจริง 16 ใบ (8 คู่, 4×4)
+5. **Firebase Storage** — diagram เอกสารมี แต่โค้ดตัดออกแล้ว (ใช้ bundled assets เพราะ Storage ต้องใช้แพลน Blaze)
+
+---
+
+## 6. แผนพัฒนา 3 เฟส (จาก session ก่อน)
+
+**เฟส 1:**
+- 1.1 จับคู่การ์ด — ✅ เสร็จ (มี scoring + test)
+- 1.2 ชีวิตประจำวัน — ✅ เสร็จ (drag เด้งกลับเมื่อวางผิด zone)
+- 1.3 UI/UX เฉพาะทาง — ✅ เสร็จ (ดูข้อ 2)
+- 1.4 Time-Limiter — ✅ เสร็จ (ดูข้อ 2)
+
+**เฟส 2:**
+- 2.1 คลังคำศัพท์คัสตอม (ผู้ปกครองเพิ่มรูป+เสียงเอง) — 🔴 ยังไม่มี. **ต้องตัดสินใจ:** local DB (sqflite มีเป็น transitive dep แล้ว / Hive ยังไม่มี), image_picker (ต้องเพิ่ม + permission), และ **TTS on-device (flutter_tts ยังไม่มี) จะเป็นเครื่องเสียงที่ 2 คู่ขนานกับ Cloud TTS เดิม** ต้อง design ก่อนลงมือ
+- 2.2 Dashboard + เกณฑ์คะแนน — 🔴 ส่วนใหญ่ยังไม่มี (ดูข้อ 5.2). ต้องมี recall-quiz ใน Module C ก่อน ถึงจะมีข้อมูลถูก/ผิดต่อคำมาทำกราฟ
+- 2.3 Data Anonymization + ปุ่มลบบัญชี — 🟡 เด็กใช้ anonymous อยู่แล้ว. ยังไม่มีปุ่มลบบัญชี (ต้องลบครบ 3 ที่: Auth user + Firestore ทุก collection + local DB)
+
+**เฟส 3:**
+- 3.1 มาสคอต (น้องก้าว/น้องเก่ง) — 🟡 data/เสียงมีแล้ว (tts_celebration, starRating), เหลือ asset ภาพ + provider รวมดาวสะสม
+- 3.2 Consent Form — เอกสาร ไม่ใช่โค้ด
+
+---
+
+## 7. งานค้าง (Pending — ทำต่อได้เลย)
+
+งานค้างเชิงโค้ดของเฟส 1 **เคลียร์หมดแล้ว** (responsive B/C + bug เสถียรภาพ/TTS — ดูข้อ 2). ที่เหลือ:
+
+- **asset 404 (ข้อ 4.1)** — รอรูปจริงจากทีม ไม่ใช่งานโค้ด
+- **เริ่มเฟส 2 ได้เลย** — แนะนำเริ่มจาก 2.1 (คลังคำศัพท์คัสตอม) ซึ่ง**ต้อง design ก่อนลงมือ** (เลือก local DB / image_picker / flutter_tts — ดูข้อ 6) หรือ 2.2 ที่ต้องทำ recall-quiz ใน Module C ก่อน (ปิดช่องว่างเอกสารข้อ 5.1 ไปในตัว)
+
+---
+
+## 8. คำสั่งที่ใช้บ่อย
+
+```bash
+flutter run -d chrome              # รันบน web (debug UI เร็ว)
+flutter run                        # รันบน emulator/device
+flutter run --dart-define=GOOGLE_TTS_API_KEY=xxx   # ★ ต้องใส่ key ไม่งั้น TTS เงียบ
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # regen Freezed/json
+flutter test
+```
+
+**Convention:** ห้าม hardcode สี/ขนาด/ระยะห่าง ใช้ token จาก `theme/` เสมอ. ห้าม hardcode route path ใช้ค่าคงที่จาก `app_routes.dart`. TTS string ทั้งหมดอยู่ใน `l10n/tts_strings_th.dart` (แก้แล้วต้อง bump scenario version เพราะใช้ hash เป็น cache key)
