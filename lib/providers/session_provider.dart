@@ -14,18 +14,18 @@ final clockProvider = Provider<Clock>((ref) => DateTime.now);
 
 final uuidFactoryProvider = Provider<UuidFactory>((ref) => const Uuid().v4);
 
-final activeSessionProvider = Provider.family<ActiveSession, ActiveSessionKey>((
-  ref,
-  key,
-) {
-  return ActiveSession(
-    sessionId: ref.watch(uuidFactoryProvider)(),
-    uid: ref.watch(uidProvider),
-    module: key.module,
-    contentId: key.contentId,
-    startedAt: ref.watch(clockProvider)().toUtc(),
-  );
-});
+// ★ ต้องเป็น autoDispose: เล่นเนื้อหาเดิมซ้ำในเซสชันแอปเดียวต้องได้ sessionId/startedAt
+// ชุดใหม่ทุกรอบ ไม่งั้น Firestore เขียนทับ record รอบก่อนหาย + durationMs นับจากรอบแรก
+final activeSessionProvider = Provider.autoDispose
+    .family<ActiveSession, ActiveSessionKey>((ref, key) {
+      return ActiveSession(
+        sessionId: ref.watch(uuidFactoryProvider)(),
+        uid: ref.watch(uidProvider),
+        module: key.module,
+        contentId: key.contentId,
+        startedAt: ref.watch(clockProvider)().toUtc(),
+      );
+    });
 
 final sessionRecorderProvider = Provider<SessionRecorder>((ref) {
   return SessionRecorder(

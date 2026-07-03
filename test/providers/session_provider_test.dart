@@ -44,12 +44,16 @@ void main() {
                   GamePosition(x: 1, y: 2),
                   GamePosition(x: 3, y: 4),
                 ],
+                score: 10,
+                stars: 3,
               ),
             );
 
         final record = writer.records.single;
         expect(record.sessionId, 'session-1');
         expect(record.uid, 'uid-1');
+        expect(record.score, 10);
+        expect(record.stars, 3);
         expect(record.scenarioId, '711_milk_001');
         expect(record.module, kModuleDailyLife);
         expect(record.startedAt, '2026-04-20T10:00:00.000Z');
@@ -114,6 +118,39 @@ void main() {
         expect(record.matchEvents, events);
       },
     );
+
+    test('replaying the same content creates a fresh session', () async {
+      final container = _container(
+        writer: _FakeSessionWriter(),
+        uid: 'uid-1',
+        clock: _clockSequence([
+          DateTime.utc(2026, 4, 20, 10),
+          DateTime.utc(2026, 4, 20, 10, 5),
+        ]),
+        uuidFactory: _uuidSequence(['session-first', 'session-second']),
+      );
+      addTearDown(container.dispose);
+      const key = ActiveSessionKey(
+        module: kModuleMemory,
+        contentId: 'thai_animals',
+      );
+
+      // รอบแรก: จำลองหน้าจอเกม watch ระหว่างเล่น แล้วปิดหน้าจอ (subscription ปิด)
+      final subscription = container.listen(
+        activeSessionProvider(key),
+        (_, __) {},
+      );
+      final first = subscription.read();
+      subscription.close();
+      await container.pump(); // ให้ autoDispose เก็บ state ของรอบแรกก่อน
+
+      // รอบสอง: เข้าเล่นเนื้อหาเดิมอีกครั้ง ต้องไม่ได้ session เดิม (bug 4.2)
+      final second = container.read(activeSessionProvider(key));
+
+      expect(first.sessionId, 'session-first');
+      expect(second.sessionId, 'session-second');
+      expect(second.startedAt, DateTime.utc(2026, 4, 20, 10, 5));
+    });
 
     test('does not write records without an authenticated uid', () async {
       final writer = _FakeSessionWriter();
