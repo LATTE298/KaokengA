@@ -94,8 +94,8 @@ lib/
 ### เสียงในเครื่องเป็นเครื่องเสียงสำรอง (flutter_tts) ✅ เสร็จ (2026-07-03)
 ปิด bug "TTS เงียบถ้าลืม dart-define" ถาวร — **แอปมีเสียงเสมอ** ไม่ว่า build ยังไง/เน็ตเป็นยังไง:
 
-- **สถาปัตยกรรม:** interface กลาง `TtsSpeaker` (speak/cancel/dispose อยู่ใน `tts_service.dart`) มี 2 implementation: `TtsService` (Cloud, มี `fallback` เสริม) และ `DeviceTtsService` (`services/device_tts_service.dart` — ครอบ flutter_tts, ตั้ง th-TH + rate 0.45 + pitch 1.1 เทียบเคียงเสียง Cloud). ทุกจุดในแอปเรียกผ่าน `ttsServiceProvider` ซึ่งตอนนี้เป็น `Provider<TtsSpeaker>`
-- **ตรรกะเลือกเครื่องเสียง (ใน `tts_provider.dart`):** ไม่มีคีย์ → ใช้ `DeviceTtsService` ล้วน. มีคีย์ → Cloud TTS โดยส่ง device เป็น `fallback`: bytes ว่าง/`synthesize` throw (เช่น ออฟไลน์และไม่เคยแคช) → เสียงในเครื่องพูดแทนอัตโนมัติ
+- **สถาปัตยกรรม:** interface กลาง `TtsSpeaker` (speak/cancel/dispose อยู่ใน `tts_service.dart`) มี 2 implementation: `TtsService` (orchestrator, มี `fallback` เสริม) และ `DeviceTtsService` (`services/device_tts_service.dart` — ครอบ flutter_tts). ทุกจุดในแอปเรียกผ่าน `ttsServiceProvider` ซึ่งเป็น `Provider<TtsSpeaker>`
+- **ลำดับการหาเสียงต่อประโยค (ใน `tts_provider.dart`):** cache → **คลิปอัดล่วงหน้าใน `assets/tts/`** (`BundledTtsClient` + `tts_manifest.json` — key คือข้อความตรงเป๊ะ) → Cloud TTS (เฉพาะมีคีย์) → เสียง engine ในเครื่อง. คลิปอัดไว้ = คุณภาพดีสุด+เร็วสุด+ฟรี; manifest ครบ 61 ประโยคแล้ว ทีมแค่เจนเสียงมาวางตามชื่อไฟล์ (**ดู `docs/TTS_CLIPS.md`** — เจนจาก Google AI Studio แล้วรัน `tool/convert_tts_clips.ps1`) ไฟล์ไหนยังไม่มีจะตกไปเสียงถัดไปเอง ไม่พัง. **แก้ TTS string เมื่อไหร่ต้องอัปเดต key ใน manifest + เจนคลิปใหม่**
 - **กติกาที่ต้องรักษา:** `DeviceTtsService` **ห้าม throw ออกไปหาผู้เรียก** (เครื่องไม่มีเสียงไทย → เงียบ+log เท่านั้น), speak ใหม่/cancel ของ `TtsService` ต้องสั่ง `fallback.cancel()` ด้วยเสมอ (กันเสียงค้าง — มี test คุม), และ fallback ที่ล้มเหลวหลังโดน cancel ห้ามแทรกกลับมาพูด (generation guard — มี test คุม)
 - **⚠️ quirk ของ flutter_tts บนเว็บ (ตรวจจากซอร์ส 4.2.5 — โค้ดใน `device_tts_service.dart` ชดเชยไว้แล้ว อย่าถอด):** (1) สเกล rate ต่างกัน: เว็บส่งตรง utterance.rate (1.0=ปกติ) แต่ Android คูณ 2 (0.5=ปกติ) → ตั้งแยกแพลตฟอร์ม (2) เว็บ "ทิ้ง" speak เงียบๆ ถ้าสถานะภายในยังเป็น playing และ stop ไม่รีเซ็ตสถานะทันที (รอ event async) → ต้อง stop เอง + หน่วง ~80ms ก่อน speak + generation guard (3) ต้อง setVoice ไทยตรงๆ (lang อย่างเดียวเบราว์เซอร์ไม่เลือกให้) โดยเลือกชื่อมี Natural/Neural ก่อน (4) เสียง online ของ Edge มี latency ~0.5-1.5 วิ/ประโยคและต้องต่อเน็ต — เป็นข้อจำกัดของเบราว์เซอร์ ไม่ใช่ bug; บน Android engine ในเครื่องไม่มีปัญหานี้
 - **Android manifest:** เพิ่ม `<queries>` intent `android.intent.action.TTS_SERVICE` (package visibility บน Android 11+)
@@ -127,6 +127,8 @@ bug เดิมข้อ crash ไม่มีเน็ต / session cache / TT
 1. **asset 404** — `thumb_home.webp`, `thumb_kitchen.webp` ฯลฯ ยังไม่มีไฟล์จริงใน `assets/images/` → แสดง placeholder ไอคอนแทน (ไม่ crash แต่สแปม console). ต้องใส่รูปจริงหรือลบการอ้างอิง (ทีมต้องเตรียมรูปเอง — โค้ดรองรับผ่าน placeholder manifest อยู่แล้ว)
 
 2. **เสียงสำรองในเครื่องยังไม่ถูกลองบนแท็บเล็ตจริง** — เครื่อง dev ไม่มี Android SDK. ให้ทีม build APK แล้วลองฟัง 2 โหมด: ไม่ใส่คีย์ (ต้องได้เสียง engine ในเครื่อง) และใส่คีย์แต่ปิดเน็ต (ประโยคที่ไม่เคยแคชต้องตกมาเสียงในเครื่อง). ถ้าเครื่องไม่มีเสียงไทย ให้ติดตั้ง Google Speech Services
+
+3. **คลิปเสียงอัดล่วงหน้ายังไม่ได้เจน (61 ไฟล์)** — โครงโค้ด+manifest พร้อมแล้ว เหลือทีมเจนเสียงจาก Google AI Studio ตาม checklist ใน `docs/TTS_CLIPS.md` แล้ววางไฟล์ .opus ใน `assets/tts/` (ผ่าน `tool/convert_tts_clips.ps1`) — ระหว่างที่ยังไม่มีไฟล์ แอปใช้เสียงสำรองในเครื่องไปก่อน
 
 ---
 

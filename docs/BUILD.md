@@ -65,7 +65,7 @@ flutter build apk --release --dart-define=GOOGLE_TTS_API_KEY=<your-key>
 ```
 
 > [!NOTE]
-> If the define is omitted the app **falls back to the device's built-in TTS engine** (`DeviceTtsService` via `flutter_tts` — see `lib/providers/tts_provider.dart`), so it still speaks Thai, just with a lower-quality voice than Cloud Neural2. The same on-device voice also takes over at runtime whenever Cloud TTS fails (e.g. offline and the phrase is not cached yet). Supply the key for the intended voice quality.
+> The app resolves audio per phrase in this order: **pre-recorded clips in `assets/tts/` → Cloud TTS (only when the key is supplied) → the device's built-in TTS engine** (`flutter_tts`). So the app always speaks even without a key — bundled clips give the best quality/latency at zero cost. See [docs/TTS_CLIPS.md](TTS_CLIPS.md) for the full clip checklist and how to generate them with Google AI Studio.
 
 The key is a Google Cloud API key with the **Cloud Text-to-Speech API** enabled (create one in the Google Cloud console under **APIs & Services -> Credentials**). Do not commit the key to git.
 

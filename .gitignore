@@ -61,3 +61,5 @@ pnpm-debug.log*
 
 # Local AI/tooling settings and generated reports
 .claude/settings.local.json
+# ไฟล์ WAV ดิบจาก AI Studio ก่อนแปลงเป็น opus (ดู docs/TTS_CLIPS.md)
+/tts_raw/

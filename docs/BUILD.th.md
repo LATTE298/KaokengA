@@ -65,7 +65,7 @@ flutter build apk --release --dart-define=GOOGLE_TTS_API_KEY=<คีย์ขอ
 ```
 
 > [!NOTE]
-> ถ้าไม่ใส่คีย์ แอปจะ**สลับไปใช้เสียง TTS ในเครื่องแทน** (`DeviceTtsService` ผ่าน `flutter_tts` — ดู `lib/providers/tts_provider.dart`) ยังพูดไทยได้แต่คุณภาพเสียงด้อยกว่า Cloud Neural2 และเสียงในเครื่องตัวเดียวกันนี้จะรับช่วงอัตโนมัติเมื่อ Cloud TTS ล้มเหลวกลางทาง (เช่น ออฟไลน์และประโยคนั้นยังไม่เคยแคช) — ใส่คีย์เมื่อต้องการคุณภาพเสียงเต็ม
+> แอปหาเสียงต่อประโยคตามลำดับ: **คลิปอัดล่วงหน้าใน `assets/tts/` → Cloud TTS (เฉพาะเมื่อใส่คีย์) → เสียง engine ในเครื่อง** (`flutter_tts`) — จึงมีเสียงเสมอแม้ไม่มีคีย์ โดยคลิปอัดล่วงหน้าให้คุณภาพ/ความเร็วดีที่สุดแบบไม่มีค่าใช้จ่าย ดูรายการคลิปทั้งหมดและวิธีเจนด้วย Google AI Studio ที่ [docs/TTS_CLIPS.md](TTS_CLIPS.md)
 
 คีย์ที่ใช้คือ Google Cloud API key ที่เปิดใช้งาน **Cloud Text-to-Speech API** แล้ว (สร้างได้จาก Google Cloud console เมนู **APIs & Services -> Credentials**) **ห้ามคอมมิตคีย์ลง git**
 
