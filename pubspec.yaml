@@ -45,6 +45,10 @@ dependencies:
   crypto: ^3.0.6
   just_audio: ^0.10.5
 
+  # TTS ในเครื่อง (engine ของ Android/เบราว์เซอร์) — เครื่องเสียงสำรองเมื่อไม่มีคีย์
+  # GOOGLE_TTS_API_KEY หรือ Cloud TTS ล้มเหลว (เช่น ออฟไลน์) แอปจะได้ไม่เงียบสนิท
+  flutter_tts: ^4.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

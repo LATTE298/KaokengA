@@ -43,5 +43,10 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- ให้ flutter_tts มองเห็น/เช็ค TTS engine ในเครื่องได้บน Android 11+
+             (package visibility) — ไม่ประกาศแล้ว isLanguageAvailable/เลือก engine ไม่ทำงาน -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
     </queries>
 </manifest>

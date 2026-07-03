@@ -25,6 +25,19 @@ class TtsException implements Exception {
 // Abstract interfaces
 // ---------------------------------------------------------------------------
 
+// สัญญากลางของ "ตัวพูด" ที่ทั้งแอปเรียกผ่าน ttsServiceProvider — มีสองเครื่องเสียง:
+// TtsService (Google Cloud TTS) และ DeviceTtsService (engine ในเครื่องผ่าน flutter_tts
+// ใช้เมื่อไม่มีคีย์หรือ Cloud ล้มเหลว) จุดเรียกใช้ห้ามผูกกับ implementation ตรงๆ
+abstract class TtsSpeaker {
+  /// พูด [text] — การเรียกครั้งใหม่ต้องตัดเสียงที่ค้างอยู่เสมอ (latest wins)
+  /// ห้าม throw ออกไปหาผู้เรียก: เสียงเป็น best-effort ต้องไม่ทำแอปล้ม
+  Future<void> speak(String text);
+
+  Future<void> cancel();
+
+  Future<void> dispose();
+}
+
 abstract class TtsClient {
   Future<Uint8List> synthesize(String text);
 }
@@ -118,27 +131,40 @@ class NoOpTtsClient implements TtsClient {
 // TtsService — orchestrates client + cache + player
 // ---------------------------------------------------------------------------
 
-class TtsService {
+class TtsService implements TtsSpeaker {
   TtsService({
     required TtsClient client,
     required TtsAudioCache cache,
     required TtsAudioPlayer player,
+    TtsSpeaker? fallback,
   }) : _client = client,
        _cache = cache,
-       _player = player;
+       _player = player,
+       _fallback = fallback;
 
   final TtsClient _client;
   final TtsAudioCache _cache;
   final TtsAudioPlayer _player;
 
+  // เครื่องเสียงสำรอง (เสียงในเครื่อง) เมื่อ Cloud ให้เสียงไม่ได้ — ไม่ได้เป็นเจ้าของ:
+  // dispose() ของ service นี้จะไม่แตะ fallback ให้ provider ที่สร้างจัดการวงจรชีวิตเอง
+  final TtsSpeaker? _fallback;
+
   var _generation = 0;
   var _disposed = false;
 
+  @override
   Future<void> speak(String text) async {
+    int? generation;
     try {
-      final generation = await _beginNewRequest();
+      generation = await _beginNewRequest();
       final bytes = await _getAudioBytes(text);
-      if (bytes == null || bytes.isEmpty || !_isCurrent(generation)) return;
+      if (!_isCurrent(generation)) return;
+      if (bytes == null || bytes.isEmpty) {
+        // client คืนค่าว่าง (เช่น NoOpTtsClient) → ส่งต่อเครื่องเสียงสำรองแทนการเงียบ
+        await _fallback?.speak(text);
+        return;
+      }
       await _player.playBytes(bytes);
     } on Object catch (e, st) {
       developer.log(
@@ -147,13 +173,20 @@ class TtsService {
         error: e,
         stackTrace: st,
       );
+      // Cloud ล้มเหลว (เช่น ออฟไลน์และประโยคนี้ยังไม่เคยแคช) → เสียงในเครื่องพูดแทน
+      // เช็ค generation ก่อน กันคำเก่าที่ถูก speak ใหม่แทนที่ไปแล้วแทรกกลับมาพูด
+      if (generation != null && _isCurrent(generation)) {
+        await _fallback?.speak(text);
+      }
     }
   }
 
+  @override
   Future<void> cancel() async {
     _generation++;
     try {
       await _player.stop();
+      await _fallback?.cancel();
     } on Object catch (e, st) {
       developer.log(
         'TtsService.cancel failed',
@@ -178,6 +211,7 @@ class TtsService {
     return bytes;
   }
 
+  @override
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
@@ -199,6 +233,8 @@ class TtsService {
     _generation++;
     final generation = _generation;
     await _player.stop();
+    // เผื่อรอบก่อนเครื่องเสียงสำรองกำลังพูดค้างอยู่ — เสียงใหม่ต้องแทนที่เสมอ
+    await _fallback?.cancel();
     return generation;
   }
 

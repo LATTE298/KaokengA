@@ -24,7 +24,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
        _placeholderImagePaths = loadedScenario.placeholderImagePaths;
 
   final ScenarioConfig config;
-  final TtsService tts;
+  final TtsSpeaker tts;
   final bool reduceMotion;
   final async.FutureOr<void> Function(
     List<GamePosition> dragPath,
