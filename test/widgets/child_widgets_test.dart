@@ -1,6 +1,7 @@
 import 'package:daily_life/models/scenario_config.dart';
 import 'package:daily_life/models/vocabulary_item.dart';
 import 'package:daily_life/theme/colors.dart';
+import 'package:daily_life/theme/spacing.dart';
 import 'package:daily_life/widgets/child/child_async_view.dart';
 import 'package:daily_life/widgets/child/module_card.dart';
 import 'package:daily_life/widgets/child/pressable_child_card.dart';
@@ -18,36 +19,39 @@ void main() {
 
   testWidgets('PressableChildCard invokes tap callback', (tester) async {
     var taps = 0;
-    await tester.pumpWidget(
-      _wrap(
-        PressableChildCard(
-          onTap: () => taps++,
-          child: const SizedBox(width: 80, height: 80, child: Text('Tap')),
-        ),
+    await _pumpOnStage(
+      tester,
+      PressableChildCard(
+        onTap: () => taps++,
+        child: const SizedBox(width: 80, height: 80, child: Text('Tap')),
       ),
     );
 
     await tester.tap(find.text('Tap'));
+    // ให้ timer กันกดซ้ำ (kTapCooldown) ใน PressableChildCard หมดอายุก่อนจบ test
+    // ไม่งั้น flutter_test ฟ้อง "A Timer is still pending"
+    await tester.pump(kTapCooldown);
 
     expect(taps, 1);
   });
 
   testWidgets('ModuleCard renders label and triggers callback', (tester) async {
     var taps = 0;
-    await tester.pumpWidget(
-      _wrap(
-        ModuleCard(
-          label: 'Module A',
-          description: 'ลองทำกิจกรรม',
-          icon: Icons.home_rounded,
-          background: kYellowLight,
-          onTap: () => taps++,
-        ),
+    await _pumpOnStage(
+      tester,
+      ModuleCard(
+        label: 'Module A',
+        description: 'ลองทำกิจกรรม',
+        icon: Icons.home_rounded,
+        background: kYellowLight,
+        onTap: () => taps++,
+        cardWidth: 220,
       ),
     );
 
     expect(find.text('Module A'), findsOneWidget);
     await tester.tap(find.text('Module A'));
+    await tester.pump(kTapCooldown);
     expect(taps, 1);
   });
 
@@ -55,26 +59,27 @@ void main() {
     tester,
   ) async {
     var taps = 0;
-    await tester.pumpWidget(
-      _wrap(
-        ScenarioCard(
-          summary: const ScenarioSummary(
-            scenarioId: 'known',
-            titleTh: 'ซื้อนม',
-            category: 'daily_life',
-            module: 'A',
-            configUrl: 'assets/scenarios/known.json',
-            thumbnailUrl: 'assets/images/known.webp',
-            version: 1,
-            published: true,
-          ),
-          onTap: () => taps++,
+    await _pumpOnStage(
+      tester,
+      ScenarioCard(
+        summary: const ScenarioSummary(
+          scenarioId: 'known',
+          titleTh: 'ซื้อนม',
+          category: 'daily_life',
+          module: 'A',
+          configUrl: 'assets/scenarios/known.json',
+          thumbnailUrl: 'assets/images/known.webp',
+          version: 1,
+          published: true,
         ),
+        onTap: () => taps++,
+        cardHeight: 240,
       ),
     );
 
     expect(find.text('ซื้อนม'), findsOneWidget);
     await tester.tap(find.text('ซื้อนม'));
+    await tester.pump(kTapCooldown);
     expect(taps, 1);
   });
 
@@ -147,6 +152,14 @@ void main() {
     );
     expect(find.text('Ready'), findsOneWidget);
   });
+}
+
+// pump บนจอขนาดแน่นอน 900x600 (แนวนอน — แอปล็อก landscape) การ์ดฝั่งเด็กคำนวณขนาด
+// แบบ responsive จากพื้นที่จริง จึงต้องล็อกขนาดจอ test ไว้ ไม่ให้ layout เพี้ยน/ล้นแบบสุ่ม
+Future<void> _pumpOnStage(WidgetTester tester, Widget child) async {
+  await tester.binding.setSurfaceSize(const Size(900, 600));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  await tester.pumpWidget(_wrap(child));
 }
 
 Widget _wrap(Widget child) {

@@ -28,7 +28,7 @@ void main() {
           tts: _testTtsService(),
           reduceMotion: true,
           enablePromptTimers: false,
-          onComplete: (_) {},
+          onComplete: (_, __, ___) {},
         );
 
         game.onGameResize(Vector2(800, 450));
@@ -49,9 +49,16 @@ void main() {
           hasLength(loaded.config.interactables.length),
           reason: summary.scenarioId,
         );
+        // PlaceholderComponent เกิดเฉพาะรูปที่ประกาศใน placeholder manifest —
+        // รูปที่มีไฟล์จริงแล้ว (เช่น ฉากเซเว่น) ต้องเรนเดอร์เป็น Sprite แทน
+        final expectedPlaceholders =
+            (loaded.usesPlaceholder(loaded.config.backgroundImage) ? 1 : 0) +
+            loaded.config.interactables
+                .where((i) => loaded.usesPlaceholder(i.image))
+                .length;
         expect(
           game.descendants().whereType<PlaceholderComponent>().length,
-          loaded.config.interactables.length + 1,
+          expectedPlaceholders,
           reason: summary.scenarioId,
         );
 

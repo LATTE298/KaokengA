@@ -27,12 +27,16 @@ void main() {
           ),
           config: _scenario(),
           dragPath: const [GamePosition(x: 1, y: 2), GamePosition(x: 3, y: 4)],
+          score: 8,
+          stars: 2,
         ),
       );
 
       final record = writer.records.single;
       expect(record.sessionId, 'session-1');
       expect(record.uid, 'uid-1');
+      expect(record.score, 8);
+      expect(record.stars, 2);
       expect(record.scenarioId, '711_milk_001');
       expect(record.module, kModuleDailyLife);
       expect(record.startedAt, '2026-04-20T10:00:00.000Z');
