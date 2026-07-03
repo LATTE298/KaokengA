@@ -94,21 +94,34 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
     // ที่ครอบการ์ดแต่ละใบใน _MemoryTileView สั่นให้แล้วตั้งแต่ตอนแตะติด (spec 1.3)
     setState(() {});
 
+    // TTS: หนึ่งเหตุการณ์พูดครั้งเดียว — speak ครั้งใหม่ตัดเสียงก่อนหน้าเสมอ การยิงติดกัน
+    // หลายครั้ง (ชื่อคู่ → จับคู่ได้ → จับคู่ครบ) จะเหลือแต่คำสุดท้าย คำอื่นโดนตัดทิ้งหมด
     final pairName = result.pairName;
-    if (pairName != null) {
-      ref.read(ttsServiceProvider).speak(pairName);
-    }
     if (result.matched) {
       // Match (spec 03 Flow 2 §4 MATCH).
       HapticService.memoryMatch();
-      ref.read(ttsServiceProvider).speak(kTtsMemoryMatch);
-      if (result.completed) _onComplete();
-    } else if (result.mismatched) {
-      // No match — hold both face-up 1.2s, then flip back (spec 03 Flow 2 §4).
-      Future<void>.delayed(const Duration(milliseconds: 1200), () {
-        if (!mounted) return;
-        setState(_controller.flipBackLastMismatch);
-      });
+      if (result.completed) {
+        _onComplete(); // พูด kTtsMemoryComplete ที่เดียวใน _onComplete
+      } else {
+        ref
+            .read(ttsServiceProvider)
+            .speak(
+              pairName == null
+                  ? kTtsMemoryMatch
+                  : ttsMemoryMatchNamed(pairName),
+            );
+      }
+    } else {
+      if (pairName != null) {
+        ref.read(ttsServiceProvider).speak(pairName);
+      }
+      if (result.mismatched) {
+        // No match — hold both face-up 1.2s, then flip back (spec 03 Flow 2 §4).
+        Future<void>.delayed(const Duration(milliseconds: 1200), () {
+          if (!mounted) return;
+          setState(_controller.flipBackLastMismatch);
+        });
+      }
     }
   }
 

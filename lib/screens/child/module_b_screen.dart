@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../l10n/tts_strings_th.dart';
 import '../../providers/content_providers.dart';
-import '../../providers/tts_provider.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
@@ -33,10 +31,9 @@ class ModuleBScreen extends ConsumerWidget {
                 error: (_, __) => Text('โหลดเกมไม่สำเร็จ', style: kTextLg),
                 data:
                     (pack) => PressableChildCard(
-                      onTap: () {
-                        ref.read(ttsServiceProvider).speak(kTtsMemoryStart);
-                        context.push(kRouteMemoryGame);
-                      },
+                      // ไม่พูด kTtsMemoryStart ตรงนี้ — MemoryGameScreen.initState
+                      // ประกาศเองอยู่แล้ว พูดสองที่ติดกันทำให้เสียงแรกโดนตัดเป็นกระตุก
+                      onTap: () => context.push(kRouteMemoryGame),
                       child: Container(
                         width: 260,
                         height: 320,

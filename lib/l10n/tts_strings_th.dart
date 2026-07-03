@@ -28,6 +28,10 @@ const List<String> kTtsCelebrations = [
 const String kTtsMemoryMatch = 'จับคู่ได้แล้ว!';
 const String kTtsMemoryComplete = 'เก่งมากเลย! จับคู่ได้ครบแล้ว!';
 
+// ชื่อคู่ + คำชมต้องรวมเป็น utterance เดียว (เช่น "แมว จับคู่ได้แล้ว!") ห้ามแยก speak
+// สองครั้งติดกัน — speak ครั้งใหม่ตัดเสียงก่อนหน้าเสมอ ชื่อคู่จะโดนตัดก่อนพูดจบ
+String ttsMemoryMatchNamed(String pairName) => '$pairName $kTtsMemoryMatch';
+
 // --- Time-Limiter / Break reminder (spec 1.4) -----------------------------
 // ข้อความ TTS เตือนพักสายตา — โทนนุ่มนวล เหมือนเพื่อนเตือน ไม่ใช่ครู/พ่อแม่สั่งห้าม
 const String kTtsBreakReminder = 'น้องเล่นมานานแล้วนะครับ มาพักสายตาก่อนนะ';
