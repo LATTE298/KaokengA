@@ -64,8 +64,8 @@ flutter run --dart-define=GOOGLE_TTS_API_KEY=<your-key>
 flutter build apk --release --dart-define=GOOGLE_TTS_API_KEY=<your-key>
 ```
 
-> [!WARNING]
-> If the define is omitted the app still builds and runs normally, but it is **completely silent**: `ttsClientProvider` (see `lib/providers/tts_provider.dart`) falls back to a no-op TTS client and **no error or warning is shown anywhere**. "App works but there is no Thai speech" is almost always a missing `GOOGLE_TTS_API_KEY`.
+> [!NOTE]
+> If the define is omitted the app **falls back to the device's built-in TTS engine** (`DeviceTtsService` via `flutter_tts` — see `lib/providers/tts_provider.dart`), so it still speaks Thai, just with a lower-quality voice than Cloud Neural2. The same on-device voice also takes over at runtime whenever Cloud TTS fails (e.g. offline and the phrase is not cached yet). Supply the key for the intended voice quality.
 
 The key is a Google Cloud API key with the **Cloud Text-to-Speech API** enabled (create one in the Google Cloud console under **APIs & Services -> Credentials**). Do not commit the key to git.
 
@@ -176,7 +176,10 @@ Test coverage spans:
 ## Troubleshooting
 
 **App runs but there is no Thai speech (TTS silent)**
-The build is missing the TTS key. Rerun or rebuild with `--dart-define=GOOGLE_TTS_API_KEY=<your-key>` — without it the app silently falls back to a no-op TTS client and never reports an error. See [Google Cloud TTS API Key](#google-cloud-tts-api-key-required-for-sound).
+Without `--dart-define=GOOGLE_TTS_API_KEY=<your-key>` the app uses the device's built-in TTS engine. If that is silent too, the device has no Thai voice installed — on Android open **Settings -> General management -> Text-to-speech** and install/enable Google Speech Services with Thai, or supply the Cloud key. Check the `flutter run` console for log lines tagged `tts` to see which engine failed.
+
+**Speech uses a robotic voice instead of the natural one**
+The build is running on the on-device fallback voice. Rebuild with a valid `GOOGLE_TTS_API_KEY` (see [Google Cloud TTS API Key](#google-cloud-tts-api-key-required-for-sound)) — invalid keys or a disabled Text-to-Speech API also land here (look for `Google TTS failed with 403` in the logs).
 
 **`google-services.json` missing**
 ```

@@ -20,7 +20,7 @@
 - **Freezed** + json_serializable (models)
 - **go_router** (navigation)
 - **Firebase** Auth (anonymous สำหรับเด็ก + email/password สำหรับผู้ปกครอง) + Firestore
-- **just_audio** + Google Cloud TTS (เสียงพูดภาษาไทย)
+- **just_audio** + Google Cloud TTS (เสียงพูดภาษาไทย) + **flutter_tts** (เสียงในเครื่อง — เครื่องเสียงสำรอง)
 
 ### โครงสร้าง lib/ (ย่อ)
 ```
@@ -91,6 +91,15 @@ lib/
 - **responsive Module C:** `vocab_card` ย่อไอคอน/ฟอนต์ตามขนาดช่อง grid จริง + `FittedBox` scaleDown กันคำยาวโดนตัด (เดิมล้น 71px เมื่อช่อง < ~100px — มี regression test ช่อง 80×80 คุมแล้ว) และขยับ padding ซ้าย grid 48→80 ให้พ้นปุ่มย้อนกลับที่ลอยทับมุมการ์ดคอลัมน์แรก
 - **เอกสาร BUILD (EN+TH):** เพิ่ม section คีย์ `GOOGLE_TTS_API_KEY` แบบเต็ม + Troubleshooting "แอปรันได้แต่ไม่มีเสียง" — ตัว fallback เงียบใน `ttsClientProvider` ยังอยู่เหมือนเดิม (อาจเพิ่ม warning ตอน debug ทีหลังได้ แต่เอกสารครอบคลุมแล้ว)
 
+### เสียงในเครื่องเป็นเครื่องเสียงสำรอง (flutter_tts) ✅ เสร็จ (2026-07-03)
+ปิด bug "TTS เงียบถ้าลืม dart-define" ถาวร — **แอปมีเสียงเสมอ** ไม่ว่า build ยังไง/เน็ตเป็นยังไง:
+
+- **สถาปัตยกรรม:** interface กลาง `TtsSpeaker` (speak/cancel/dispose อยู่ใน `tts_service.dart`) มี 2 implementation: `TtsService` (Cloud, มี `fallback` เสริม) และ `DeviceTtsService` (`services/device_tts_service.dart` — ครอบ flutter_tts, ตั้ง th-TH + rate 0.45 + pitch 1.1 เทียบเคียงเสียง Cloud). ทุกจุดในแอปเรียกผ่าน `ttsServiceProvider` ซึ่งตอนนี้เป็น `Provider<TtsSpeaker>`
+- **ตรรกะเลือกเครื่องเสียง (ใน `tts_provider.dart`):** ไม่มีคีย์ → ใช้ `DeviceTtsService` ล้วน. มีคีย์ → Cloud TTS โดยส่ง device เป็น `fallback`: bytes ว่าง/`synthesize` throw (เช่น ออฟไลน์และไม่เคยแคช) → เสียงในเครื่องพูดแทนอัตโนมัติ
+- **กติกาที่ต้องรักษา:** `DeviceTtsService` **ห้าม throw ออกไปหาผู้เรียก** (เครื่องไม่มีเสียงไทย → เงียบ+log เท่านั้น), speak ใหม่/cancel ของ `TtsService` ต้องสั่ง `fallback.cancel()` ด้วยเสมอ (กันเสียงค้าง — มี test คุม), และ fallback ที่ล้มเหลวหลังโดน cancel ห้ามแทรกกลับมาพูด (generation guard — มี test คุม)
+- **Android manifest:** เพิ่ม `<queries>` intent `android.intent.action.TTS_SERVICE` (package visibility บน Android 11+)
+- **ยังไม่ได้ทดสอบบนเครื่องจริง:** เครื่อง dev นี้ไม่มี Android SDK — build APK + ลองฟังเสียงบนแท็บเล็ตจริงเป็นงานของทีม (เช็คว่าเครื่องมี Google Speech Services ภาษาไทย)
+
 ---
 
 ## 3. หลักการ Responsive (ต้องใช้กับทุกหน้าจอใหม่)
@@ -112,11 +121,11 @@ lib/
 
 ## 4. ⚠️ Bug/ความเสี่ยงที่ต้องรู้ (พบตอนรีวิว ยังไม่ได้แก้)
 
-bug เดิมข้อ crash ไม่มีเน็ต / session cache / TTS ซ้อน / เอกสาร TTS key **แก้เสร็จหมดแล้ว** (ดูข้อ 2) เหลือ:
+bug เดิมข้อ crash ไม่มีเน็ต / session cache / TTS ซ้อน / TTS เงียบถ้าลืมคีย์ **แก้เสร็จหมดแล้ว** (ดูข้อ 2) เหลือ:
 
 1. **asset 404** — `thumb_home.webp`, `thumb_kitchen.webp` ฯลฯ ยังไม่มีไฟล์จริงใน `assets/images/` → แสดง placeholder ไอคอนแทน (ไม่ crash แต่สแปม console). ต้องใส่รูปจริงหรือลบการอ้างอิง (ทีมต้องเตรียมรูปเอง — โค้ดรองรับผ่าน placeholder manifest อยู่แล้ว)
 
-2. **TTS เงียบถ้าลืม dart-define (ความเสี่ยงคงเหลือ)** — เอกสาร BUILD เขียนครอบคลุมแล้ว แต่ตัวโค้ด `ttsClientProvider` ยัง fallback เงียบเหมือนเดิม ถ้าอยากกันพลาดเพิ่ม ให้แสดง warning/assert ตอน debug build เมื่อ key ว่าง
+2. **เสียงสำรองในเครื่องยังไม่ถูกลองบนแท็บเล็ตจริง** — เครื่อง dev ไม่มี Android SDK. ให้ทีม build APK แล้วลองฟัง 2 โหมด: ไม่ใส่คีย์ (ต้องได้เสียง engine ในเครื่อง) และใส่คีย์แต่ปิดเน็ต (ประโยคที่ไม่เคยแคชต้องตกมาเสียงในเครื่อง). ถ้าเครื่องไม่มีเสียงไทย ให้ติดตั้ง Google Speech Services
 
 ---
 
@@ -141,7 +150,7 @@ bug เดิมข้อ crash ไม่มีเน็ต / session cache / TT
 - 1.4 Time-Limiter — ✅ เสร็จ (ดูข้อ 2)
 
 **เฟส 2:**
-- 2.1 คลังคำศัพท์คัสตอม (ผู้ปกครองเพิ่มรูป+เสียงเอง) — 🔴 ยังไม่มี. **ต้องตัดสินใจ:** local DB (sqflite มีเป็น transitive dep แล้ว / Hive ยังไม่มี), image_picker (ต้องเพิ่ม + permission), และ **TTS on-device (flutter_tts ยังไม่มี) จะเป็นเครื่องเสียงที่ 2 คู่ขนานกับ Cloud TTS เดิม** ต้อง design ก่อนลงมือ
+- 2.1 คลังคำศัพท์คัสตอม (ผู้ปกครองเพิ่มรูป+เสียงเอง) — 🔴 ยังไม่มี. **ต้องตัดสินใจ:** local DB (sqflite มีเป็น transitive dep แล้ว / Hive ยังไม่มี), image_picker (ต้องเพิ่ม + permission). ส่วน **TTS on-device: flutter_tts เพิ่มเข้ามาแล้ว** (เป็นเครื่องเสียงสำรอง — ดูข้อ 2) คำศัพท์คัสตอมใช้ `DeviceTtsService` พูดคำที่ผู้ปกครองพิมพ์ได้เลยโดยไม่เสียค่า API
 - 2.2 Dashboard + เกณฑ์คะแนน — 🔴 ส่วนใหญ่ยังไม่มี (ดูข้อ 5.2). ต้องมี recall-quiz ใน Module C ก่อน ถึงจะมีข้อมูลถูก/ผิดต่อคำมาทำกราฟ
 - 2.3 Data Anonymization + ปุ่มลบบัญชี — 🟡 เด็กใช้ anonymous อยู่แล้ว. ยังไม่มีปุ่มลบบัญชี (ต้องลบครบ 3 ที่: Auth user + Firestore ทุก collection + local DB)
 
@@ -165,7 +174,7 @@ bug เดิมข้อ crash ไม่มีเน็ต / session cache / TT
 ```bash
 flutter run -d chrome              # รันบน web (debug UI เร็ว)
 flutter run                        # รันบน emulator/device
-flutter run --dart-define=GOOGLE_TTS_API_KEY=xxx   # ★ ต้องใส่ key ไม่งั้น TTS เงียบ
+flutter run --dart-define=GOOGLE_TTS_API_KEY=xxx   # ★ ใส่ key = เสียง Neural2 / ไม่ใส่ = เสียง engine ในเครื่อง (สำรอง)
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # regen Freezed/json
 flutter test

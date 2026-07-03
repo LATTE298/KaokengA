@@ -64,8 +64,8 @@ flutter run --dart-define=GOOGLE_TTS_API_KEY=<คีย์ของคุณ>
 flutter build apk --release --dart-define=GOOGLE_TTS_API_KEY=<คีย์ของคุณ>
 ```
 
-> [!WARNING]
-> ถ้าลืมใส่ แอปยังบิลด์และรันได้ตามปกติ แต่จะ**เงียบสนิททั้งแอป**: `ttsClientProvider` (ดู `lib/providers/tts_provider.dart`) จะ fallback ไปใช้ TTS client เปล่าโดย**ไม่มี error หรือคำเตือนใดๆ** อาการ "แอปใช้ได้แต่ไม่มีเสียงพูด" เกือบทั้งหมดเกิดจากลืมใส่ `GOOGLE_TTS_API_KEY`
+> [!NOTE]
+> ถ้าไม่ใส่คีย์ แอปจะ**สลับไปใช้เสียง TTS ในเครื่องแทน** (`DeviceTtsService` ผ่าน `flutter_tts` — ดู `lib/providers/tts_provider.dart`) ยังพูดไทยได้แต่คุณภาพเสียงด้อยกว่า Cloud Neural2 และเสียงในเครื่องตัวเดียวกันนี้จะรับช่วงอัตโนมัติเมื่อ Cloud TTS ล้มเหลวกลางทาง (เช่น ออฟไลน์และประโยคนั้นยังไม่เคยแคช) — ใส่คีย์เมื่อต้องการคุณภาพเสียงเต็ม
 
 คีย์ที่ใช้คือ Google Cloud API key ที่เปิดใช้งาน **Cloud Text-to-Speech API** แล้ว (สร้างได้จาก Google Cloud console เมนู **APIs & Services -> Credentials**) **ห้ามคอมมิตคีย์ลง git**
 
@@ -133,7 +133,10 @@ flutter test
 ## การแก้ปัญหาเบื้องต้น (Troubleshooting)
 
 **แอปรันได้แต่ไม่มีเสียงพูดภาษาไทย (TTS เงียบ)**
-บิลด์นั้นไม่ได้ใส่คีย์ TTS ให้รัน/บิลด์ใหม่พร้อม `--dart-define=GOOGLE_TTS_API_KEY=<คีย์ของคุณ>` — ถ้าไม่ใส่ แอปจะ fallback เป็น TTS client เปล่าแบบเงียบๆ โดยไม่มีข้อความ error ใดๆ (ดูหัวข้อ "คีย์ Google Cloud TTS" ด้านบน)
+ถ้าไม่ได้ใส่ `--dart-define=GOOGLE_TTS_API_KEY=<คีย์>` แอปจะใช้เสียง TTS ในเครื่อง — ถ้ายังเงียบอีกแปลว่าเครื่องนั้นไม่มีเสียงภาษาไทยติดตั้ง: บน Android ไปที่ **การตั้งค่า -> การจัดการทั่วไป -> การอ่านออกเสียงข้อความ** แล้วติดตั้ง/เปิด Google Speech Services พร้อมภาษาไทย หรือใส่คีย์ Cloud แทน (ดู log ใน console ของ `flutter run` ที่ติดแท็ก `tts` ว่า engine ไหนล้มเหลว)
+
+**เสียงพูดเป็นเสียงหุ่นยนต์ ไม่ใช่เสียงธรรมชาติ**
+แสดงว่ากำลังใช้เสียงสำรองในเครื่องอยู่ ให้บิลด์ใหม่พร้อมคีย์ `GOOGLE_TTS_API_KEY` ที่ใช้ได้จริง (ดูหัวข้อ "คีย์ Google Cloud TTS" ด้านบน) — คีย์ผิดหรือยังไม่เปิด Text-to-Speech API ก็ทำให้ตกมาที่เสียงสำรองเช่นกัน (หา `Google TTS failed with 403` ใน log)
 
 **ไม่พบไฟล์ `google-services.json`**
 ```text
