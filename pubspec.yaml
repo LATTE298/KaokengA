@@ -68,3 +68,4 @@ flutter:
     - assets/images/
     - assets/memory_packs/
     - assets/vocabulary/
+    - assets/tts/

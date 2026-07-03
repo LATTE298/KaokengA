@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../services/bundled_tts_client.dart';
 import '../services/device_tts_service.dart';
 import '../services/tts_service.dart';
 // Picks tts_io.dart on native, tts_web.dart on web.
@@ -67,22 +68,26 @@ final deviceTtsProvider = Provider<TtsSpeaker>((ref) {
 });
 
 // ---------------------------------------------------------------------------
+// Bundled clips — เสียงไทยอัดล่วงหน้าใน assets/tts (ดู docs/TTS_CLIPS.md)
+// ---------------------------------------------------------------------------
+
+final bundledTtsClientProvider = Provider<TtsClient>((ref) {
+  return BundledTtsClient(network: ref.watch(ttsClientProvider));
+});
+
+// ---------------------------------------------------------------------------
 // TtsSpeaker singleton (spec 13 §TTS Provider)
 // ---------------------------------------------------------------------------
 
-// ไม่มีคีย์ → ใช้เสียงในเครื่องล้วน (เดิมเงียบสนิทผ่าน NoOpTtsClient — bug "TTS เงียบ
-// ถ้าลืม dart-define"). มีคีย์ → Cloud TTS โดยมีเสียงในเครื่องเป็นเครื่องสำรองเมื่อ
-// Cloud ล้มเหลว (เช่น ออฟไลน์และประโยคนั้นยังไม่เคยแคช)
+// ลำดับการหาเสียงต่อประโยค: cache → ไฟล์อัดล่วงหน้าใน assets/tts → Cloud TTS
+// (เฉพาะเมื่อมีคีย์) → เสียง engine ในเครื่อง (fallback สุดท้าย) — แอปไม่มีทางเงียบ
+// และประโยคที่อัดไว้แล้วเล่นทันทีไม่ต้องต่อเน็ต/ไม่เสียค่า API
 final ttsServiceProvider = Provider<TtsSpeaker>((ref) {
-  final deviceTts = ref.watch(deviceTtsProvider);
-  final apiKey = ref.watch(googleTtsApiKeyProvider);
-  if (apiKey.isEmpty) return deviceTts;
-
   final service = TtsService(
-    client: ref.watch(ttsClientProvider),
+    client: ref.watch(bundledTtsClientProvider),
     cache: ref.watch(ttsAudioCacheProvider),
     player: ref.watch(ttsAudioPlayerProvider),
-    fallback: deviceTts,
+    fallback: ref.watch(deviceTtsProvider),
   );
   ref.onDispose(service.dispose);
   return service;
