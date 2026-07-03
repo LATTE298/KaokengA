@@ -55,6 +55,22 @@ flutterfire configure
 
 ดาวน์โหลดไฟล์ `android/app/google-services.json` เพื่อมาแทนที่ได้จาก Firebase console ภายใต้เมนู **Project settings -> Your apps -> Android app** โปรเจกต์นี้ไม่จำเป็นต้องใช้ไฟล์ `.env` และ **ห้ามคอมมิต** ไฟล์ service-account ของ Firebase หรือไฟล์ admin SDK JSON ลงในระบบ (ไฟล์เหล่านี้ถูกยกเว้นไว้ใน `.gitignore` แล้ว)
 
+## คีย์ Google Cloud TTS (จำเป็น — ลืมใส่แล้วแอปไม่มีเสียง)
+
+เสียงพูดภาษาไทยทั้งหมดในแอปสังเคราะห์ผ่าน Google Cloud Text-to-Speech โดยคีย์จะถูกฝังไว้ตั้งแต่ตอน**บิลด์**ผ่าน `--dart-define` — ต้องใส่กับทุกคำสั่ง `flutter run` **และ** `flutter build`:
+
+```bash
+flutter run --dart-define=GOOGLE_TTS_API_KEY=<คีย์ของคุณ>
+flutter build apk --release --dart-define=GOOGLE_TTS_API_KEY=<คีย์ของคุณ>
+```
+
+> [!WARNING]
+> ถ้าลืมใส่ แอปยังบิลด์และรันได้ตามปกติ แต่จะ**เงียบสนิททั้งแอป**: `ttsClientProvider` (ดู `lib/providers/tts_provider.dart`) จะ fallback ไปใช้ TTS client เปล่าโดย**ไม่มี error หรือคำเตือนใดๆ** อาการ "แอปใช้ได้แต่ไม่มีเสียงพูด" เกือบทั้งหมดเกิดจากลืมใส่ `GOOGLE_TTS_API_KEY`
+
+คีย์ที่ใช้คือ Google Cloud API key ที่เปิดใช้งาน **Cloud Text-to-Speech API** แล้ว (สร้างได้จาก Google Cloud console เมนู **APIs & Services -> Credentials**) **ห้ามคอมมิตคีย์ลง git**
+
+เสียงที่สังเคราะห์แล้วจะถูกแคชไว้ในเครื่อง (สูงสุด 50 MB แบบ LRU) แต่ละประโยคจึงเสียค่าเรียก API เฉพาะครั้งแรกที่เล่นเท่านั้น
+
 ## การรันโปรเจกต์บนเครื่อง (Run Locally)
 
 เชื่อมต่ออุปกรณ์ Android หรือเปิด emulator จากนั้น:
@@ -115,6 +131,9 @@ flutter test
 - `test/content/` — การตรวจสอบความถูกต้องของ asset manifest
 
 ## การแก้ปัญหาเบื้องต้น (Troubleshooting)
+
+**แอปรันได้แต่ไม่มีเสียงพูดภาษาไทย (TTS เงียบ)**
+บิลด์นั้นไม่ได้ใส่คีย์ TTS ให้รัน/บิลด์ใหม่พร้อม `--dart-define=GOOGLE_TTS_API_KEY=<คีย์ของคุณ>` — ถ้าไม่ใส่ แอปจะ fallback เป็น TTS client เปล่าแบบเงียบๆ โดยไม่มีข้อความ error ใดๆ (ดูหัวข้อ "คีย์ Google Cloud TTS" ด้านบน)
 
 **ไม่พบไฟล์ `google-services.json`**
 ```text

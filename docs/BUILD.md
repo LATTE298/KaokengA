@@ -55,6 +55,22 @@ flutterfire configure
 
 Download a replacement `android/app/google-services.json` from the Firebase console under **Project settings -> Your apps -> Android app**. No `.env` file is required. Do not commit Firebase service-account or admin SDK JSON files; `.gitignore` excludes those.
 
+## Google Cloud TTS API Key (Required for Sound)
+
+All Thai speech in the app is synthesised with Google Cloud Text-to-Speech. The API key is injected **at build time** via `--dart-define` — pass it to every `flutter run` **and** `flutter build` command:
+
+```bash
+flutter run --dart-define=GOOGLE_TTS_API_KEY=<your-key>
+flutter build apk --release --dart-define=GOOGLE_TTS_API_KEY=<your-key>
+```
+
+> [!WARNING]
+> If the define is omitted the app still builds and runs normally, but it is **completely silent**: `ttsClientProvider` (see `lib/providers/tts_provider.dart`) falls back to a no-op TTS client and **no error or warning is shown anywhere**. "App works but there is no Thai speech" is almost always a missing `GOOGLE_TTS_API_KEY`.
+
+The key is a Google Cloud API key with the **Cloud Text-to-Speech API** enabled (create one in the Google Cloud console under **APIs & Services -> Credentials**). Do not commit the key to git.
+
+Synthesised audio is cached on-device (up to 50 MB with LRU eviction), so each phrase costs an API call only the first time it is played.
+
 ## Run Locally
 
 ### 1. View Available Devices
@@ -158,6 +174,9 @@ Test coverage spans:
 - `test/content/` — asset manifest validation
 
 ## Troubleshooting
+
+**App runs but there is no Thai speech (TTS silent)**
+The build is missing the TTS key. Rerun or rebuild with `--dart-define=GOOGLE_TTS_API_KEY=<your-key>` — without it the app silently falls back to a no-op TTS client and never reports an error. See [Google Cloud TTS API Key](#google-cloud-tts-api-key-required-for-sound).
 
 **`google-services.json` missing**
 ```
