@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, debugPrint;
 import 'package:flutter_tts/flutter_tts.dart';
 
 import 'tts_service.dart';
@@ -17,6 +18,7 @@ class DeviceTtsService implements TtsSpeaker {
 
   final FlutterTts _tts;
   Future<void>? _init;
+  var _voiceChosen = false;
   var _disposed = false;
 
   Future<void> _ensureInit() {
@@ -30,11 +32,56 @@ class DeviceTtsService implements TtsSpeaker {
     }();
   }
 
+  // บนเว็บ setLanguage (utterance.lang) อย่างเดียวไม่พอ: ถ้าไม่ set voice ตรงๆ
+  // เบราว์เซอร์มักหยิบ voice default ของระบบ (เช่น ภาษาอังกฤษ) มาอ่านข้อความไทย
+  // → เงียบสนิท ทั้งที่มีเสียงไทยแบบ online ของเบราว์เซอร์ (เช่น Edge Premwadee)
+  // ให้ใช้อยู่ — ต้องไล่รายการ voice แล้วเลือกตัวภาษาไทยเอง
+  //
+  // ทำเฉพาะเว็บ: บน Android การ setLanguage เลือกเสียงไทยให้ถูกอยู่แล้ว การ set
+  // voice ตรงๆ อาจไปทับตัวเลือกที่ดีกว่าของ engine
+  //
+  // คืน false เมื่อยังหาไม่เจอ (รายการ voice บนเว็บโหลดแบบ async อาจยังว่างช่วงแรก)
+  // เพื่อให้ speak ครั้งถัดไปลองใหม่
+  Future<bool> _pickThaiVoiceForWeb() async {
+    try {
+      final voices = await _tts.getVoices;
+      if (voices is! List) return false;
+      for (final voice in voices) {
+        if (voice is! Map) continue;
+        final locale = (voice['locale'] ?? '').toString().toLowerCase();
+        if (!locale.startsWith('th')) continue;
+        await _tts.setVoice({
+          'name': (voice['name'] ?? '').toString(),
+          'locale': (voice['locale'] ?? '').toString(),
+        });
+        return true;
+      }
+      if (kDebugMode) {
+        debugPrint(
+          'DeviceTts: no Thai voice in this browser yet '
+          '(voices=${voices.length}) — will retry on next speak',
+        );
+      }
+      return false;
+    } on Object catch (e, st) {
+      developer.log(
+        'DeviceTtsService voice lookup failed',
+        name: 'tts',
+        error: e,
+        stackTrace: st,
+      );
+      return false;
+    }
+  }
+
   @override
   Future<void> speak(String text) async {
     if (_disposed) return;
     try {
       await _ensureInit();
+      if (kIsWeb && !_voiceChosen) {
+        _voiceChosen = await _pickThaiVoiceForWeb();
+      }
       await _tts.speak(text);
     } on Object catch (e, st) {
       developer.log(
