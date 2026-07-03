@@ -40,8 +40,10 @@ class _ModuleCScreenState extends ConsumerState<ModuleCScreen> {
         child: Stack(
           children: [
             Padding(
+              // ซ้ายต้องพ้นปุ่มย้อนกลับที่ลอยมุมบนซ้าย (8 + 64 = 72) — เดิม kSpace12 (48)
+              // ทำให้ปุ่มทับมุมการ์ดคอลัมน์แรก แตะมุมนั้นแล้วโดนปุ่มแทนการ์ด
               padding: const EdgeInsets.fromLTRB(
-                kSpace12,
+                kTouchTargetMin + kSpace4,
                 kSpace10,
                 kSpace6,
                 kSpace6,

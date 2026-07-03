@@ -44,17 +44,41 @@ class _VocabCardState extends State<VocabCard> {
           ),
           boxShadow: [_active ? kShadowMd : kShadowSm],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _iconFor(widget.item.category),
-              size: 48,
-              color: kTextSecondary,
-            ),
-            const SizedBox(height: kSpace2),
-            Text(widget.item.ttsWord, style: kChildLabel),
-          ],
+        // ย่อไอคอน/ฟอนต์ตามขนาดช่องจริงของ grid (กฎ responsive — CLAUDE.md ข้อ 3)
+        // ค่า fix เดิม (ไอคอน 48 + kChildLabel 22) ล้นช่องเมื่อจอแคบจนช่องเล็กกว่า ~100px
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final cell = constraints.maxHeight;
+            final iconSize = (cell * 0.4).clamp(28.0, 48.0).toDouble();
+            final labelStyle =
+                cell < 110
+                    ? kChildLabel.copyWith(fontSize: 18, height: 1.2)
+                    : kChildLabel;
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _iconFor(widget.item.category),
+                  size: iconSize,
+                  color: kTextSecondary,
+                ),
+                const SizedBox(height: kSpace2),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: kSpace1),
+                  // scaleDown กันคำยาว (เช่น "แปรงสีฟัน") ล้น/ถูกตัดคำ — คำศัพท์ต้อง
+                  // อ่านได้ครบเสมอ ยอมให้ตัวเล็กลงแทนการขึ้นบรรทัดใหม่หรือ ellipsis
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      widget.item.ttsWord,
+                      style: labelStyle,
+                      maxLines: 1,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

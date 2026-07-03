@@ -1,5 +1,6 @@
 import 'package:daily_life/models/scenario_config.dart';
 import 'package:daily_life/models/vocabulary_item.dart';
+import 'package:daily_life/screens/child/module_b_screen.dart';
 import 'package:daily_life/theme/colors.dart';
 import 'package:daily_life/theme/spacing.dart';
 import 'package:daily_life/widgets/child/child_async_view.dart';
@@ -103,6 +104,42 @@ void main() {
     await tester.tap(find.text('แมว'));
     await tester.pump(const Duration(seconds: 1));
     expect(tappedWord, 'แมว');
+  });
+
+  testWidgets('VocabCard scales down inside a small grid cell', (tester) async {
+    // ช่องเล็กระดับที่เจอบนจอแคบ — เดิม (ไอคอน 48 + kChildLabel 22) ล้นช่องแบบนี้
+    // ถ้าล้น flutter_test จะ throw RenderFlex overflow ให้ test fail เอง
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 80,
+          height: 80,
+          child: VocabCard(
+            item: const VocabularyItem(
+              itemId: 'toothbrush',
+              image: 'assets/images/toothbrush.webp',
+              ttsWord: 'แปรงสีฟัน',
+              category: 'household',
+            ),
+            onTap: (_) async {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('แปรงสีฟัน'), findsOneWidget);
+  });
+
+  testWidgets('ModuleBScreen fits a short landscape screen', (tester) async {
+    // จอเตี้ยอ้างอิง Samsung S8+ แนวนอน — การ์ดต้องย่อตามพื้นที่ ไม่ล้นจอ
+    await tester.binding.setSurfaceSize(const Size(740, 360));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: ModuleBScreen())),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PressableChildCard), findsOneWidget);
   });
 
   testWidgets('ChildAsyncView renders loading, error, empty, and data states', (

@@ -30,31 +30,42 @@ class ModuleBScreen extends ConsumerWidget {
                 loading: const CircularProgressIndicator(),
                 error: (_, __) => Text('โหลดเกมไม่สำเร็จ', style: kTextLg),
                 data:
-                    (pack) => PressableChildCard(
-                      // ไม่พูด kTtsMemoryStart ตรงนี้ — MemoryGameScreen.initState
-                      // ประกาศเองอยู่แล้ว พูดสองที่ติดกันทำให้เสียงแรกโดนตัดเป็นกระตุก
-                      onTap: () => context.push(kRouteMemoryGame),
-                      child: Container(
-                        width: 260,
-                        height: 320,
-                        decoration: BoxDecoration(
-                          color: kBlueLight,
-                          borderRadius: kRadiusLg,
-                          boxShadow: const [kShadowMd],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.grid_view_rounded,
-                              size: 96,
-                              color: kBlueDark,
+                    (pack) => LayoutBuilder(
+                      builder: (context, constraints) {
+                        // ขนาดการ์ดคิดเป็นสัดส่วนจากพื้นที่จริง (กฎ responsive —
+                        // CLAUDE.md ข้อ 3) เดิม fix 260x320 พอดีแท็บเล็ตแต่เบียดจอเตี้ย
+                        // (เช่น S8+ สูง ~360 หัก SafeArea เหลือไม่พอ)
+                        final cardHeight = (constraints.maxHeight * 0.85)
+                            .clamp(200.0, 320.0)
+                            .toDouble();
+                        final cardWidth = cardHeight * (260 / 320);
+                        return PressableChildCard(
+                          // ไม่พูด kTtsMemoryStart ตรงนี้ — MemoryGameScreen.initState
+                          // ประกาศเองอยู่แล้ว พูดสองที่ติดกันทำให้เสียงแรกโดนตัดเป็นกระตุก
+                          onTap: () => context.push(kRouteMemoryGame),
+                          child: Container(
+                            width: cardWidth,
+                            height: cardHeight,
+                            decoration: BoxDecoration(
+                              color: kBlueLight,
+                              borderRadius: kRadiusLg,
+                              boxShadow: const [kShadowMd],
                             ),
-                            const SizedBox(height: kSpace4),
-                            Text(pack.titleTh, style: kTextXL),
-                          ],
-                        ),
-                      ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.grid_view_rounded,
+                                  size: cardHeight * 0.3,
+                                  color: kBlueDark,
+                                ),
+                                const SizedBox(height: kSpace4),
+                                Text(pack.titleTh, style: kTextXL),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
               ),
             ),
