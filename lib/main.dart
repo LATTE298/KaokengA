@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,20 +30,40 @@ Future<void> main() async {
 
   // Anonymous identity for session writes under /sessions/{uid}/records.
   // Parent email+password login (MVP item #2) will later link to this UID.
+  // ล็อกอินล้มเหลว (เช่น network-request-failed ตอนเปิดแอปโดยไม่มีเน็ต) ต้องไม่ crash:
+  // เปิดแอปแบบ guest ไปก่อน — uid เป็น null แล้ว SessionRecorder จะข้ามการเขียน Firestore
+  // เอง (ดู session_recorder.dart) — แล้ว retry เบื้องหลังจนกว่าจะสำเร็จเมื่อเน็ตกลับมา
+  final authService = AuthService(
+    FirebaseAuth.instance,
+    FirebaseFirestore.instance,
+  );
   try {
-    await AuthService(
-      FirebaseAuth.instance,
-      FirebaseFirestore.instance,
-    ).ensureAnonymousChildSession();
+    await authService.ensureAnonymousChildSession();
   } catch (e) {
-    if (kIsWeb) {
-      debugPrint('Skipping Firebase Auth due to Web config issue: $e');
-    } else {
-      rethrow;
-    }
+    debugPrint('Anonymous sign-in failed, starting as guest: $e');
+    unawaited(_retryAnonymousSignIn(authService));
   }
 
   runApp(const ProviderScope(child: DailyLifeApp()));
+}
+
+// Retry แบบ backoff (5 วิ → เพดาน 5 นาที) ไม่หยุดจนกว่าจะสำเร็จ — แท็บเล็ตบ้าน/โรงเรียน
+// มักได้เน็ตหลังเปิดแอปไปแล้วหลายนาที. เรียกซ้ำได้ปลอดภัย: signInAnonymouslyIfNeeded
+// คืน user เดิมทันทีถ้ามีการล็อกอินสำเร็จไปก่อนแล้ว (เช่น ผู้ปกครอง login เอง) จึงไม่ทับบัญชี
+Future<void> _retryAnonymousSignIn(AuthService authService) async {
+  var delay = const Duration(seconds: 5);
+  const maxDelay = Duration(minutes: 5);
+  while (true) {
+    await Future<void>.delayed(delay);
+    try {
+      await authService.ensureAnonymousChildSession();
+      return;
+    } catch (e) {
+      debugPrint('Anonymous sign-in retry failed: $e');
+      delay *= 2;
+      if (delay > maxDelay) delay = maxDelay;
+    }
+  }
 }
 
 class DailyLifeApp extends StatelessWidget {
