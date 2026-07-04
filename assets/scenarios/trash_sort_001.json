@@ -23,7 +23,7 @@
     },
     {
       "id": "paper_ball",
-      "image": "assets/images/trash_paper.png",
+      "image": "assets/images/trash_paper.jpg",
       "is_target": false,
       "start_pos": { "x": 900, "y": 500 }
     }
