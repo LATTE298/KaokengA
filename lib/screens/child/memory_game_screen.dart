@@ -18,6 +18,7 @@ import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child_back_button.dart';
 import '../../widgets/child/child_async_view.dart';
+import '../../widgets/child/game_result_dialog.dart';
 import '../../widgets/child/pressable_child_card.dart';
 
 // Memory game — 4×4 grid, 8 pairs (spec 03 Flow 2).
@@ -154,10 +155,10 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _MemoryResultDialog(
+      builder: (context) => GameResultDialog(
         stars: stars,
         score: score,
-        totalFlips: _controller.totalFlips,
+        detail: 'เปิดการ์ดทั้งหมด ${_controller.totalFlips} ครั้ง',
         onClose: () {
           Navigator.of(context).pop(); // ปิด dialog
           if (context.mounted && context.canPop()) context.pop(); // กลับหน้าหลัก
@@ -305,89 +306,3 @@ String emojiForPair(String pairId) {
   return map[pairId] ?? '🐾';
 }
 
-// Popup สรุปผลตอนจบเกม — แสดงดาว 0-3 ดวง + คะแนน + ปุ่มปิดกลับหน้าหลัก.
-class _MemoryResultDialog extends StatelessWidget {
-  const _MemoryResultDialog({
-    required this.stars,
-    required this.score,
-    required this.totalFlips,
-    required this.onClose,
-  });
-
-  final int stars;
-  final int score;
-  final int totalFlips;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(
-        horizontal: kSpace6,
-        vertical: kSpace4,
-      ),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: kSpace8,
-            vertical: kSpace5,
-          ),
-          decoration: BoxDecoration(
-            color: kWarmWhite,
-            borderRadius: kRadiusLg,
-            boxShadow: const [kShadowLg],
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('เก่งมากเลย!', style: kTextXL),
-                const SizedBox(height: kSpace4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(3, (i) {
-                    final filled = i < stars;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: kSpace1,
-                      ),
-                      child: Icon(
-                        Icons.star_rounded,
-                        size: 48,
-                        color: filled
-                            ? kYellowPrimary
-                            : kYellowPrimary.withValues(alpha: 0.2),
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(height: kSpace4),
-                Text('คะแนน $score เต็ม 10', style: kTextLg),
-                const SizedBox(height: kSpace2),
-                Text(
-                  'เปิดการ์ดทั้งหมด $totalFlips ครั้ง',
-                  style: kTextSm.copyWith(color: kTextSecondary),
-                ),
-                const SizedBox(height: kSpace5),
-                // เอา style: FilledButton.styleFrom(...) ที่เคยเซ็ตซ้ำเองตรงนี้ออก เพราะ
-                // app_theme.dart ตั้งค่ากลางให้ทุกปุ่มในแอปแล้ว (ขนาด-สี-ฟอนต์เดียวกันทุกที่
-                // โดยไม่ต้องก็อปสไตล์มาวางซ้ำทุกหน้าจอ — spec 1.3)
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: onClose,
-                    child: const Text('ปิด'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

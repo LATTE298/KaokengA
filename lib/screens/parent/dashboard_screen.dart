@@ -329,6 +329,7 @@ String _moduleLabel(String module) {
   return switch (module) {
     kModuleDailyLife => 'ชีวิตประจำวัน',
     kModuleMemory => 'จับคู่ภาพ',
+    kModuleVocab => 'เกมตอบคำถามคำศัพท์',
     _ => module,
   };
 }

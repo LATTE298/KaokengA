@@ -7,7 +7,9 @@ import '../screens/child/module_b_screen.dart';
 import '../screens/child/memory_game_screen.dart';
 import '../screens/child/module_c_screen.dart';
 import '../screens/child/scenario_game_screen.dart';
+import '../screens/child/sound_board_screen.dart';
 import '../screens/child/splash_screen.dart';
+import '../screens/child/vocab_quiz_screen.dart';
 import '../screens/parent/auth_screen.dart';
 import '../screens/parent/dashboard_screen.dart';
 import '../screens/parent/parent_gate_screen.dart';
@@ -51,6 +53,14 @@ GoRouter buildAppRouter() {
         builder: (_, __) => const MemoryGameScreen(),
       ),
       GoRoute(path: kRouteModuleC, builder: (_, __) => const ModuleCScreen()),
+      GoRoute(
+        path: kRouteSoundBoard,
+        builder: (_, __) => const SoundBoardScreen(),
+      ),
+      GoRoute(
+        path: kRouteVocabQuiz,
+        builder: (_, __) => const VocabQuizScreen(),
+      ),
       GoRoute(
         path: kRouteParentGate,
         builder: (_, __) => const ParentGateScreen(),

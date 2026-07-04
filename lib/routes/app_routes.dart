@@ -9,6 +9,8 @@ const String kRouteScenarioGame = '/module-a/game';
 const String kRouteModuleB = '/module-b';
 const String kRouteMemoryGame = '/module-b/game';
 const String kRouteModuleC = '/module-c';
+const String kRouteSoundBoard = '/module-c/sound-board';
+const String kRouteVocabQuiz = '/module-c/quiz';
 
 // Parent routes
 const String kRouteParentGate = '/parent-gate';

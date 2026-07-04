@@ -58,7 +58,7 @@ class _VocabCardState extends State<VocabCard> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _iconFor(widget.item.category),
+                  iconForVocabCategory(widget.item.category),
                   size: iconSize,
                   color: kTextSecondary,
                 ),
@@ -85,7 +85,9 @@ class _VocabCardState extends State<VocabCard> {
   }
 }
 
-IconData _iconFor(String category) {
+// ไอคอนตัวแทนหมวดคำศัพท์ — ใช้ร่วมกันระหว่าง sound board (VocabCard) และการ์ด
+// ตัวเลือกในเกมตอบคำถาม (vocab_quiz_screen) จนกว่ารูปจริงจะมาแทน placeholder
+IconData iconForVocabCategory(String category) {
   switch (category) {
     case 'animals':
       return Icons.pets_rounded;
