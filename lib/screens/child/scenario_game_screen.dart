@@ -179,7 +179,13 @@ class _ObjectiveBar extends StatelessWidget {
     final targetName = _thaiNameFor(targetId);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(kSpace12, kSpace2, kSpace4, 0),
+      // ซ้ายต้องพ้นปุ่มย้อนกลับที่ลอยมุมบนซ้าย (8 + 64 = 72) ไม่งั้นปุ่มทับไอคอนแถบโจทย์
+      margin: const EdgeInsets.fromLTRB(
+        kTouchTargetMin + kSpace4,
+        kSpace2,
+        kSpace4,
+        0,
+      ),
       padding: const EdgeInsets.symmetric(
         horizontal: kSpace4,
         vertical: kSpace2,

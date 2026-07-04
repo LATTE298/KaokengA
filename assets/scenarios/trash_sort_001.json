@@ -11,21 +11,21 @@
   "interactables": [
     {
       "id": "plastic_bottle",
-      "image": "assets/images/trash_bottle.png",
+      "image": "assets/images/trash_bottle.jpg",
       "is_target": true,
-      "start_pos": { "x": 300, "y": 500 }
+      "start_pos": { "x": 300, "y": 620 }
     },
     {
       "id": "food_waste",
       "image": "assets/images/trash_food.png",
       "is_target": false,
-      "start_pos": { "x": 600, "y": 500 }
+      "start_pos": { "x": 640, "y": 650 }
     },
     {
       "id": "paper_ball",
       "image": "assets/images/trash_paper.png",
       "is_target": false,
-      "start_pos": { "x": 900, "y": 500 }
+      "start_pos": { "x": 980, "y": 620 }
     }
   ],
   "target_zone": {
