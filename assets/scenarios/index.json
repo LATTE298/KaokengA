@@ -16,7 +16,7 @@
       "category": "daily_life",
       "module": "A",
       "config_url": "assets/scenarios/trash_sort_001.json",
-      "thumbnail_url": "assets/images/thumb_home.webp",
+      "thumbnail_url": "assets/images/thumb_trash.jpg",
       "version": 1,
       "published": true
     },
@@ -26,7 +26,7 @@
       "category": "daily_life",
       "module": "A",
       "config_url": "assets/scenarios/food_prep_001.json",
-      "thumbnail_url": "assets/images/thumb_kitchen.webp",
+      "thumbnail_url": "assets/images/thumb_fruit.jpg",
       "version": 1,
       "published": true
     }

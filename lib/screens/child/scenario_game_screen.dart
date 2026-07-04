@@ -146,17 +146,20 @@ String _buildHint(String targetId) {
 }
 
 // Map id → ชื่อภาษาไทยสำหรับ TTS และหัวข้อโจทย์
+// ⚠️ เพิ่ม/แก้ id ในไฟล์ฉากเมื่อไหร่ ต้องอัปเดตที่นี่ + เพิ่มคลิป sc_ask_*/sc_hint_*
+// ใน tts_manifest.json ให้ตรงประโยคที่ประกอบจากชื่อนี้ (ดู docs/TTS_CLIPS.md)
 String _thaiNameFor(String id) {
   const map = {
     'milk_carton_blue': 'นมกล่องสีน้ำเงิน',
     'bread_loaf': 'ขนมปัง',
     'potato_chips': 'ขนมกรุบกรอบ',
     'plastic_bottle': 'ขวดพลาสติก',
-    'banana_peel': 'เปลือกกล้วย',
+    'food_waste': 'เศษอาหาร',
     'paper_ball': 'กระดาษ',
     'banana': 'กล้วย',
-    'toothbrush': 'แปรงสีฟัน',
-    'pencil': 'ดินสอ',
+    'orange': 'ส้ม',
+    'apple': 'แอปเปิ้ล',
+    'grapes': 'องุ่น',
   };
   return map[id] ?? id;
 }

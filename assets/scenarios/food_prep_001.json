@@ -1,6 +1,6 @@
 {
   "scenario_id": "food_prep_001",
-  "version": 1,
+  "version": 2,
   "category": "daily_life",
   "module": "A",
   "title_th": "ช่วยจัดผลไม้ใส่จาน",
@@ -11,21 +11,27 @@
   "interactables": [
     {
       "id": "banana",
-      "image": "assets/images/banana.webp",
+      "image": "assets/images/fruit_banana.png",
       "is_target": true,
       "start_pos": { "x": 300, "y": 500 }
     },
     {
-      "id": "toothbrush",
-      "image": "assets/images/toothbrush.webp",
+      "id": "orange",
+      "image": "assets/images/fruit_orange.png",
       "is_target": false,
       "start_pos": { "x": 600, "y": 500 }
     },
     {
-      "id": "pencil",
-      "image": "assets/images/pencil.webp",
+      "id": "apple",
+      "image": "assets/images/fruit_apple.png",
       "is_target": false,
       "start_pos": { "x": 900, "y": 500 }
+    },
+    {
+      "id": "grapes",
+      "image": "assets/images/fruit_grapes.png",
+      "is_target": false,
+      "start_pos": { "x": 1200, "y": 500 }
     }
   ],
   "target_zone": {

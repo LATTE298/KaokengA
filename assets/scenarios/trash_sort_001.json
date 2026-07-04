@@ -1,6 +1,6 @@
 {
   "scenario_id": "trash_sort_001",
-  "version": 1,
+  "version": 2,
   "category": "daily_life",
   "module": "A",
   "title_th": "ช่วยแยกขยะให้ถูกถัง",
@@ -11,19 +11,19 @@
   "interactables": [
     {
       "id": "plastic_bottle",
-      "image": "assets/images/plastic_bottle.webp",
+      "image": "assets/images/trash_bottle.png",
       "is_target": true,
       "start_pos": { "x": 300, "y": 500 }
     },
     {
-      "id": "banana_peel",
-      "image": "assets/images/banana_peel.webp",
+      "id": "food_waste",
+      "image": "assets/images/trash_food.png",
       "is_target": false,
       "start_pos": { "x": 600, "y": 500 }
     },
     {
       "id": "paper_ball",
-      "image": "assets/images/paper_ball.webp",
+      "image": "assets/images/trash_paper.png",
       "is_target": false,
       "start_pos": { "x": 900, "y": 500 }
     }
