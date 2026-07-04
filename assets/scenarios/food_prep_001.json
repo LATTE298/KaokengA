@@ -4,7 +4,7 @@
   "category": "daily_life",
   "module": "A",
   "title_th": "ช่วยจัดผลไม้ใส่จาน",
-  "background_image": "assets/images/bg_kitchen.webp",
+  "background_image": "assets/images/bg_kitchen.jpg",
   "tts_instruction": "น้องช่วยวางกล้วยลงบนจานให้หน่อยนะครับ",
   "tts_celebration": "เก่งมากครับ! จัดผลไม้ได้สวยเลย!",
   "tts_hint": "ลองหยิบกล้วยใส่จานนะครับ",

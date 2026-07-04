@@ -4,7 +4,7 @@
   "category": "daily_life",
   "module": "A",
   "title_th": "ช่วยแยกขยะให้ถูกถัง",
-  "background_image": "assets/images/bg_home.webp",
+  "background_image": "assets/images/bg_home.jpg",
   "tts_instruction": "น้องช่วยทิ้งขวดพลาสติกลงในถังรีไซเคิลให้หน่อยนะครับ",
   "tts_celebration": "เยี่ยมมากเลยครับ! ขอบคุณที่ช่วยดูแลโลก!",
   "tts_hint": "ลองหยิบขวดพลาสติกใส่ถังสีเขียวนะครับ",
@@ -23,7 +23,7 @@
     },
     {
       "id": "paper_ball",
-      "image": "assets/images/trash_paper.jpg",
+      "image": "assets/images/trash_paper.png",
       "is_target": false,
       "start_pos": { "x": 900, "y": 500 }
     }
