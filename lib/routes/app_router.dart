@@ -10,6 +10,7 @@ import '../screens/child/scenario_game_screen.dart';
 import '../screens/child/sound_board_screen.dart';
 import '../screens/child/splash_screen.dart';
 import '../screens/child/vocab_quiz_screen.dart';
+import '../screens/child/vocab_quiz_select_screen.dart';
 import '../screens/parent/auth_screen.dart';
 import '../screens/parent/dashboard_screen.dart';
 import '../screens/parent/parent_gate_screen.dart';
@@ -62,7 +63,14 @@ GoRouter buildAppRouter() {
       ),
       GoRoute(
         path: kRouteVocabQuiz,
-        builder: (_, __) => const VocabQuizScreen(),
+        builder: (_, __) => const VocabQuizSelectScreen(),
+      ),
+      GoRoute(
+        // Child deep-route format: /module-c/quiz/:category (หมวดคำศัพท์)
+        path: '$kRouteVocabQuiz/:category',
+        builder:
+            (_, state) =>
+                VocabQuizScreen(category: state.pathParameters['category']!),
       ),
       GoRoute(
         path: kRouteParentGate,

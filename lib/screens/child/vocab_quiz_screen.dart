@@ -20,15 +20,15 @@ import '../../widgets/child/game_result_dialog.dart';
 import '../../widgets/child/pressable_child_card.dart';
 import '../../widgets/child/vocab_card.dart' show iconForVocabCategory;
 
-// เกมตอบคำถามคำศัพท์ (Module C ตาม mockup ในเอกสารข้อเสนอ): โชว์รูปใหญ่ →
-// ถาม "นี่คือ...อะไร?" ตามหมวด → เลือกคำตอบจากปุ่ม ก/ข/ค → คะแนน 10/8/6/4
-// แล้วบันทึกการตอบรายคำลง Firestore (ข้อมูลตั้งต้นของ dashboard เฟส 2.2)
-//
-// รูปโจทย์ใช้ Image.asset ตาม path ใน vocabulary.json — ระหว่างที่รูปจริงยังไม่มา
-// (bug asset 404) errorBuilder จะ fallback เป็นไอคอนหมวดให้เอง เมื่อทีมวางรูปจริง
-// ใน assets/images/ หน้าจอนี้อัปเกรดเป็นภาพเต็มอัตโนมัติโดยไม่ต้องแก้โค้ด
+// เกมตอบคำถามคำศัพท์ (Module C ตาม mockup ในเอกสารข้อเสนอ): เลือกหมวดจาก
+// VocabQuizSelectScreen แล้วเข้ามาหน้านี้ → โชว์รูปใหญ่ → ถาม "นี่คือ...อะไร?"
+// ตามหมวด → เลือกคำตอบจากปุ่ม ก/ข/ค → คะแนน 10/8/6/4 แล้วบันทึกการตอบรายคำ
+// ลง Firestore แยกตามหมวด (scenarioId = quiz_<หมวด> — ข้อมูล dashboard เฟส 2.2)
 class VocabQuizScreen extends ConsumerWidget {
-  const VocabQuizScreen({super.key});
+  const VocabQuizScreen({super.key, required this.category});
+
+  /// หมวดคำศัพท์ที่เล่น (key ตาม kVocabCategories เช่น 'animals')
+  final String category;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,7 +44,15 @@ class VocabQuizScreen extends ConsumerWidget {
               error:
                   (_, __) =>
                       Center(child: Text('โหลดไม่สำเร็จ', style: kTextLg)),
-              data: (items) => _QuizBoard(items: items),
+              data: (items) {
+                final categoryItems =
+                    items.where((i) => i.category == category).toList();
+                // หมวดต้องมีคำพอทำตัวเลือก 3 ใบ — น้อยกว่านั้นถือว่าข้อมูลผิด
+                if (categoryItems.length < 3) {
+                  return Center(child: Text('โหลดไม่สำเร็จ', style: kTextLg));
+                }
+                return _QuizBoard(category: category, items: categoryItems);
+              },
             ),
             const Positioned(top: 8, left: 8, child: ChildBackButton()),
           ],
@@ -55,8 +63,11 @@ class VocabQuizScreen extends ConsumerWidget {
 }
 
 class _QuizBoard extends ConsumerStatefulWidget {
-  const _QuizBoard({required this.items});
+  const _QuizBoard({required this.category, required this.items});
 
+  final String category;
+
+  /// คำเฉพาะหมวดที่เลือกแล้ว (กรองมาจากหน้าจอชั้นนอก)
   final List<VocabularyItem> items;
 
   @override
@@ -79,9 +90,9 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
     super.initState();
     _session = ref.read(
       activeSessionProvider(
-        const ActiveSessionKey(
+        ActiveSessionKey(
           module: kModuleVocab,
-          contentId: kVocabQuizContentId,
+          contentId: 'quiz_${widget.category}',
         ),
       ),
     );

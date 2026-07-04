@@ -101,7 +101,7 @@ void main() {
             sessionId: 'session-4',
             uid: 'uid-1',
             module: kModuleVocab,
-            contentId: kVocabQuizContentId,
+            contentId: 'quiz_animals',
             startedAt: DateTime.utc(2026, 4, 20, 10),
           ),
           answerEvents: events,
@@ -113,7 +113,7 @@ void main() {
       final record = writer.records.single;
       expect(record.sessionId, 'session-4');
       expect(record.module, kModuleVocab);
-      expect(record.scenarioId, kVocabQuizContentId);
+      expect(record.scenarioId, 'quiz_animals');
       expect(record.durationMs, 90000);
       expect(record.completed, isTrue);
       expect(record.score, 8);

@@ -7,6 +7,7 @@ import 'package:daily_life/providers/session_provider.dart';
 import 'package:daily_life/providers/tts_provider.dart';
 import 'package:daily_life/screens/child/module_c_screen.dart';
 import 'package:daily_life/screens/child/vocab_quiz_screen.dart';
+import 'package:daily_life/screens/child/vocab_quiz_select_screen.dart';
 import 'package:daily_life/services/session_repository.dart';
 import 'package:daily_life/services/tts_service.dart';
 import 'package:daily_life/theme/spacing.dart';
@@ -29,6 +30,27 @@ void main() {
 
     expect(find.text('ฟังเสียงคำศัพท์'), findsOneWidget);
     expect(find.text('เกมตอบคำถาม'), findsOneWidget);
+  });
+
+  testWidgets('VocabQuizSelectScreen lists every category', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          vocabularyProvider.overrideWith((ref) => Future.value(_items)),
+        ],
+        child: const MaterialApp(home: VocabQuizSelectScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // fixture มีแค่ 2 หมวด — การ์ดต้องขึ้นตามหมวดที่มีจริงเท่านั้น
+    expect(find.byKey(const Key('quiz_cat_animals')), findsOneWidget);
+    expect(find.byKey(const Key('quiz_cat_food')), findsOneWidget);
+    expect(find.text('สัตว์'), findsOneWidget);
+    expect(find.text('อาหาร'), findsOneWidget);
+    expect(find.byKey(const Key('quiz_cat_drinks')), findsNothing);
   });
 
   group('VocabQuizScreen', () {
@@ -75,7 +97,7 @@ void main() {
 
       final record = writer.records.single;
       expect(record.module, kModuleVocab);
-      expect(record.scenarioId, kVocabQuizContentId);
+      expect(record.scenarioId, 'quiz_animals');
       expect(record.completed, isTrue);
       expect(record.score, 10);
       expect(record.stars, 3);
@@ -119,7 +141,7 @@ Future<void> _pumpQuiz(
         sessionRepositoryProvider.overrideWithValue(writer),
         uidProvider.overrideWithValue('uid-1'),
       ],
-      child: const MaterialApp(home: VocabQuizScreen()),
+      child: const MaterialApp(home: VocabQuizScreen(category: 'animals')),
     ),
   );
   // รอ vocabularyProvider (Future) แล้วให้บอร์ดขึ้น
