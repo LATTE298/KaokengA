@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart' show FlutterError;
 import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-import '../models/memory_pack.dart';
 import '../models/loaded_scenario_config.dart';
 import '../models/scenario_config.dart';
 import '../models/vocabulary_item.dart';
@@ -25,8 +24,6 @@ abstract class ContentRepository {
       placeholderImagePaths: const {},
     );
   }
-
-  Future<MemoryPack> fetchDefaultMemoryPack();
 
   Future<List<VocabularyItem>> fetchVocabulary();
 }
@@ -117,13 +114,6 @@ class AssetContentRepository extends ContentRepository {
       config: config,
       placeholderImagePaths: placeholderPaths,
     );
-  }
-
-  @override
-  Future<MemoryPack> fetchDefaultMemoryPack() async {
-    const path = 'assets/memory_packs/thai_animals_001.json';
-    final raw = await _loadAssetJson(path);
-    return _parseObject(raw, MemoryPack.fromJson, path);
   }
 
   @override
@@ -237,11 +227,6 @@ class CachedRemoteContentRepository extends ContentRepository {
       return _assetFallback.fetchLoadedScenarioConfig(assetOrUrl);
     }
     return super.fetchLoadedScenarioConfig(assetOrUrl);
-  }
-
-  @override
-  Future<MemoryPack> fetchDefaultMemoryPack() {
-    return _assetFallback.fetchDefaultMemoryPack();
   }
 
   @override

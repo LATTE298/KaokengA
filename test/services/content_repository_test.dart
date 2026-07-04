@@ -25,7 +25,7 @@ void main() {
       final repo = AssetContentRepository(bundle: _FakeAssetBundle({}));
 
       await expectLater(
-        repo.fetchDefaultMemoryPack(),
+        repo.fetchVocabulary(),
         throwsA(isA<ContentNotFoundException>()),
       );
     });

@@ -131,7 +131,7 @@ void main() {
   });
 
   testWidgets('ModuleBScreen fits a short landscape screen', (tester) async {
-    // จอเตี้ยอ้างอิง Samsung S8+ แนวนอน — การ์ดต้องย่อตามพื้นที่ ไม่ล้นจอ
+    // จอเตี้ยอ้างอิง Samsung S8+ แนวนอน — การ์ด 6 หมวดต้องย่อตามพื้นที่ ไม่ล้นจอ
     await tester.binding.setSurfaceSize(const Size(740, 360));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -139,7 +139,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(PressableChildCard), findsOneWidget);
+    expect(find.byType(PressableChildCard), findsNWidgets(6));
+    expect(find.text('สัตว์'), findsOneWidget);
+    expect(find.text('เครื่องดื่ม'), findsOneWidget);
   });
 
   testWidgets('ChildAsyncView renders loading, error, empty, and data states', (

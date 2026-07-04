@@ -21,13 +21,15 @@ import '../../widgets/child/child_async_view.dart';
 import '../../widgets/child/game_result_dialog.dart';
 import '../../widgets/child/pressable_child_card.dart';
 
-// Memory game — 4×4 grid, 8 pairs (spec 03 Flow 2).
+// Memory game — 4×4 grid, สุ่ม 8 คู่จากแพ็คของหมวดที่เลือก (spec 03 Flow 2).
 class MemoryGameScreen extends ConsumerWidget {
-  const MemoryGameScreen({super.key});
+  const MemoryGameScreen({super.key, required this.packId});
+
+  final String packId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncPack = ref.watch(memoryPackProvider);
+    final asyncPack = ref.watch(memoryPackProvider(packId));
 
     return Scaffold(
       backgroundColor: kWarmWhite,
@@ -256,53 +258,34 @@ class _MemoryTileView extends StatelessWidget {
           borderRadius: kRadiusMd,
           boxShadow: const [kShadowSm],
         ),
-        child: Center(
-          child:
-              isFaceUp
-                  ? Text(
-                    emojiForPair(tile.pair.id),
-                    style: const TextStyle(fontSize: 40),
-                  )
-                  : Icon(
+        // หน้าการ์ดเปิด = รูปจริงจากคลังคำศัพท์ (แทนอิโมจิเดิม — รูปทีมมาแล้ว)
+        child:
+            isFaceUp
+                ? Padding(
+                  padding: const EdgeInsets.all(kSpace2),
+                  child: Image.asset(
+                    tile.pair.image,
+                    fit: BoxFit.contain,
+                    errorBuilder:
+                        (_, __, ___) => const Center(
+                          child: Icon(
+                            Icons.image_rounded,
+                            size: 40,
+                            color: kTextSecondary,
+                          ),
+                        ),
+                  ),
+                )
+                : Center(
+                  child: Icon(
                     Icons.star_rounded,
                     size: 40,
                     color: kYellowPrimary.withValues(alpha: 0.8),
                   ),
-        ),
+                ),
       ),
     );
   }
 }
 
-// แทนชื่อสัตว์ด้วยอิโมจิ ให้เด็กดูง่ายขึ้นกว่าตัวหนังสือ (spec 1.3).
-// อิงจาก id ของ pair ในชุดคำศัพท์สัตว์ไทย หากไม่พบ id จะ fallback เป็น 🐾.
-String emojiForPair(String pairId) {
-  const map = {
-    'cat': '🐱',
-    'dog': '🐶',
-    'frog': '🐸',
-    'fish': '🐟',
-    'bird': '🐦',
-    'duck': '🦆',
-    'cow': '🐮',
-    'pig': '🐷',
-    'elephant': '🐘',
-    'rabbit': '🐰',
-    'tiger': '🐯',
-    'lion': '🦁',
-    'bear': '🐻',
-    'monkey': '🐵',
-    'chicken': '🐔',
-    'horse': '🐴',
-    'sheep': '🐑',
-    'butterfly': '🦋',
-    'bee': '🐝',
-    'snail': '🐌',
-    'turtle': '🐢',
-    'snake': '🐍',
-    'crab': '🦀',
-    'octopus': '🐙',
-  };
-  return map[pairId] ?? '🐾';
-}
 

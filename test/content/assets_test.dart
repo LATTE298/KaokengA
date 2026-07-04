@@ -63,20 +63,6 @@ void main() {
       },
     );
 
-    test('memory pack has 8 pairs and declared placeholder-safe images', () {
-      final pack = _readJson('assets/memory_packs/thai_animals_001.json');
-      final pairs = pack['pairs'] as List<dynamic>;
-
-      expect(pairs.length, 8);
-      for (final rawPair in pairs) {
-        final pair = rawPair as Map<String, dynamic>;
-        _expectImageAvailableOrPlaceholder(
-          pair['image'] as String,
-          placeholderPaths,
-        );
-      }
-    });
-
     test('vocabulary has 90 items and declared placeholder-safe images', () {
       final vocabulary = _readJson('assets/vocabulary/vocabulary.json');
       final items = vocabulary['items'] as List<dynamic>;

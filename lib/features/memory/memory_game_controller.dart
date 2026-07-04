@@ -32,10 +32,15 @@ class MemoryTapResult {
 class MemoryGameController {
   MemoryGameController({
     required MemoryPack pack,
+    this.pairCount = 8,
     Random? random,
     int Function()? elapsedMs,
   }) : _elapsedMs = elapsedMs ?? (() => 0),
-       tiles = _buildShuffledDeck(pack, random ?? Random());
+       tiles = _buildShuffledDeck(pack, pairCount, random ?? Random());
+
+  /// จำนวนคู่ต่อรอบ (กระดาน 4×4 = 8 คู่) — แพ็คจากคลังคำมี ~15 คู่/หมวด
+  /// จึงสุ่มหยิบมาเล่นรอบละ 8 ให้เล่นซ้ำแล้วเจอไม่ซ้ำหน้าเดิม
+  final int pairCount;
 
   final int Function() _elapsedMs;
   final List<MemoryTileState> tiles;
@@ -124,10 +129,13 @@ class MemoryGameController {
 
   static List<MemoryTileState> _buildShuffledDeck(
     MemoryPack pack,
+    int pairCount,
     Random random,
   ) {
+    final pool = [...pack.pairs]..shuffle(random);
+    final selected = pool.take(min(pairCount, pool.length));
     final doubled = <MemoryTileState>[];
-    for (final pair in pack.pairs) {
+    for (final pair in selected) {
       doubled.add(MemoryTileState(pair: pair));
       doubled.add(MemoryTileState(pair: pair));
     }

@@ -49,8 +49,11 @@ GoRouter buildAppRouter() {
       ),
       GoRoute(path: kRouteModuleB, builder: (_, __) => const ModuleBScreen()),
       GoRoute(
-        path: kRouteMemoryGame,
-        builder: (_, __) => const MemoryGameScreen(),
+        // Child deep-route format: /module-b/game/:packId (แพ็ค = หมวดคำศัพท์)
+        path: '$kRouteMemoryGame/:packId',
+        builder:
+            (_, state) =>
+                MemoryGameScreen(packId: state.pathParameters['packId']!),
       ),
       GoRoute(path: kRouteModuleC, builder: (_, __) => const ModuleCScreen()),
       GoRoute(

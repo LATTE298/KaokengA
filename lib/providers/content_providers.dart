@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/app_types.dart';
 import '../models/memory_pack.dart';
 import '../models/loaded_scenario_config.dart';
 import '../models/scenario_config.dart';
@@ -42,9 +43,37 @@ final loadedScenarioConfigProvider =
       return repo.fetchLoadedScenarioConfig(summary.configUrl);
     });
 
-final memoryPackProvider = FutureProvider<MemoryPack>((ref) async {
-  final repo = ref.watch(contentRepositoryProvider);
-  return repo.fetchDefaultMemoryPack();
+// แพ็คเกมจับคู่ภาพ: สร้างจากคลังคำศัพท์รายหมวด (แหล่งข้อมูลเดียวกับ sound board
+// และเกมตอบคำถาม — ไม่มีไฟล์แพ็คแยกให้ดูแล เพิ่มคำใหม่แล้วทุกเกมได้พร้อมกัน)
+// แพ็คละ ~15 คู่ ตัวเกมสุ่มหยิบ 8 คู่ต่อรอบใน MemoryGameController
+final memoryPacksProvider = FutureProvider<List<MemoryPack>>((ref) async {
+  final items = await ref.watch(vocabularyProvider.future);
+  return [
+    for (final category in kVocabCategories)
+      MemoryPack(
+        packId: 'memory_$category',
+        titleTh: kVocabCategoryTitles[category] ?? category,
+        pairs: [
+          for (final item in items.where((i) => i.category == category))
+            MemoryPair(
+              id: item.itemId,
+              image: item.image,
+              ttsName: item.ttsWord,
+            ),
+        ],
+      ),
+  ].where((pack) => pack.pairs.length >= 2).toList();
+});
+
+final memoryPackProvider = FutureProvider.family<MemoryPack, String>((
+  ref,
+  packId,
+) async {
+  final packs = await ref.watch(memoryPacksProvider.future);
+  return packs.firstWhere(
+    (pack) => pack.packId == packId,
+    orElse: () => throw StateError('ไม่พบแพ็คจับคู่ภาพ: $packId'),
+  );
 });
 
 final vocabularyProvider = FutureProvider<List<VocabularyItem>>((ref) async {

@@ -103,6 +103,36 @@ void main() {
       expect(result.completed, isTrue);
       expect(controller.allMatched, isTrue);
     });
+
+    test('samples 8 pairs per round from a larger pack', () {
+      // แพ็คจากคลังคำมี ~15 คู่/หมวด — กระดาน 4×4 ต้องสุ่มหยิบแค่ 8 คู่
+      final bigPack = MemoryPack(
+        packId: 'memory_animals',
+        titleTh: 'สัตว์',
+        pairs: [
+          for (var i = 0; i < 15; i++)
+            MemoryPair(
+              id: 'animal_$i',
+              image: 'assets/images/vocab/animal_$i.png',
+              ttsName: 'สัตว์$i',
+            ),
+        ],
+      );
+
+      final controller = MemoryGameController(
+        pack: bigPack,
+        random: Random(1),
+      );
+
+      expect(controller.tiles, hasLength(16));
+      final pairIds = controller.tiles.map((t) => t.pair.id).toSet();
+      expect(pairIds, hasLength(8), reason: '8 คู่ไม่ซ้ำกัน คู่ละ 2 ใบ');
+
+      // สุ่มจริง: seed ต่างกันควรได้ชุดคู่ต่างกัน (เทียบกับอีก seed)
+      final other = MemoryGameController(pack: bigPack, random: Random(2));
+      final otherIds = other.tiles.map((t) => t.pair.id).toSet();
+      expect(otherIds, isNot(equals(pairIds)));
+    });
   });
 }
 

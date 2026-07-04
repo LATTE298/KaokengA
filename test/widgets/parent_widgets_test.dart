@@ -182,11 +182,6 @@ class _FakeContentRepository implements ContentRepository {
   }
 
   @override
-  Future<MemoryPack> fetchDefaultMemoryPack() {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<List<VocabularyItem>> fetchVocabulary() {
     throw UnimplementedError();
   }
