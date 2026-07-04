@@ -20,9 +20,13 @@ import '../../widgets/child/game_result_dialog.dart';
 import '../../widgets/child/pressable_child_card.dart';
 import '../../widgets/child/vocab_card.dart' show iconForVocabCategory;
 
-// เกมตอบคำถามคำศัพท์ (Module C ตามเอกสารข้อเสนอ): พูด/โชว์คำ → เลือกจากการ์ด
-// 3 ใบ → ให้คะแนน 10/8/6/4 + ดาว แล้วบันทึกการตอบรายคำลง Firestore
-// (ข้อมูลตั้งต้นของ dashboard เฟส 2.2)
+// เกมตอบคำถามคำศัพท์ (Module C ตาม mockup ในเอกสารข้อเสนอ): โชว์รูปใหญ่ →
+// ถาม "นี่คือ...อะไร?" ตามหมวด → เลือกคำตอบจากปุ่ม ก/ข/ค → คะแนน 10/8/6/4
+// แล้วบันทึกการตอบรายคำลง Firestore (ข้อมูลตั้งต้นของ dashboard เฟส 2.2)
+//
+// รูปโจทย์ใช้ Image.asset ตาม path ใน vocabulary.json — ระหว่างที่รูปจริงยังไม่มา
+// (bug asset 404) errorBuilder จะ fallback เป็นไอคอนหมวดให้เอง เมื่อทีมวางรูปจริง
+// ใน assets/images/ หน้าจอนี้อัปเกรดเป็นภาพเต็มอัตโนมัติโดยไม่ต้องแก้โค้ด
 class VocabQuizScreen extends ConsumerWidget {
   const VocabQuizScreen({super.key});
 
@@ -63,7 +67,7 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
   late final VocabQuizController _controller;
   late final ActiveSession _session;
 
-  /// itemId ที่เพิ่งตอบถูก — ไว้ flash การ์ดเขียวช่วงรอเปลี่ยนข้อ
+  /// itemId ที่เพิ่งตอบถูก — ไว้ flash ปุ่มเขียวช่วงรอเปลี่ยนข้อ
   String? _correctFlashId;
 
   /// กันแตะระหว่างรอเปลี่ยนข้อ/รอ popup
@@ -97,8 +101,11 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
     });
   }
 
-  void _speakQuestionWord() {
-    ref.read(ttsServiceProvider).speak(_controller.currentQuestion.answer.ttsWord);
+  // พูดประโยคคำถามตามหมวด — ห้ามพูดคำตอบเอง (เฉลยทันที)
+  void _speakQuestion() {
+    ref
+        .read(ttsServiceProvider)
+        .speak(ttsQuizQuestion(_controller.currentQuestion.answer.category));
   }
 
   Future<void> _onChoiceTap(String itemId) async {
@@ -107,7 +114,7 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
     if (!result.accepted) return;
 
     if (!result.correct) {
-      // ตอบผิด: ล็อกการ์ดที่ผิด + เตือนนุ่มๆ แล้วให้ลองต่อจนถูก (ไม่มีการ "แพ้")
+      // ตอบผิด: ล็อกปุ่มที่ผิด + เตือนนุ่มๆ แล้วให้ลองต่อจนถูก (ไม่มีการ "แพ้")
       HapticService.tapLight();
       ref.read(ttsServiceProvider).speak(kTtsQuizRetry);
       setState(() {});
@@ -147,8 +154,8 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
       _correctFlashId = null;
       _transitioning = false;
     });
-    // ขึ้นข้อใหม่แล้วค่อยอ่านโจทย์ — หนึ่งเหตุการณ์หนึ่ง utterance
-    _speakQuestionWord();
+    // ขึ้นข้อใหม่แล้วค่อยอ่านคำถาม — หนึ่งเหตุการณ์หนึ่ง utterance
+    _speakQuestion();
   }
 
   void _showResultDialog() {
@@ -171,19 +178,19 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
   @override
   Widget build(BuildContext context) {
     final question = _controller.currentQuestion;
+    final answer = question.answer;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // แบ่งพื้นที่เป็นสัดส่วนจากจอจริง (กฎ responsive ข้อ 3): แถบบน ~10%,
-        // การ์ดโจทย์ ~28%, ตัวเลือก ~ที่เหลือ — ไม่มี scroll ทุกขนาดจอ
-        final promptHeight = (constraints.maxHeight * 0.28).clamp(88.0, 160.0);
-        final choiceWidth =
-            ((constraints.maxWidth - kSpace6 * 2 - kInteractiveGapMin * 2) / 3)
-                .clamp(120.0, 300.0)
-                .toDouble();
-
+        // จอแนวนอน: ซ้าย = รูปโจทย์ใหญ่ + ประโยคคำถาม, ขวา = ปุ่มตอบ ก/ข/ค
+        // ทุกขนาดคิดเป็นสัดส่วนจากพื้นที่จริง (กฎ responsive ข้อ 3) ไม่มี scroll
         return Padding(
-          padding: const EdgeInsets.fromLTRB(kSpace6, kSpace2, kSpace6, kSpace5),
+          padding: const EdgeInsets.fromLTRB(
+            kSpace6,
+            kSpace2,
+            kSpace6,
+            kSpace5,
+          ),
           child: Column(
             children: [
               // แถบบน: เลขข้อ (เว้นซ้ายให้ปุ่มย้อนกลับที่ลอยอยู่)
@@ -201,58 +208,86 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
                 ),
               ),
               const SizedBox(height: kSpace2),
-
-              // การ์ดโจทย์: โชว์คำ + แตะเพื่อฟังซ้ำได้เสมอ
-              PressableChildCard(
-                key: const Key('quiz_prompt'),
-                onTap: _speakQuestionWord,
-                child: Container(
-                  width: double.infinity,
-                  height: promptHeight,
-                  decoration: BoxDecoration(
-                    color: kBlueLight,
-                    borderRadius: kRadiusLg,
-                    boxShadow: const [kShadowMd],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.volume_up_rounded,
-                        size: promptHeight * 0.4,
-                        color: kBlueDark,
-                      ),
-                      const SizedBox(width: kSpace4),
-                      Text(
-                        question.answer.ttsWord,
-                        key: const Key('quiz_word'),
-                        style: kTextXL,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: kInteractiveGapMin),
-
-              // ตัวเลือก 3 ใบ (ก/ข/ค ตามเอกสาร) — เว้นระยะกันกดพลาด
               Expanded(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (var i = 0; i < question.choices.length; i++) ...[
-                      if (i > 0) const SizedBox(width: kInteractiveGapMin),
-                      _ChoiceCard(
-                        key: Key('choice_${question.choices[i].itemId}'),
-                        item: question.choices[i],
-                        width: choiceWidth,
-                        locked: _controller.lockedChoiceIds.contains(
-                          question.choices[i].itemId,
-                        ),
-                        correctFlash:
-                            _correctFlashId == question.choices[i].itemId,
-                        onTap: () => _onChoiceTap(question.choices[i].itemId),
+                    // ฝั่งซ้าย: รูปโจทย์ (แตะเพื่อฟังคำถามซ้ำ) + ประโยคคำถาม
+                    Expanded(
+                      flex: 11,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: PressableChildCard(
+                              key: const Key('quiz_prompt'),
+                              onTap: _speakQuestion,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(kSpace4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: kRadiusLg,
+                                  border: Border.all(
+                                    color: kWarmBorder,
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: const [kShadowMd],
+                                ),
+                                child: _PromptImage(
+                                  key: Key('quiz_image_${answer.itemId}'),
+                                  item: answer,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: kSpace3),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'คำถาม: ${ttsQuizQuestion(answer.category)}?',
+                              key: const Key('quiz_question'),
+                              style: kTextXL,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
+                    const SizedBox(width: kInteractiveGapMin),
+
+                    // ฝั่งขวา: ปุ่มตอบ ก/ข/ค เรียงลงมา (ตาม mockup ในเอกสาร)
+                    Expanded(
+                      flex: 9,
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < question.choices.length; i++) ...[
+                            if (i > 0)
+                              const SizedBox(height: kInteractiveGapMin),
+                            Expanded(
+                              child: _ChoicePill(
+                                key: Key(
+                                  'choice_${question.choices[i].itemId}',
+                                ),
+                                prefix: _kChoicePrefixes[i],
+                                item: question.choices[i],
+                                background:
+                                    _kChoiceBackgrounds[i %
+                                        _kChoiceBackgrounds.length],
+                                locked: _controller.lockedChoiceIds.contains(
+                                  question.choices[i].itemId,
+                                ),
+                                correctFlash:
+                                    _correctFlashId ==
+                                    question.choices[i].itemId,
+                                onTap:
+                                    () => _onChoiceTap(
+                                      question.choices[i].itemId,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -264,33 +299,62 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
   }
 }
 
-class _ChoiceCard extends StatelessWidget {
-  const _ChoiceCard({
+// ตัวนำหน้าตัวเลือกตามเอกสารข้อเสนอ (ก/ข/ค)
+const _kChoicePrefixes = ['ก', 'ข', 'ค'];
+
+// สีพื้นปุ่มไล่ตามตำแหน่ง (ตกแต่งอย่างเดียว ไม่สื่อถูก/ผิด — สถานะถูก/ผิดใช้
+// ขอบเขียว/หรี่จางแทน) ให้เด็กแยกปุ่มแต่ละอันได้ง่ายแบบเดียวกับ mockup
+const _kChoiceBackgrounds = [kBlueLight, kYellowLight, kWarmSurface];
+
+// รูปโจทย์: ใช้รูปจริงจาก assets ถ้ามี — ยังไม่มี (placeholder) ให้โชว์ไอคอนหมวด
+// ขนาดใหญ่ไปก่อน จะกลายเป็นภาพจริงเองเมื่อทีมวางไฟล์รูป
+class _PromptImage extends StatelessWidget {
+  const _PromptImage({super.key, required this.item});
+
+  final VocabularyItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      item.image,
+      fit: BoxFit.contain,
+      errorBuilder:
+          (_, __, ___) => LayoutBuilder(
+            builder: (context, constraints) {
+              final size = (constraints.maxHeight * 0.7).clamp(48.0, 200.0);
+              return Icon(
+                iconForVocabCategory(item.category),
+                size: size.toDouble(),
+                color: kTextSecondary,
+              );
+            },
+          ),
+    );
+  }
+}
+
+class _ChoicePill extends StatelessWidget {
+  const _ChoicePill({
     super.key,
+    required this.prefix,
     required this.item,
-    required this.width,
+    required this.background,
     required this.locked,
     required this.correctFlash,
     required this.onTap,
   });
 
+  final String prefix;
   final VocabularyItem item;
-  final double width;
+  final Color background;
 
-  /// เคยตอบผิดในข้อนี้ไปแล้ว — หรี่ลงและไม่รับแตะ (controller กันซ้ำอีกชั้น)
+  /// เคยตอบผิดในข้อนี้ไปแล้ว — หรี่ลงและ controller ไม่รับซ้ำ
   final bool locked;
   final bool correctFlash;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final background =
-        correctFlash
-            ? kSuccessLight
-            : locked
-            ? kDisabledSurface
-            : Colors.white;
-
     return PressableChildCard(
       onTap: onTap,
       child: AnimatedOpacity(
@@ -298,39 +362,57 @@ class _ChoiceCard extends StatelessWidget {
         opacity: locked ? 0.45 : 1.0,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
-          width: width,
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: kSpace5),
           decoration: BoxDecoration(
-            color: background,
-            borderRadius: kRadiusMd,
+            color:
+                correctFlash
+                    ? kSuccessLight
+                    : locked
+                    ? kDisabledSurface
+                    : background,
+            borderRadius: kRadiusFull,
             border: Border.all(
               color: correctFlash ? kSuccess : kWarmBorder,
-              width: correctFlash ? 2 : 1,
+              width: correctFlash ? 2.5 : 1.5,
             ),
             boxShadow: const [kShadowSm],
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // ย่อไอคอน/ฟอนต์ตามช่องจริง — แพทเทิร์นเดียวกับ VocabCard
-              final cell = constraints.maxHeight;
-              final iconSize = (cell * 0.35).clamp(32.0, 72.0).toDouble();
+              // ไอคอนเล็กหน้าคำตอบ: ใช้รูปจริงถ้ามี ไม่มีใช้ไอคอนหมวด — ช่วยเด็ก
+              // ที่ยังอ่านหนังสือไม่คล่องแยกตัวเลือกได้ (ตาม mockup)
+              final iconSize = (constraints.maxHeight * 0.55).clamp(28.0, 48.0);
               final labelStyle =
-                  cell < 110
+                  constraints.maxHeight < 72
                       ? kChildLabel.copyWith(fontSize: 18, height: 1.2)
                       : kChildLabel;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              return Row(
                 children: [
-                  Icon(
-                    iconForVocabCategory(item.category),
-                    size: iconSize,
-                    color: kTextSecondary,
+                  SizedBox(
+                    width: iconSize.toDouble(),
+                    height: iconSize.toDouble(),
+                    child: Image.asset(
+                      item.image,
+                      fit: BoxFit.contain,
+                      errorBuilder:
+                          (_, __, ___) => Icon(
+                            iconForVocabCategory(item.category),
+                            size: iconSize.toDouble(),
+                            color: kTextSecondary,
+                          ),
+                    ),
                   ),
-                  const SizedBox(height: kSpace2),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: kSpace1),
+                  const SizedBox(width: kSpace4),
+                  Expanded(
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text(item.ttsWord, style: labelStyle, maxLines: 1),
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '$prefix. ${item.ttsWord}',
+                        style: labelStyle,
+                        maxLines: 1,
+                      ),
                     ),
                   ),
                 ],

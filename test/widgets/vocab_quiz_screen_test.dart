@@ -132,8 +132,11 @@ String _progressText(WidgetTester tester) {
 }
 
 VocabularyItem _currentAnswerItem(WidgetTester tester) {
-  final word = tester.widget<Text>(find.byKey(const Key('quiz_word'))).data!;
-  return _items.firstWhere((i) => i.ttsWord == word);
+  // โจทย์ไม่โชว์คำตอบเป็นตัวหนังสือแล้ว (โชว์รูป) — อ่านจาก key ของรูปโจทย์แทน
+  for (final item in _items) {
+    if (tester.any(find.byKey(Key('quiz_image_${item.itemId}')))) return item;
+  }
+  fail('ไม่พบรูปโจทย์บนหน้าจอ');
 }
 
 List<String> _visibleChoiceIds(WidgetTester tester) {
