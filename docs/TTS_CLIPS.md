@@ -3,7 +3,7 @@
 แอปเล่นเสียงตามลำดับ: **ไฟล์อัดล่วงหน้าใน `assets/tts/` → Cloud TTS (ถ้ามีคีย์) → เสียง engine ในเครื่อง**
 ไฟล์ไหนยังไม่มี แอปใช้เสียงสำรองแทนอัตโนมัติ — **ทยอยเติมทีละไฟล์ได้ ไม่ต้องครบก่อน**
 
-รายการทั้งหมด **71 คลิป** ตรงกับ [`assets/tts/tts_manifest.json`](../assets/tts/tts_manifest.json) แล้ว ไม่ต้องแก้ JSON ใดๆ — แค่วางไฟล์ให้ชื่อตรง
+รายการทั้งหมด **132 คลิป** ตรงกับ [`assets/tts/tts_manifest.json`](../assets/tts/tts_manifest.json) แล้ว ไม่ต้องแก้ JSON ใดๆ — แค่วางไฟล์ให้ชื่อตรง (คำศัพท์อิงคลังคำจริง 6 หมวด 90 คำจาก zip "NSC คำศัพท์ + ภาพ")
 
 ## วิธีทำ
 
@@ -46,9 +46,9 @@
 | `sys_quiz_complete` ★ | เก่งมากเลย! ตอบครบทุกข้อแล้ว! |
 | `sys_quiz_ask_animals` ★ | นี่คือสัตว์อะไร |
 | `sys_quiz_ask_food` ★ | นี่คืออาหารอะไร |
-| `sys_quiz_ask_colours` ★ | นี่คือสีอะไร |
-| `sys_quiz_ask_body` ★ | นี่คืออวัยวะอะไร |
-| `sys_quiz_ask_household` ★ | นี่คือของใช้อะไร |
+| `sys_quiz_ask_drinks` ★ | นี่คือเครื่องดื่มอะไร |
+| `sys_quiz_ask_places` ★ | นี่คือที่ไหน |
+| `sys_quiz_ask_occupations` ★ | นี่คืออาชีพอะไร |
 | `sys_quiz_ask_generic` ★ | นี่คืออะไร |
 
 ★ = เพิ่มเข้ามาพร้อมเกมตอบคำถาม Module C
@@ -82,32 +82,140 @@
 | `match_monkey` | ลิง จับคู่ได้แล้ว! |
 | `match_buffalo` | ควาย จับคู่ได้แล้ว! |
 
-### คำศัพท์ (32) — ใช้ทั้ง Module B (ชื่อคู่) และ Module C (sound board)
+### คำศัพท์ (93) — คลังคำจริง 6 หมวด (ใช้ใน sound board + เกมตอบคำถาม)
 
-| ไฟล์ | ข้อความ | | ไฟล์ | ข้อความ |
-|---|---|---|---|---|
-| `word_cat` | แมว | | `word_red` | สีแดง |
-| `word_dog` | หมา | | `word_blue` | สีน้ำเงิน |
-| `word_elephant` | ช้าง | | `word_yellow` | สีเหลือง |
-| `word_tiger` | เสือ | | `word_green` | สีเขียว |
-| `word_fish` | ปลา | | `word_white` | สีขาว |
-| `word_bird` | นก | | `word_black` | สีดำ |
-| `word_monkey` | ลิง | | `word_hand` | มือ |
-| `word_buffalo` | ควาย | | `word_foot` | เท้า |
-| `word_rice` | ข้าว | | `word_eye` | ตา |
-| `word_banana` | กล้วย | | `word_ear` | หู |
-| `word_milk` | นม | | `word_mouth` | ปาก |
-| `word_water` | น้ำ | | `word_nose` | จมูก |
-| `word_mango` | มะม่วง | | `word_chair` | เก้าอี้ |
-| `word_egg` | ไข่ | | `word_table` | โต๊ะ |
-| | | | `word_bed` | เตียง |
-| | | | `word_door` | ประตู |
-| | | | `word_window` | หน้าต่าง |
-| | | | `word_lamp` | โคมไฟ |
+#### สัตว์ (15)
+
+| ไฟล์ | ข้อความ |
+|---|---|
+| `word_shrimp` | กุ้ง |
+| `word_bird` | นก |
+| `word_fish` | ปลา |
+| `word_crab` | ปู |
+| `word_ant` | มด |
+| `word_horse` | ม้า |
+| `word_cow` | วัว |
+| `word_mouse` | หนู |
+| `word_dog` | หมา |
+| `word_bear` | หมี |
+| `word_pig` | หมู |
+| `word_tiger` | เสือ |
+| `word_sheep` | แกะ |
+| `word_cat` | แมว |
+| `word_chicken` | ไก่ |
+
+#### อาหาร (15)
+
+| ไฟล์ | ข้อความ |
+|---|---|
+| `word_rice` | ข้าว |
+| `word_fried_rice` | ข้าวผัด |
+| `word_soup` | ซุป |
+| `word_clear_soup` | ต้มจืด |
+| `word_pad_thai` | ผัดไทย |
+| `word_pie` | พาย |
+| `word_pizza` | พิซซ่า |
+| `word_candy` | ลูกอม |
+| `word_suki` | สุกี้ |
+| `word_som_tam` | ส้มตำ |
+| `word_fried_pork` | หมูทอด |
+| `word_burger` | เบอร์เกอร์ |
+| `word_congee` | โจ๊ก |
+| `word_fried_chicken` | ไก่ทอด |
+| `word_omelet` | ไข่เจียว |
+
+#### น้ำ (15)
+
+| ไฟล์ | ข้อความ |
+|---|---|
+| `word_coffee` | กาแฟ |
+| `word_tea` | ชา |
+| `word_milk_tea` | ชานม |
+| `word_iced_tea` | ชาเย็น |
+| `word_thai_tea` | ชาไทย |
+| `word_milk` | นม |
+| `word_milk_shake` | นมปั่น |
+| `word_lemonade` | น้ำมะนาว |
+| `word_orange_juice` | น้ำส้ม |
+| `word_water` | น้ำเปล่า |
+| `word_ice` | น้ำแข็ง |
+| `word_red_drink` | น้ำแดง |
+| `word_cocoa` | โกโก้ |
+| `word_cola` | โคล่า |
+| `word_soda` | โซดา |
+
+#### สถานที่ (15)
+
+| ไฟล์ | ข้อความ |
+|---|---|
+| `word_market` | ตลาด |
+| `word_road` | ถนน |
+| `word_sea` | ทะเล |
+| `word_home` | บ้าน |
+| `word_forest` | ป่า |
+| `word_mountain` | ภูเขา |
+| `word_shop` | ร้านค้า |
+| `word_temple` | วัด |
+| `word_garden` | สวน |
+| `word_zoo` | สวนสัตว์ |
+| `word_kitchen` | ห้องครัว |
+| `word_bedroom` | ห้องนอน |
+| `word_bathroom` | ห้องน้ำ |
+| `word_hospital` | โรงพยาบาล |
+| `word_school` | โรงเรียน |
+
+#### อาชีพ (15)
+
+| ไฟล์ | ข้อความ |
+|---|---|
+| `word_teacher` | คุณครู |
+| `word_farmer` | ชาวนา |
+| `word_barber` | ช่างตัดผม |
+| `word_police` | ตำรวจ |
+| `word_soldier` | ทหาร |
+| `word_firefighter` | นักดับเพลิง |
+| `word_singer` | นักร้อง |
+| `word_artist` | นักวาด |
+| `word_student` | นักเรียน |
+| `word_nurse` | พยาบาล |
+| `word_vendor` | พ่อค้าแม่ค้า |
+| `word_doctor` | หมอ |
+| `word_dentist` | หมอฟัน |
+| `word_vet` | สัตวแพทย์ |
+| `word_chef` | เชฟ |
+
+#### คำในชีวิตประจำวัน (15)
+
+| ไฟล์ | ข้อความ |
+|---|---|
+| `word_scared` | กลัว |
+| `word_eat` | กินข้าว |
+| `word_happy` | ดีใจ |
+| `word_drink` | ดื่มน้ำ |
+| `word_sleep` | นอน |
+| `word_sit` | นั่ง |
+| `word_run` | วิ่ง |
+| `word_hungry` | หิว |
+| `word_read` | อ่าน |
+| `word_hurt` | เจ็บ |
+| `word_sad` | เสียใจ |
+| `word_brush_teeth` | แปรงฟัน |
+| `word_angry` | โกรธ |
+| `word_yes` | ใช่ |
+| `word_no` | ไม่ใช่ |
+
+#### ใช้ใน memory pack อย่างเดียว (3)
+
+| ไฟล์ | ข้อความ |
+|---|---|
+| `word_elephant` | ช้าง |
+| `word_monkey` | ลิง |
+| `word_buffalo` | ควาย |
 
 ## ลำดับที่แนะนำ (ถ้าไม่อยากเจนรวดเดียว)
 
-1. `word_*` 32 ไฟล์ — ได้ยินบ่อยสุด (ทุกครั้งที่แตะการ์ด)
-2. `match_*` + `sys_memory_*` — เกมจับคู่ครบเสียง
-3. `sc_*` — Module A ครบเสียง
-4. `sys_*` ที่เหลือ — เสียงต้อนรับ/เตือนพัก
+1. `sys_quiz_*` 10 ไฟล์ + `word_*` หมวดสัตว์/อาหาร — เกมตอบคำถามได้เสียงครบก่อน
+2. `word_*` ที่เหลือ (รวม 93 ไฟล์) — sound board ครบเสียง
+3. `match_*` + `sys_memory_*` — เกมจับคู่ครบเสียง
+4. `sc_*` — Module A ครบเสียง
+5. `sys_*` ที่เหลือ — เสียงต้อนรับ/เตือนพัก

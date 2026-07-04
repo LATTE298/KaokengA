@@ -43,20 +43,21 @@ const String kTtsQuizComplete = 'เก่งมากเลย! ตอบคร
 
 const String kTtsQuizAskAnimals = 'นี่คือสัตว์อะไร';
 const String kTtsQuizAskFood = 'นี่คืออาหารอะไร';
-const String kTtsQuizAskColours = 'นี่คือสีอะไร';
-const String kTtsQuizAskBody = 'นี่คืออวัยวะอะไร';
-const String kTtsQuizAskHousehold = 'นี่คือของใช้อะไร';
+const String kTtsQuizAskDrinks = 'นี่คือเครื่องดื่มอะไร';
+const String kTtsQuizAskPlaces = 'นี่คือที่ไหน';
+const String kTtsQuizAskOccupations = 'นี่คืออาชีพอะไร';
 const String kTtsQuizAskGeneric = 'นี่คืออะไร';
 
-/// ประโยคคำถามตามหมวดคำศัพท์ (หมวดตรงกับ vocabulary.json) — UI เอาไปเติม "?"
-/// ตอนแสดงผลเองได้ แต่ตัว TTS ใช้ข้อความนี้ตรงๆ (เป็น key ของคลิปใน manifest)
+/// ประโยคคำถามตามหมวดคำศัพท์ (หมวดตรงกับ vocabulary.json ชุดจริง 6 หมวดของทีม)
+/// — UI เอาไปเติม "?" ตอนแสดงผลเองได้ แต่ตัว TTS ใช้ข้อความนี้ตรงๆ (เป็น key
+/// ของคลิปใน manifest). หมวด everyday ปนคำกริยา/ความรู้สึก จึงใช้คำถามกลางๆ
 String ttsQuizQuestion(String category) {
   return switch (category) {
     'animals' => kTtsQuizAskAnimals,
     'food' => kTtsQuizAskFood,
-    'colours' => kTtsQuizAskColours,
-    'body' => kTtsQuizAskBody,
-    'household' => kTtsQuizAskHousehold,
+    'drinks' => kTtsQuizAskDrinks,
+    'places' => kTtsQuizAskPlaces,
+    'occupations' => kTtsQuizAskOccupations,
     _ => kTtsQuizAskGeneric,
   };
 }

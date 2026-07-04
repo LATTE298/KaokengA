@@ -66,6 +66,7 @@ flutter:
   assets:
     - assets/scenarios/
     - assets/images/
+    - assets/images/vocab/
     - assets/memory_packs/
     - assets/vocabulary/
     - assets/tts/

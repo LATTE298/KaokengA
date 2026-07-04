@@ -77,11 +77,12 @@ void main() {
       }
     });
 
-    test('vocabulary has 30 items and declared placeholder-safe images', () {
+    test('vocabulary has 90 items and declared placeholder-safe images', () {
       final vocabulary = _readJson('assets/vocabulary/vocabulary.json');
       final items = vocabulary['items'] as List<dynamic>;
 
-      expect(items.length, 30);
+      // คลังคำจริงของทีม: 6 หมวด × 15 คำ (จาก zip "NSC คำศัพท์ + ภาพ")
+      expect(items.length, 90);
       for (final rawItem in items) {
         final item = rawItem as Map<String, dynamic>;
         _expectImageAvailableOrPlaceholder(

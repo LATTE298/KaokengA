@@ -44,30 +44,39 @@ class _VocabCardState extends State<VocabCard> {
           ),
           boxShadow: [_active ? kShadowMd : kShadowSm],
         ),
-        // ย่อไอคอน/ฟอนต์ตามขนาดช่องจริงของ grid (กฎ responsive — CLAUDE.md ข้อ 3)
-        // ค่า fix เดิม (ไอคอน 48 + kChildLabel 22) ล้นช่องเมื่อจอแคบจนช่องเล็กกว่า ~100px
+        // รูปจริงด้านบน + คำด้านล่าง — ย่อฟอนต์ตามขนาดช่องจริงของ grid
+        // (กฎ responsive — CLAUDE.md ข้อ 3) รูปโหลดไม่ได้ fallback เป็นไอคอนหมวด
         child: LayoutBuilder(
           builder: (context, constraints) {
             final cell = constraints.maxHeight;
-            final iconSize = (cell * 0.4).clamp(28.0, 48.0).toDouble();
             final labelStyle =
                 cell < 110
                     ? kChildLabel.copyWith(fontSize: 18, height: 1.2)
                     : kChildLabel;
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  iconForVocabCategory(widget.item.category),
-                  size: iconSize,
-                  color: kTextSecondary,
-                ),
-                const SizedBox(height: kSpace2),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: kSpace1),
-                  // scaleDown กันคำยาว (เช่น "แปรงสีฟัน") ล้น/ถูกตัดคำ — คำศัพท์ต้อง
-                  // อ่านได้ครบเสมอ ยอมให้ตัวเล็กลงแทนการขึ้นบรรทัดใหม่หรือ ellipsis
-                  child: FittedBox(
+            return Padding(
+              padding: const EdgeInsets.all(kSpace2),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: kRadiusSm,
+                      child: Image.asset(
+                        widget.item.image,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (_, __, ___) => Icon(
+                              iconForVocabCategory(widget.item.category),
+                              size: (cell * 0.4).clamp(28.0, 48.0).toDouble(),
+                              color: kTextSecondary,
+                            ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: kSpace2),
+                  // scaleDown กันคำยาวล้น/ถูกตัดคำ — คำศัพท์ต้องอ่านได้ครบเสมอ
+                  // ยอมให้ตัวเล็กลงแทนการขึ้นบรรทัดใหม่หรือ ellipsis
+                  FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
                       widget.item.ttsWord,
@@ -75,8 +84,8 @@ class _VocabCardState extends State<VocabCard> {
                       maxLines: 1,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -85,20 +94,22 @@ class _VocabCardState extends State<VocabCard> {
   }
 }
 
-// ไอคอนตัวแทนหมวดคำศัพท์ — ใช้ร่วมกันระหว่าง sound board (VocabCard) และการ์ด
-// ตัวเลือกในเกมตอบคำถาม (vocab_quiz_screen) จนกว่ารูปจริงจะมาแทน placeholder
+// ไอคอนตัวแทนหมวดคำศัพท์ (6 หมวดจริงตาม vocabulary.json) — ใช้เป็น fallback
+// ของ sound board (VocabCard) และเกมตอบคำถาม เมื่อไฟล์รูปโหลดไม่ได้
 IconData iconForVocabCategory(String category) {
   switch (category) {
     case 'animals':
       return Icons.pets_rounded;
     case 'food':
       return Icons.restaurant_rounded;
-    case 'colours':
-      return Icons.palette_rounded;
-    case 'body':
-      return Icons.accessibility_new_rounded;
-    case 'household':
-      return Icons.chair_rounded;
+    case 'drinks':
+      return Icons.local_drink_rounded;
+    case 'places':
+      return Icons.place_rounded;
+    case 'occupations':
+      return Icons.badge_rounded;
+    case 'everyday':
+      return Icons.emoji_people_rounded;
     default:
       return Icons.label_rounded;
   }

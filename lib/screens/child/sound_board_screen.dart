@@ -13,8 +13,8 @@ import '../../widgets/child/child_async_view.dart';
 import '../../widgets/child/vocab_card.dart';
 
 // Sound board (spec 02 §ModuleCScreen, spec 03 Flow 3) — โหมด "ฟังเสียงคำศัพท์"
-// 5×6 grid 30 คำ แตะเพื่อฟัง ไม่มี auto-play. เดิมเป็นตัว ModuleCScreen ทั้งหน้า
-// ย้ายมาที่นี่เมื่อ Module C กลายเป็น hub (เพิ่มเกมตอบคำถามตามเอกสารข้อเสนอ)
+// grid 5 คอลัมน์ เลื่อนแนวตั้ง (คลังคำจริง 6 หมวด 90 คำ) แตะเพื่อฟัง ไม่มี auto-play
+// เดิมเป็นตัว ModuleCScreen ทั้งหน้า ย้ายมาที่นี่เมื่อ Module C กลายเป็น hub
 class SoundBoardScreen extends ConsumerStatefulWidget {
   const SoundBoardScreen({super.key});
 
