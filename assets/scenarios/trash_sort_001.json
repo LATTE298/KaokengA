@@ -11,7 +11,7 @@
   "interactables": [
     {
       "id": "plastic_bottle",
-      "image": "assets/images/trash_bottle.jpg",
+      "image": "assets/images/trash_bottle.png",
       "is_target": true,
       "start_pos": { "x": 300, "y": 620 }
     },
