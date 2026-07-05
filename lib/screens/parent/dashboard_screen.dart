@@ -47,11 +47,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       );
     }
 
+    // มือถือแนวนอน (จอเตี้ย): ย้ายสลับแท็บไปไว้ที่ AppBar แล้วซ่อนแถบเมนูล่าง
+    // เพื่อคืนพื้นที่แนวตั้งให้เนื้อหา (dashboard ต้องเห็นครบไม่ต้องเลื่อน)
+    final isLandscape = MediaQuery.of(context).size.height < 500;
+
     return Scaffold(
       backgroundColor: kWarmWhite,
       appBar: AppBar(
         title: Text(_tabs[_tab].titleTh),
         actions: [
+          if (isLandscape)
+            for (var i = 0; i < _tabs.length; i++)
+              IconButton(
+                tooltip: _tabs[i].titleTh,
+                isSelected: i == _tab,
+                icon: Icon(_tabs[i].icon),
+                onPressed: () => setState(() => _tab = i),
+              ),
           IconButton(
             tooltip: 'ออกจากระบบ',
             icon: const Icon(Icons.account_circle_rounded),
@@ -64,14 +76,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         1 => const ProgressDashboard(),
         _ => const _ScenarioSettingsTab(),
       },
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab,
-        onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: [
-          for (final t in _tabs)
-            NavigationDestination(icon: Icon(t.icon), label: t.titleTh),
-        ],
-      ),
+      bottomNavigationBar: isLandscape
+          ? null
+          : NavigationBar(
+              selectedIndex: _tab,
+              onDestinationSelected: (i) => setState(() => _tab = i),
+              destinations: [
+                for (final t in _tabs)
+                  NavigationDestination(
+                    icon: Icon(t.icon),
+                    label: t.titleTh,
+                  ),
+              ],
+            ),
     );
   }
 

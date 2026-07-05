@@ -61,8 +61,10 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(844, 390));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
+    // จำลอง chrome จริงของ DashboardScreen (AppBar + แถบเมนูล่าง) ที่กินความสูง
+    // เพื่อให้ dense layout ต้อง fit body area จริง (เตี้ยกว่าทั้งจอ ~136px)
     await tester.pumpWidget(
-      _wrap([
+      _wrapInApp([
         _record('s1', kModuleMemory, 'memory_animals', 9, '2026-06-16T10:00:00'),
         _record('s2', kModuleDailyLife, '711_milk_001', 6, '2026-06-16T11:00:00'),
         _record('s3', kModuleVocab, 'quiz_food', 8, '2026-06-16T12:00:00'),
@@ -97,6 +99,25 @@ void main() {
 }
 
 Widget _wrap(List<SessionRecord> records) {
+  return _wrapWith(
+    records,
+    Scaffold(body: ProgressDashboard(now: DateTime(2026, 6, 16, 18))),
+  );
+}
+
+// จำลอง chrome ของ DashboardScreen จริงตอนแนวนอน (AppBar อย่างเดียว — แถบเมนูล่าง
+// ถูกซ่อนเมื่อ landscape) เพื่อทดสอบว่า dense layout fit ใน body area จริง
+Widget _wrapInApp(List<SessionRecord> records) {
+  return _wrapWith(
+    records,
+    Scaffold(
+      appBar: AppBar(title: const Text('ความก้าวหน้า')),
+      body: ProgressDashboard(now: DateTime(2026, 6, 16, 18)),
+    ),
+  );
+}
+
+Widget _wrapWith(List<SessionRecord> records, Widget home) {
   return ProviderScope(
     overrides: [
       uidProvider.overrideWithValue('uid-1'),
@@ -107,10 +128,7 @@ Widget _wrap(List<SessionRecord> records) {
         _FakeContentRepository([_scenario('711_milk_001', 'ซื้อนม')]),
       ),
     ],
-    // now คงที่เพื่อกรอบกราฟ deterministic
-    child: MaterialApp(
-      home: Scaffold(body: ProgressDashboard(now: DateTime(2026, 6, 16, 18))),
-    ),
+    child: MaterialApp(home: home),
   );
 }
 

@@ -206,11 +206,20 @@ class _DenseLandscape extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // แบ่งพื้นที่แนวตั้งด้วย Expanded ทั้งคู่ → ไม่มีส่วนไหนดันจน
+                      // อีกส่วนล้น ไม่ว่าจอสูงแค่ไหน
                       Expanded(
+                        flex: 3,
                         child: _DenseTips(tips: skillTips(summary)),
                       ),
                       const SizedBox(height: kSpace2),
-                      _DenseGames(games: summary.recentGames, titles: titles),
+                      Expanded(
+                        flex: 2,
+                        child: _DenseGames(
+                          games: summary.recentGames,
+                          titles: titles,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -526,11 +535,15 @@ class _DenseTipsState extends State<_DenseTips> {
             ],
           ),
           const SizedBox(height: kSpace1),
-          Text(
-            tip.bodyTh,
-            style: kTextXs.copyWith(color: kTextSecondary, height: 1.3),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
+          // Flexible ให้คำอธิบายหดตามพื้นที่จริง (จอเตี้ยเหลือ 1-2 บรรทัด + ...)
+          // แทนการล้น เพราะพื้นที่ carousel เปลี่ยนตามความสูงจอ
+          Flexible(
+            child: Text(
+              tip.bodyTh,
+              style: kTextXs.copyWith(color: kTextSecondary, height: 1.3),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 4,
+            ),
           ),
         ],
       ),
@@ -572,52 +585,55 @@ class _DenseGames extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // จัดเป็น 2 แถว แถวละ 2 เกม แต่ละแถวใช้ Expanded → หดตามความสูงจริง ไม่ล้น
+    final rows = <Widget>[];
+    for (var i = 0; i < games.length; i += 2) {
+      rows.add(
+        Expanded(
+          child: Row(
+            children: [
+              Expanded(child: _denseGameChip(games[i])),
+              const SizedBox(width: kSpace2),
+              Expanded(
+                child: i + 1 < games.length
+                    ? _denseGameChip(games[i + 1])
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return _denseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
           Text('เกมที่เล่นล่าสุด', style: kTextXs.copyWith(color: kTextPrimary)),
-          const SizedBox(height: kSpace2),
-          for (var i = 0; i < games.length; i += 2)
-            Padding(
-              padding: EdgeInsets.only(top: i == 0 ? 0 : kSpace2),
-              child: Row(
-                children: [
-                  Expanded(child: _denseGameChip(games[i])),
-                  const SizedBox(width: kSpace2),
-                  Expanded(
-                    child: i + 1 < games.length
-                        ? _denseGameChip(games[i + 1])
-                        : const SizedBox.shrink(),
-                  ),
-                ],
-              ),
-            ),
+          const SizedBox(height: kSpace1),
+          Expanded(child: Column(children: rows)),
         ],
       ),
     );
   }
 
   Widget _denseGameChip(RecentGame game) {
+    // บรรทัดเดียว (ไอคอน + ชื่อ + คะแนน) ให้เตี้ยพอดีช่องในจอแนวนอน
     return Row(
       children: [
-        Icon(_gameIcon(game.module), color: kBluePrimary, size: 16),
+        Icon(_gameIcon(game.module), color: kBluePrimary, size: 15),
         const SizedBox(width: kSpace1),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _gameLabel(game, titles),
-                style: kTextXs.copyWith(color: kTextPrimary, height: 1.1),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text('${game.score}/10', style: kTextXs),
-            ],
+          child: Text(
+            _gameLabel(game, titles),
+            style: kTextXs.copyWith(color: kTextPrimary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
+        ),
+        const SizedBox(width: kSpace1),
+        Text(
+          '${game.score}/10',
+          style: kTextXs.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
