@@ -269,8 +269,10 @@ class _SkillRow extends StatelessWidget {
       builder: (context, constraints) {
         // 4 การ์ดต่อแถวถ้ากว้างพอ ไม่งั้นตัดเป็น 2 คอลัมน์ (กฎ responsive)
         final columns = constraints.maxWidth >= 560 ? 4 : 2;
-        final cardWidth =
-            (constraints.maxWidth - kSpace3 * (columns - 1)) / columns;
+        // clamp กัน constraint แปลกชั่วขณะ (เช่นตอน relayout) ไม่ให้ width ติดลบ
+        final cardWidth = ((constraints.maxWidth - kSpace3 * (columns - 1)) /
+                columns)
+            .clamp(0.0, double.infinity);
         return Wrap(
           spacing: kSpace3,
           runSpacing: kSpace3,
@@ -299,14 +301,21 @@ class _SkillCard extends StatelessWidget {
     return _card(
       child: Column(
         children: [
-          Text(
-            skill.dimension.titleTh,
-            style: kTextSm.copyWith(color: kTextPrimary),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          // ความสูงคงที่ 2 บรรทัด ให้การ์ดทุกใบสูงเท่ากันแม้ชื่อยาวไม่เท่ากัน
+          // ("การใช้ชีวิตประจำวัน" ยาวสุด → ตัดเป็น 2 บรรทัดตาม mockup)
+          SizedBox(
+            height: 44,
+            child: Center(
+              child: Text(
+                skill.dimension.titleTh,
+                style: kTextSm.copyWith(color: kTextPrimary),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
-          const SizedBox(height: kSpace3),
+          const SizedBox(height: kSpace2),
           SizedBox(
             width: 84,
             height: 84,
