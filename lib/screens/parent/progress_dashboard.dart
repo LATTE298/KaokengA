@@ -80,8 +80,10 @@ class _DashboardBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // จอกว้างพอ (แท็บเล็ตแนวนอน) → 2 คอลัมน์ตาม mockup: เนื้อหาหลัก | คำแนะนำ
-        final twoColumn = constraints.maxWidth >= 900;
+        // จอกว้างพอ (มือถือแนวนอน/แท็บเล็ต) → 2 คอลัมน์ตาม mockup: เนื้อหา | คำแนะนำ
+        // เกณฑ์ 720 ให้มือถือแนวนอน (เช่น 844-932px) ได้เลย์เอาต์ mockup; แนวตั้งเป็น
+        // คอลัมน์เดียว scroll
+        final twoColumn = constraints.maxWidth >= 720;
         final main = _MainColumn(summary: summary, titles: titles);
         final tips = _TipsPanel(tips: skillTips(summary));
 
