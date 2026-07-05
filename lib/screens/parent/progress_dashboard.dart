@@ -410,13 +410,41 @@ class _DenseTrend extends StatelessWidget {
   }
 }
 
-class _DenseTips extends StatelessWidget {
+// ข้อแนะนำแบบเลื่อน/กดทีละหัวข้อ (ซ้าย-ขวา) แทนการ scroll ขึ้นลง — ทำให้แต่ละ
+// คำแนะนำอ่านง่ายเต็มๆ ทีละข้อ. รองรับทั้งปัด (PageView) และกดปุ่ม ‹ ›
+class _DenseTips extends StatefulWidget {
   const _DenseTips({required this.tips});
 
   final List<SkillTip> tips;
 
   @override
+  State<_DenseTips> createState() => _DenseTipsState();
+}
+
+class _DenseTipsState extends State<_DenseTips> {
+  final _controller = PageController();
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _go(int delta) {
+    final next = (_page + delta).clamp(0, widget.tips.length - 1);
+    if (next != _page) {
+      _controller.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final tips = widget.tips;
     return _denseCard(
       color: kWarmSurface,
       child: Column(
@@ -427,22 +455,82 @@ class _DenseTips extends StatelessWidget {
               const Icon(Icons.lightbulb_rounded, color: kYellowDark, size: 18),
               const SizedBox(width: kSpace2),
               Text('ข้อแนะนำ', style: kTextSm.copyWith(color: kTextPrimary)),
+              const Spacer(),
+              // จุดบอกหน้าปัจจุบัน/ทั้งหมด
+              for (var i = 0; i < tips.length; i++)
+                Container(
+                  width: 7,
+                  height: 7,
+                  margin: const EdgeInsets.only(left: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: i == _page ? kYellowDark : kWarmBorder,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: kSpace2),
-          // แสดงเท่าที่พื้นที่รับได้ ไม่ overflow (ScrollView ภายในเผื่ออยากอ่านครบ)
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final tip in tips) ...[
-                    _DenseTipItem(tip: tip),
-                    if (tip != tips.last) const SizedBox(height: kSpace2),
-                  ],
-                ],
-              ),
+            child: Row(
+              children: [
+                _NavArrow(
+                  icon: Icons.chevron_left_rounded,
+                  enabled: _page > 0,
+                  onTap: () => _go(-1),
+                ),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _controller,
+                    onPageChanged: (i) => setState(() => _page = i),
+                    itemCount: tips.length,
+                    itemBuilder: (_, i) => _tipPage(tips[i]),
+                  ),
+                ),
+                _NavArrow(
+                  icon: Icons.chevron_right_rounded,
+                  enabled: _page < tips.length - 1,
+                  onTap: () => _go(1),
+                ),
+              ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tipPage(SkillTip tip) {
+    final color =
+        tip.dimension == null ? kYellowDark : _skillColors[tip.dimension]!;
+    final icon = tip.dimension == null
+        ? Icons.schedule_rounded
+        : _skillIcons[tip.dimension]!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: kSpace2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: kSpace2),
+              Expanded(
+                child: Text(
+                  tip.titleTh,
+                  style: kTextSm.copyWith(color: color),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: kSpace1),
+          Text(
+            tip.bodyTh,
+            style: kTextXs.copyWith(color: kTextSecondary, height: 1.3),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -450,38 +538,27 @@ class _DenseTips extends StatelessWidget {
   }
 }
 
-class _DenseTipItem extends StatelessWidget {
-  const _DenseTipItem({required this.tip});
+class _NavArrow extends StatelessWidget {
+  const _NavArrow({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
 
-  final SkillTip tip;
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        tip.dimension == null ? kYellowDark : _skillColors[tip.dimension]!;
-    final icon = tip.dimension == null
-        ? Icons.schedule_rounded
-        : _skillIcons[tip.dimension]!;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: color, size: 15),
-        const SizedBox(width: kSpace2),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(tip.titleTh, style: kTextXs.copyWith(color: color)),
-              Text(
-                tip.bodyTh,
-                style: kTextXs.copyWith(color: kTextSecondary, height: 1.2),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
+    return InkResponse(
+      onTap: enabled ? onTap : null,
+      radius: 20,
+      child: Icon(
+        icon,
+        size: 26,
+        color: enabled ? kYellowDark : kWarmBorder,
+      ),
     );
   }
 }

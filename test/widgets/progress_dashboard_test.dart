@@ -79,8 +79,9 @@ void main() {
     expect(find.text('การสื่อสาร'), findsOneWidget);
     expect(find.text('เกมที่เล่นล่าสุด'), findsOneWidget);
     expect(find.text('ข้อแนะนำ'), findsOneWidget);
-    // ไม่มี Scrollable หลักของหน้า (dense = ไม่ scroll) — มีได้แค่ tips ภายใน
-    expect(find.byType(SingleChildScrollView), findsOneWidget);
+    // dense = ไม่มี vertical scroll ของหน้าเลย (ข้อแนะนำเป็น carousel แนวนอน)
+    expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(find.byType(PageView), findsOneWidget);
   });
 
   testWidgets('shows empty state when there is no data', (tester) async {
