@@ -1,6 +1,5 @@
 import 'package:daily_life/models/app_types.dart';
 import 'package:daily_life/models/loaded_scenario_config.dart';
-import 'package:daily_life/models/memory_pack.dart';
 import 'package:daily_life/models/scenario_config.dart';
 import 'package:daily_life/models/session_record.dart';
 import 'package:daily_life/models/vocabulary_item.dart';

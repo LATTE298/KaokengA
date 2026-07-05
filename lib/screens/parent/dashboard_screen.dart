@@ -13,6 +13,7 @@ import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child/child_async_view.dart';
+import 'progress_dashboard.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -60,7 +61,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
       body: switch (_tab) {
         0 => const _ActivityLogTab(),
-        1 => const _ProgressTab(),
+        1 => const ProgressDashboard(),
         _ => const _ScenarioSettingsTab(),
       },
       bottomNavigationBar: NavigationBar(
@@ -178,82 +179,6 @@ class _SessionRecordTile extends StatelessWidget {
         '${_moduleLabel(record.module)} · ${_formatDate(record.endedAt)}',
       ),
       trailing: Text(_formatDuration(record.durationMs), style: kTextBase),
-    );
-  }
-}
-
-class _ProgressTab extends ConsumerWidget {
-  const _ProgressTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final records = ref.watch(activityLogProvider);
-    return ChildAsyncView<List<SessionRecord>>(
-      value: records,
-      loading: const Center(child: CircularProgressIndicator()),
-      error:
-          (_, __) => Center(child: Text('โหลดข้อมูลไม่สำเร็จ', style: kTextMd)),
-      data: (items) {
-        final dailyLife =
-            items.where((r) => r.module == kModuleDailyLife).length;
-        final memory = items.where((r) => r.module == kModuleMemory).length;
-        final averageMs =
-            items.isEmpty
-                ? 0
-                : items.map((r) => r.durationMs).reduce((a, b) => a + b) ~/
-                    items.length;
-        return Padding(
-          padding: const EdgeInsets.all(kSpace6),
-          child: Wrap(
-            spacing: kSpace4,
-            runSpacing: kSpace4,
-            children: [
-              _ProgressStat(
-                label: 'เล่นทั้งหมด',
-                value: '${items.length} ครั้ง',
-              ),
-              _ProgressStat(label: 'ชีวิตประจำวัน', value: '$dailyLife ครั้ง'),
-              _ProgressStat(label: 'จับคู่ภาพ', value: '$memory ครั้ง'),
-              _ProgressStat(
-                label: 'เวลาเฉลี่ย',
-                value: _formatDuration(averageMs),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ProgressStat extends StatelessWidget {
-  const _ProgressStat({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 220,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: kRadiusMd,
-          boxShadow: const [kShadowSm],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(kSpace5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: kTextBase.copyWith(color: kTextSecondary)),
-              const SizedBox(height: kSpace2),
-              Text(value, style: kTextLg),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
