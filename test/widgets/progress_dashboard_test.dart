@@ -54,6 +54,35 @@ void main() {
     expect(find.text('ข้อแนะนำ'), findsOneWidget);
   });
 
+  testWidgets('dense landscape fits a phone screen without overflow', (
+    tester,
+  ) async {
+    // มือถือแนวนอน (อุปกรณ์หลัก) — ต้องเห็นครบไม่ overflow/ไม่ scroll
+    await tester.binding.setSurfaceSize(const Size(844, 390));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      _wrap([
+        _record('s1', kModuleMemory, 'memory_animals', 9, '2026-06-16T10:00:00'),
+        _record('s2', kModuleDailyLife, '711_milk_001', 6, '2026-06-16T11:00:00'),
+        _record('s3', kModuleVocab, 'quiz_food', 8, '2026-06-16T12:00:00'),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    // ไม่มี RenderFlex overflow / exception ใดๆ
+    expect(tester.takeException(), isNull);
+    // องค์ประกอบหลักครบในจอเดียว
+    expect(find.text('พัฒนาการของเด็ก'), findsOneWidget);
+    expect(find.text('ความจำ'), findsOneWidget);
+    expect(find.text('การสื่อสาร'), findsOneWidget);
+    expect(find.text('เกมที่เล่นล่าสุด'), findsOneWidget);
+    expect(find.text('ข้อแนะนำ'), findsOneWidget);
+    // ไม่มี Scrollable หลักของหน้า (dense = ไม่ scroll) — มีได้แค่ tips ภายใน
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+  });
+
   testWidgets('shows empty state when there is no data', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1024, 768));
     addTearDown(() => tester.binding.setSurfaceSize(null));

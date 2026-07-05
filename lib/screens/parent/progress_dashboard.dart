@@ -80,9 +80,12 @@ class _DashboardBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // จอกว้างพอ (มือถือแนวนอน/แท็บเล็ต) → 2 คอลัมน์ตาม mockup: เนื้อหา | คำแนะนำ
-        // เกณฑ์ 720 ให้มือถือแนวนอน (เช่น 844-932px) ได้เลย์เอาต์ mockup; แนวตั้งเป็น
-        // คอลัมน์เดียว scroll
+        // มือถือแนวนอน (อุปกรณ์หลัก แอปล็อก landscape): จอเตี้ย → จัดแบบแน่นให้เห็น
+        // ครบทั้งหน้าในจอเดียวไม่ต้องเลื่อน. จอสูง (แท็บเล็ต/แนวตั้ง) ใช้เลย์เอาต์ scroll
+        if (constraints.maxHeight < 520 && constraints.maxWidth >= 640) {
+          return _DenseLandscape(summary: summary, titles: titles);
+        }
+        // จอกว้างพอ (แท็บเล็ต) → 2 คอลัมน์ตาม mockup: เนื้อหา | คำแนะนำ
         final twoColumn = constraints.maxWidth >= 720;
         final main = _MainColumn(summary: summary, titles: titles);
         final tips = _TipsPanel(tips: skillTips(summary));
@@ -152,6 +155,396 @@ Widget _card({required Widget child, Color color = Colors.white}) {
     ),
     child: child,
   );
+}
+
+Widget _denseCard({required Widget child, Color color = Colors.white}) {
+  return Container(
+    padding: const EdgeInsets.all(kSpace3),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: kRadiusMd,
+      boxShadow: const [kShadowSm],
+    ),
+    child: child,
+  );
+}
+
+// เลย์เอาต์แบบแน่นสำหรับมือถือแนวนอน (อุปกรณ์หลัก) — เห็นครบทั้งหน้าในจอเดียว
+// ไม่ต้องเลื่อน. แบ่ง 2 คอลัมน์: ซ้าย = สรุป+ทักษะ+กราฟ, ขวา = คำแนะนำ+เกมล่าสุด
+// ทุกส่วนใช้ Expanded เติมความสูงที่มีจริง จึงพอดีทุกความสูงจอโดยไม่ hardcode
+class _DenseLandscape extends StatelessWidget {
+  const _DenseLandscape({required this.summary, required this.titles});
+
+  final DashboardSummary summary;
+  final Map<String, String> titles;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(kSpace3),
+      child: Column(
+        children: [
+          _DenseTopBar(summary: summary),
+          const SizedBox(height: kSpace2),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    children: [
+                      _DenseSkillsRow(skills: summary.skills),
+                      const SizedBox(height: kSpace2),
+                      Expanded(child: _DenseTrend(trend: summary.trend)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: kSpace3),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: _DenseTips(tips: skillTips(summary)),
+                      ),
+                      const SizedBox(height: kSpace2),
+                      _DenseGames(games: summary.recentGames, titles: titles),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// แถบบน: ข้อมูลเด็ก (ซ้าย) + ภาพรวม % พร้อมแถบ (ขวา) รวมในแถวเดียวประหยัดความสูง
+class _DenseTopBar extends StatelessWidget {
+  const _DenseTopBar({required this.summary});
+
+  final DashboardSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = summary.overallPercent ?? 0;
+    return _denseCard(
+      color: kBlueLight,
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 18,
+            backgroundColor: Colors.white,
+            child: Icon(Icons.face_rounded, size: 22, color: kBluePrimary),
+          ),
+          const SizedBox(width: kSpace3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('พัฒนาการของเด็ก', style: kTextMd),
+                Text(
+                  'เล่น ${summary.totalSessions} ครั้ง'
+                  '${_lastPlayedSuffix(summary.lastPlayedAt)}',
+                  style: kTextXs,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: kSpace3),
+          // ภาพรวม % + แถบสั้น (FittedBox กัน overflow เมื่อระดับเป็นคำยาว)
+          SizedBox(
+            width: 190,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '${percent.round()}%',
+                        style: kTextLg.copyWith(color: kBluePrimary),
+                      ),
+                      const SizedBox(width: kSpace1),
+                      Text(
+                        skillLevelLabel(percent),
+                        style: kTextXs.copyWith(color: kBluePrimary),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                ClipRRect(
+                  borderRadius: kRadiusFull,
+                  child: LinearProgressIndicator(
+                    value: (percent / 100).clamp(0.0, 1.0),
+                    minHeight: 8,
+                    backgroundColor: Colors.white,
+                    valueColor: const AlwaysStoppedAnimation(kBluePrimary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// 4 ด้านแบบแนวนอน (วงกลมเล็ก + ข้อความข้าง) — 1 แถวเตี้ย ประหยัดความสูง
+class _DenseSkillsRow extends StatelessWidget {
+  const _DenseSkillsRow({required this.skills});
+
+  final List<SkillScore> skills;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (var i = 0; i < skills.length; i++) ...[
+          if (i > 0) const SizedBox(width: kSpace2),
+          Expanded(child: _DenseSkillChip(skill: skills[i])),
+        ],
+      ],
+    );
+  }
+}
+
+class _DenseSkillChip extends StatelessWidget {
+  const _DenseSkillChip({required this.skill});
+
+  final SkillScore skill;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _skillColors[skill.dimension]!;
+    final percent = skill.percent;
+    return _denseCard(
+      child: Row(
+        children: [
+          SizedBox(
+            width: 38,
+            height: 38,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  value: percent == null
+                      ? 0
+                      : (percent / 100).clamp(0.0, 1.0),
+                  strokeWidth: 5,
+                  backgroundColor: kWarmSurface,
+                  valueColor: AlwaysStoppedAnimation(color),
+                ),
+                Icon(_skillIcons[skill.dimension], color: color, size: 16),
+              ],
+            ),
+          ),
+          const SizedBox(width: kSpace2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  skill.dimension.titleTh,
+                  style: kTextXs.copyWith(color: kTextPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  percent == null ? '—' : '${percent.round()}%',
+                  style: kTextMd.copyWith(color: color),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DenseTrend extends StatelessWidget {
+  const _DenseTrend({required this.trend});
+
+  final List<DailyTrendPoint> trend;
+
+  @override
+  Widget build(BuildContext context) {
+    return _denseCard(
+      color: kBlueLight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('แนวโน้มพัฒนาการ (${trend.length} วัน)', style: kTextXs),
+          const SizedBox(height: kSpace2),
+          Expanded(
+            child:
+                trend.length < 2
+                    ? Center(
+                      child: Text('เล่นอย่างน้อย 2 วัน', style: kTextXs),
+                    )
+                    : CustomPaint(
+                      size: Size.infinite,
+                      painter: _TrendPainter(trend),
+                    ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DenseTips extends StatelessWidget {
+  const _DenseTips({required this.tips});
+
+  final List<SkillTip> tips;
+
+  @override
+  Widget build(BuildContext context) {
+    return _denseCard(
+      color: kWarmSurface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.lightbulb_rounded, color: kYellowDark, size: 18),
+              const SizedBox(width: kSpace2),
+              Text('ข้อแนะนำ', style: kTextSm.copyWith(color: kTextPrimary)),
+            ],
+          ),
+          const SizedBox(height: kSpace2),
+          // แสดงเท่าที่พื้นที่รับได้ ไม่ overflow (ScrollView ภายในเผื่ออยากอ่านครบ)
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final tip in tips) ...[
+                    _DenseTipItem(tip: tip),
+                    if (tip != tips.last) const SizedBox(height: kSpace2),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DenseTipItem extends StatelessWidget {
+  const _DenseTipItem({required this.tip});
+
+  final SkillTip tip;
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        tip.dimension == null ? kYellowDark : _skillColors[tip.dimension]!;
+    final icon = tip.dimension == null
+        ? Icons.schedule_rounded
+        : _skillIcons[tip.dimension]!;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 15),
+        const SizedBox(width: kSpace2),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tip.titleTh, style: kTextXs.copyWith(color: color)),
+              Text(
+                tip.bodyTh,
+                style: kTextXs.copyWith(color: kTextSecondary, height: 1.2),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// เกมที่เล่นล่าสุด — 2 คอลัมน์ compact
+class _DenseGames extends StatelessWidget {
+  const _DenseGames({required this.games, required this.titles});
+
+  final List<RecentGame> games;
+  final Map<String, String> titles;
+
+  @override
+  Widget build(BuildContext context) {
+    return _denseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('เกมที่เล่นล่าสุด', style: kTextXs.copyWith(color: kTextPrimary)),
+          const SizedBox(height: kSpace2),
+          for (var i = 0; i < games.length; i += 2)
+            Padding(
+              padding: EdgeInsets.only(top: i == 0 ? 0 : kSpace2),
+              child: Row(
+                children: [
+                  Expanded(child: _denseGameChip(games[i])),
+                  const SizedBox(width: kSpace2),
+                  Expanded(
+                    child: i + 1 < games.length
+                        ? _denseGameChip(games[i + 1])
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _denseGameChip(RecentGame game) {
+    return Row(
+      children: [
+        Icon(_gameIcon(game.module), color: kBluePrimary, size: 16),
+        const SizedBox(width: kSpace1),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _gameLabel(game, titles),
+                style: kTextXs.copyWith(color: kTextPrimary, height: 1.1),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text('${game.score}/10', style: kTextXs),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _HeaderCard extends StatelessWidget {
