@@ -28,6 +28,9 @@ dependencies:
   firebase_auth: ^5.3.3
   cloud_firestore: ^5.5.0
 
+  # Google Sign-In สำหรับผู้ปกครอง (6.x — API signIn() เข้ากับ firebase_auth 5.x)
+  google_sign_in: ^6.2.1
+
   # Content + cache (spec 06 §6)
   flutter_cache_manager: ^3.4.1
   path_provider: ^2.1.5

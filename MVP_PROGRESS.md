@@ -33,7 +33,8 @@
 - [x] บันทึกถูก/ผิดรายคำ (MatchEvent) แยกหมวด → ป้อน Dashboard
 
 ## Parent Dashboard (ส่วนผู้ปกครอง)
-- [x] Firebase Auth (email/password + ลิงก์บัญชี anonymous ของเด็ก)
+- [x] Firebase Auth (email/password + **Google Sign-In** + ลิงก์บัญชี anonymous + ลืมรหัสผ่าน)
+- [x] **หน้า login/สมัคร redesign** (การ์ด + โลโก้ก้าวเก่ง + Google + สลับโหมดในการ์ดเดียว)
 - [x] แท็บบันทึกการเล่น (20 ล่าสุด + load more)
 - [x] แท็บตั้งค่าสถานการณ์ (เปิด/ปิด Module A)
 - [x] **แท็บความก้าวหน้า = Dashboard เต็ม**: ภาพรวม % + พัฒนาการ 4 ด้าน (วงกลม) + กราฟแนวโน้ม 14 วัน + คำแนะนำ (carousel ปัดซ้าย-ขวา) + เกมล่าสุด

@@ -58,6 +58,18 @@ class ParentAuthController extends AsyncNotifier<void> {
     });
   }
 
+  Future<void> signInWithGoogle() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(authServiceProvider).signInWithGoogle(),
+    );
+    if (state.hasError) throw state.error!;
+  }
+
+  Future<void> sendPasswordReset(String email) {
+    return ref.read(authServiceProvider).sendPasswordReset(email);
+  }
+
   Future<void> logout() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(

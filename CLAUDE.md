@@ -100,6 +100,13 @@ lib/
 - **TTS checklist ขยายเป็น 132 คลิป** (words 93 + match 8 + sc 9 + sys 22) — คำถาม quiz ตามหมวดใหม่: สัตว์/อาหาร/เครื่องดื่ม/ที่ไหน/อาชีพ/กลางๆ
 - **ยังไม่ได้ใช้จาก zip:** โฟลเดอร์ "ภาพเกมชีวิตประจำวัน" (การ์ดขยะ 4 ประเภท+ถัง, ผลไม้ 5 ชนิด+ถ้วย — สำหรับอัปเกรด Module A) และรูปหน้าจอ mockup (ใส่เอกสารเฉยๆ ไม่ใช่ asset แอป). ต้นฉบับแตกไว้ที่ scratchpad `nsc_assets/`
 
+### ระบบ login จริง + Google Sign-In (2026-07-05)
+หน้า login/สมัครสมาชิกใช้งานได้จริง (เดิม UI เรียบ) — redesign ตาม mockup แต่คงแบรนด์ก้าวเก่ง:
+- **`auth_screen.dart` redesign**: การ์ดเดียว + โลโก้ก้าวเก่ง (gradient) + email/password + ลืมรหัสผ่าน + ปุ่ม gradient + Google + สลับโหมด signup/login ด้วยลิงก์ล่าง (ไม่ใช่แท็บ). ทุก Row ใช้ Flexible กัน overflow
+- **`AuthService` เพิ่ม**: `signInWithGoogle()` (google_sign_in 6.x — ผูก Google เข้า anonymous child เก็บประวัติ, เจอ credential ซ้ำ→signIn), `sendPasswordReset()`. signOut ออกจากทั้ง Firebase+Google
+- **ต้องพึ่ง Firebase Console (ดูข้อ 7):** เปิด Email/Password + Google provider + SHA-1 — โค้ดพร้อม แต่ login ไม่ทำงานจนกว่าจะ setup. **ตัด Facebook ออกตามที่ผู้ใช้เลือก** (Android เป็นหลัก)
+- test +3 (google/reset delegate, toggle mode) รวม 103 ผ่าน
+
 ### Dashboard พัฒนาการผู้ปกครอง (เฟส 2.2) ✅ เสร็จ (2026-07-05)
 ปิดช่องว่างเอกสารข้อ 5.2 — หน้า "ความก้าวหน้า" ใน parent dashboard ทำครบตาม mockup เอกสาร:
 
@@ -215,7 +222,7 @@ bug เดิมข้อ crash ไม่มีเน็ต / session cache / TT
 - เจนเสียง **225 คลิป** (ดู `docs/TTS_CLIPS.md` — ตัวเลข 65 เก่าแล้ว)
 - หมวดน้ำ 15 ภาพเป็นการ์ตูน (ตอนนี้ภาพถ่าย ตัดพื้นไม่ได้)
 - build APK + ทดสอบ Android จริง (เครื่อง dev ไม่มี Android SDK)
-- Firebase parent auth บน web ติด `configuration-not-found` — ตรวจ config
+- **Firebase Console setup สำหรับ login (ทำใน console — ไม่ใช่โค้ด):** (1) เปิด **Email/Password provider** (แก้ `configuration-not-found`) (2) เปิด **Google provider** (3) เพิ่ม **SHA-1 fingerprint** (debug+release) ใน Project Settings สำหรับ Google Sign-In บน Android — โค้ด login จริง+Google เสร็จแล้ว (ดูข้อ 2) รอ setup ฝั่ง console
 
 ---
 

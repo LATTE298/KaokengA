@@ -55,6 +55,34 @@ void main() {
       expect(auth.logoutCount, 1);
     });
 
+    test('signInWithGoogle delegates to auth service', () async {
+      final auth = _FakeParentAuthService();
+      final container = ProviderContainer(
+        overrides: [authServiceProvider.overrideWithValue(auth)],
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(parentAuthControllerProvider.notifier)
+          .signInWithGoogle();
+
+      expect(auth.googleCount, 1);
+    });
+
+    test('sendPasswordReset delegates to auth service', () async {
+      final auth = _FakeParentAuthService();
+      final container = ProviderContainer(
+        overrides: [authServiceProvider.overrideWithValue(auth)],
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(parentAuthControllerProvider.notifier)
+          .sendPasswordReset('parent@example.com');
+
+      expect(auth.resets.single, 'parent@example.com');
+    });
+
     test('deleteAccount delegates to auth service', () async {
       final auth = _FakeParentAuthService();
       final container = ProviderContainer(
@@ -91,10 +119,13 @@ void main() {
 class _FakeParentAuthService implements ParentAuthService {
   final registers = <(String email, String password)>[];
   final logins = <(String email, String password)>[];
+  final resets = <String>[];
   Object? loginError;
   Object? deleteError;
+  Object? googleError;
   var logoutCount = 0;
   var deleteCount = 0;
+  var googleCount = 0;
 
   @override
   String? get currentUid => 'uid-1';
@@ -133,6 +164,18 @@ class _FakeParentAuthService implements ParentAuthService {
   @override
   Future<void> signOutParent() async {
     logoutCount++;
+  }
+
+  @override
+  Future<void> signInWithGoogle() async {
+    googleCount++;
+    final error = googleError;
+    if (error != null) throw error;
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    resets.add(email);
   }
 
   @override

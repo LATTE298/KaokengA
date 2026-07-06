@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 abstract class ParentAuthService {
   String? get currentUid;
@@ -17,6 +18,12 @@ abstract class ParentAuthService {
 
   Future<void> signInParent({required String email, required String password});
 
+  /// เข้าสู่ระบบด้วยบัญชี Google (ผูกกับ anonymous child ถ้ามีเพื่อเก็บประวัติ)
+  Future<void> signInWithGoogle();
+
+  /// ส่งอีเมลรีเซ็ตรหัสผ่าน (ปุ่ม "ลืมรหัสผ่าน")
+  Future<void> sendPasswordReset(String email);
+
   Future<void> signOutParent();
 
   /// ลบข้อมูลทั้งหมดของผู้ใช้ปัจจุบัน (PDPA/สิทธิ์ในการลบ): Firestore ทุก collection
@@ -29,10 +36,12 @@ abstract class ParentAuthService {
 // /sessions/{uid}/records rules. Parent email+password login will later link
 // credentials to the same UID via User.linkWithCredential, preserving history.
 class AuthService implements ParentAuthService {
-  AuthService(this._auth, [this._firestore]);
+  AuthService(this._auth, [this._firestore, GoogleSignIn? googleSignIn])
+    : _googleSignIn = googleSignIn ?? GoogleSignIn();
 
   final FirebaseAuth _auth;
   final FirebaseFirestore? _firestore;
+  final GoogleSignIn _googleSignIn;
 
   @override
   String? get currentUid => _auth.currentUser?.uid;
@@ -91,8 +100,55 @@ class AuthService implements ParentAuthService {
   }
 
   @override
-  Future<void> signOutParent() {
-    return _auth.signOut();
+  Future<void> signInWithGoogle() async {
+    final googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) {
+      // ผู้ใช้กดยกเลิกหน้าเลือกบัญชี — ไม่ใช่ error จริง แต่โยนเพื่อหยุด flow เงียบๆ
+      throw FirebaseAuthException(
+        code: 'sign-in-cancelled',
+        message: 'ยกเลิกการเข้าสู่ระบบ',
+      );
+    }
+    final googleAuth = await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final currentUser = _auth.currentUser;
+    late final User user;
+    // เด็กเล่นแบบ anonymous อยู่ → ผูก Google เข้ากับ uid เดิมเพื่อเก็บประวัติ
+    if (currentUser != null && currentUser.isAnonymous) {
+      try {
+        final linked = await currentUser.linkWithCredential(credential);
+        user = linked.user!;
+      } on FirebaseAuthException catch (e) {
+        // บัญชี Google นี้เคยสมัครไว้แล้ว → เข้าสู่ระบบด้วยบัญชีนั้นแทน
+        if (e.code == 'credential-already-in-use' ||
+            e.code == 'email-already-in-use') {
+          final signedIn = await _auth.signInWithCredential(credential);
+          user = signedIn.user!;
+        } else {
+          rethrow;
+        }
+      }
+    } else {
+      final signedIn = await _auth.signInWithCredential(credential);
+      user = signedIn.user!;
+    }
+    await _upsertUserDoc(user);
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) {
+    return _auth.sendPasswordResetEmail(email: email.trim());
+  }
+
+  @override
+  Future<void> signOutParent() async {
+    // ออกจากทั้ง Firebase และ Google (ไม่งั้นครั้งหน้าเด้งบัญชีเดิมทันที)
+    await _googleSignIn.signOut();
+    await _auth.signOut();
   }
 
   @override
@@ -163,6 +219,9 @@ String parentAuthErrorMessage(Object error) {
       'user-not-found' => 'ไม่พบบัญชีนี้ กรุณาสร้างบัญชีใหม่',
       'requires-recent-login' =>
         'เพื่อความปลอดภัย กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่ ก่อนลบบัญชี',
+      'sign-in-cancelled' => 'ยกเลิกการเข้าสู่ระบบ',
+      'account-exists-with-different-credential' =>
+        'อีเมลนี้เคยสมัครด้วยวิธีอื่น กรุณาเข้าสู่ระบบด้วยอีเมล/รหัสผ่าน',
       'network-request-failed' => 'ไม่มีการเชื่อมต่ออินเทอร์เน็ต',
       'weak-password' => 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร',
       'invalid-email' => 'รูปแบบอีเมลไม่ถูกต้อง',

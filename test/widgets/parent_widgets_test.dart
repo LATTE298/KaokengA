@@ -38,6 +38,30 @@ void main() {
     expect(find.text('รูปแบบอีเมลไม่ถูกต้อง'), findsOneWidget);
   });
 
+  testWidgets('AuthScreen has Google button and toggles register/login', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const AuthScreen(),
+        overrides: [authServiceProvider.overrideWithValue(_FakeAuthService())],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // เริ่มโหมดเข้าสู่ระบบ + มีปุ่ม Google
+    expect(find.text('ยินดีต้อนรับกลับ!'), findsOneWidget);
+    expect(find.byKey(const Key('parent-google-signin')), findsOneWidget);
+
+    // สลับเป็นสมัครสมาชิก (การ์ดยาวกว่าจอ test — เลื่อนหาปุ่มก่อนกด)
+    final toggle = find.byKey(const Key('parent-toggle-mode'));
+    await tester.ensureVisible(toggle);
+    await tester.pumpAndSettle();
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(find.text('สร้างบัญชีใหม่'), findsOneWidget);
+  });
+
   testWidgets('DashboardScreen renders activity log data', (tester) async {
     await tester.pumpWidget(_dashboardWrap());
     await tester.pump();
@@ -144,6 +168,12 @@ class _FakeAuthService implements ParentAuthService {
 
   @override
   Future<void> signOutParent() async {}
+
+  @override
+  Future<void> signInWithGoogle() async {}
+
+  @override
+  Future<void> sendPasswordReset(String email) async {}
 
   @override
   Future<void> deleteAccountAndData() async {}
