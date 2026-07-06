@@ -9,6 +9,7 @@ import '../services/haptic_service.dart';
 import '../services/tts_service.dart';
 import 'background_component.dart';
 import 'drop_zone_component.dart';
+import 'hint_arrow_component.dart';
 import 'interactable_component.dart';
 import 'success_overlay.dart';
 
@@ -39,6 +40,10 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
   async.Timer? _idleTimer;
   bool _completed = false;
 
+  // ลูกศรใบ้ + ตำแหน่งเหนือของที่ต้องหยิบ (เก็บตอน onLoad จาก interactable ที่ isTarget)
+  HintArrowComponent? _hintArrow;
+  Vector2? _targetTopPos;
+
   final List<GamePosition> _dragPath = [];
 
   // นับครั้งที่วางผิด (spec 1.2 — เกณฑ์คะแนน Module A).
@@ -64,6 +69,10 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
     for (final item in config.interactables) {
       final pos = _toCanvas(Vector2(item.startPos.x, item.startPos.y));
+      if (item.isTarget) {
+        // เหนือ interactable (สูง 120, anchor กลาง) ขึ้นไปอีกเล็กน้อย
+        _targetTopPos = Vector2(pos.x, pos.y - 72);
+      }
       await add(
         InteractableComponent(
           config: item,
@@ -118,13 +127,31 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
   }
 
   void _resetIdleTimer() {
+    // เด็กเริ่มลากแล้ว = เจอของ → เอาลูกศรใบ้ออก
+    _removeHintArrow();
     _startIdleTimer();
   }
 
   void _onIdle() {
     if (_completed) return;
     tts.speak(config.ttsHint);
+    _showHintArrow();
     _idleTimer = async.Timer(const Duration(seconds: 15), _onIdle);
+  }
+
+  void _showHintArrow() {
+    if (_hintArrow != null || _targetTopPos == null || _completed) return;
+    final arrow = HintArrowComponent(
+      position: _targetTopPos!,
+      reduceMotion: reduceMotion,
+    );
+    _hintArrow = arrow;
+    add(arrow);
+  }
+
+  void _removeHintArrow() {
+    _hintArrow?.removeFromParent();
+    _hintArrow = null;
   }
 
   /// คิดคะแนนจากจำนวนครั้งที่วางผิด (spec 1.2).
@@ -153,6 +180,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     if (_completed) return;
     _completed = true;
     _idleTimer?.cancel();
+    _removeHintArrow();
 
     HapticService.success();
 
