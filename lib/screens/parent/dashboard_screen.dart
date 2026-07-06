@@ -8,6 +8,7 @@ import '../../models/session_record.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/parent_dashboard_providers.dart';
+import '../../services/auth_service.dart' show parentAuthErrorMessage;
 import '../../routes/app_routes.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
@@ -117,6 +118,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     },
                     child: const Text('ออกจากระบบ'),
                   ),
+                  const SizedBox(height: kSpace2),
+                  TextButton(
+                    key: const Key('parent-delete-account'),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // ปิด sheet ก่อน
+                      _confirmDeleteAccount();
+                    },
+                    child: Text(
+                      'ลบบัญชีและข้อมูลทั้งหมด',
+                      style: TextStyle(color: kError),
+                    ),
+                  ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('ยกเลิก'),
@@ -126,6 +139,43 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ),
     );
+  }
+
+  // ยืนยันสองชั้นก่อนลบถาวร (ลบไม่ได้กู้คืน) — dialog + ปุ่มสีแดง
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ลบบัญชีและข้อมูล'),
+        content: const Text(
+          'การลบจะลบประวัติการเล่นและบัญชีทั้งหมดอย่างถาวร '
+          'ไม่สามารถกู้คืนได้ ต้องการดำเนินการต่อหรือไม่?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('ยกเลิก'),
+          ),
+          FilledButton(
+            key: const Key('parent-delete-confirm'),
+            style: FilledButton.styleFrom(backgroundColor: kError),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ลบถาวร'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref.read(parentAuthControllerProvider.notifier).deleteAccount();
+      if (!mounted) return;
+      context.go(kRouteModeSelect);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(parentAuthErrorMessage(error))),
+      );
+    }
   }
 }
 

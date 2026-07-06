@@ -39,7 +39,7 @@
 - [x] **แท็บความก้าวหน้า = Dashboard เต็ม**: ภาพรวม % + พัฒนาการ 4 ด้าน (วงกลม) + กราฟแนวโน้ม 14 วัน + คำแนะนำ (carousel ปัดซ้าย-ขวา) + เกมล่าสุด
 - [x] Responsive: มือถือแนวนอน = เลย์เอาต์แน่นเห็นครบไม่ scroll (ซ่อนเมนูล่าง ย้ายแท็บไป AppBar) / จอสูง = scroll
 - [x] Logout flow
-- [ ] ปุ่มลบบัญชี/ข้อมูล (เฟส 2.3) ← ยังไม่มี
+- [x] **ปุ่มลบบัญชี/ข้อมูล (เฟส 2.3, PDPA)** — ลบ Firestore ทุก collection (sessions/settings/users) + Auth user, ยืนยัน 2 ชั้น
 
 ## TTS (เสียงพูดไทย)
 - [x] **3 ชั้น**: คลิปอัดล่วงหน้า (`assets/tts/` + manifest) → Cloud Neural2 (มีคีย์) → เสียงในเครื่อง (`flutter_tts`)
@@ -60,11 +60,10 @@
 ---
 
 ## Priority Queue (Next Up)
-1. เฟส 2.3 — ปุ่มลบบัญชี/ข้อมูล (PDPA: ลบ Auth user + Firestore ทุก collection)
-2. Polish — ลูกศรใบ้ Module A (15 วิ), จับคู่ภาพ 8→10 คู่
-3. เฟส 3.1 — มาสคอต + ระบบดาวสะสม (⏸ พักไว้ก่อน รอ design)
-4. เฟส 2.1 — คลังคำศัพท์คัสตอม (local DB + image_picker, ต้อง design)
-5. งาน asset/build: เจนเสียง 225 คลิป, หมวดน้ำการ์ตูน, build APK ทดสอบ Android จริง
+1. Polish — ลูกศรใบ้ Module A (15 วิ), จับคู่ภาพ 8→10 คู่
+2. เฟส 3.1 — มาสคอต + ระบบดาวสะสม (⏸ พักไว้ก่อน รอ design)
+3. เฟส 2.1 — คลังคำศัพท์คัสตอม (local DB + image_picker, ต้อง design)
+4. งาน asset/build: เจนเสียง 225 คลิป, หมวดน้ำการ์ตูน, build APK ทดสอบ Android จริง
 
 ## How to Use
 - Tick กล่องทันทีที่ feature ขึ้น `main`

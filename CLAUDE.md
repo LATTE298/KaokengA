@@ -194,7 +194,7 @@ bug เดิมข้อ crash ไม่มีเน็ต / session cache / TT
 **เฟส 2:**
 - 2.1 คลังคำศัพท์คัสตอม (ผู้ปกครองเพิ่มรูป+เสียงเอง) — 🔴 ยังไม่มี. **ต้องตัดสินใจ:** local DB (sqflite มีเป็น transitive dep แล้ว / Hive ยังไม่มี), image_picker (ต้องเพิ่ม + permission). ส่วน **TTS on-device: flutter_tts เพิ่มเข้ามาแล้ว** (เป็นเครื่องเสียงสำรอง — ดูข้อ 2) คำศัพท์คัสตอมใช้ `DeviceTtsService` พูดคำที่ผู้ปกครองพิมพ์ได้เลยโดยไม่เสียค่า API
 - 2.2 Dashboard + เกณฑ์คะแนน — ✅ **เสร็จ (ดูข้อ 2)**: skill breakdown 4 ด้าน + กราฟ 14 วัน + คำแนะนำ + เกมล่าสุด
-- 2.3 Data Anonymization + ปุ่มลบบัญชี — 🟡 เด็กใช้ anonymous อยู่แล้ว. ยังไม่มีปุ่มลบบัญชี (ต้องลบครบ 3 ที่: Auth user + Firestore ทุก collection + local DB)
+- 2.3 Data Anonymization + ปุ่มลบบัญชี — ✅ **เสร็จ (2026-07-05)**: เด็ก anonymous + **ปุ่มลบบัญชี/ข้อมูล** ใน logout sheet → ยืนยัน 2 ชั้น → `deleteAccountAndData()` ลบ Firestore (sessions/scenario_settings subcollection แบบ batch + users doc) + Auth user. requires-recent-login → แจ้งให้ login ใหม่
 
 **เฟส 3:**
 - 3.1 มาสคอต (น้องก้าว/น้องเก่ง) — 🟡 data/เสียงมีแล้ว (tts_celebration, starRating), เหลือ asset ภาพ + provider รวมดาวสะสม
@@ -207,10 +207,9 @@ bug เดิมข้อ crash ไม่มีเน็ต / session cache / TT
 **แกนหลักเสร็จหมดแล้ว** (2026-07-05): เกม 3 โมดูล + รูปจริง + แยกหมวด + Dashboard เฟส 2.2 + TTS 3 ชั้น + เสถียรภาพ. **97 tests เขียว**. ที่เหลือเรียงตามลำดับแนะนำ:
 
 **งานโค้ด (ทำต่อได้เลย):**
-1. **เฟส 2.3 ปุ่มลบบัญชี/ข้อมูล** — PDPA (ลบครบ 3 ที่: Auth user + Firestore ทุก collection + local ถ้ามี). สำคัญต่อการประกวด (แอปเด็ก)
-2. **Polish** — ลูกศรใบ้ Module A หลัง 15 วิ (มีแค่ TTS), จับคู่ภาพ 8→10 คู่ (ปรับ `pairCount` ให้ตรงเอกสาร ข้อ 5.4)
-3. **เฟส 3.1 มาสคอต + ดาวสะสม** — ⏸ **พักไว้ก่อน (ยังดีไซน์ไม่เสร็จ — ผู้ใช้แจ้ง 2026-07-05)**. data/เสียงมี เหลือ asset ภาพ + provider รวมดาว
-4. **เฟส 2.1 คลังคำศัพท์คัสตอม** — ใหญ่สุด ต้อง design ก่อน (local DB + image_picker + permission; TTS ใช้ `DeviceTtsService` พูดคำที่พิมพ์ได้เลย)
+1. **Polish** — ลูกศรใบ้ Module A หลัง 15 วิ (มีแค่ TTS), จับคู่ภาพ 8→10 คู่ (ปรับ `pairCount` ให้ตรงเอกสาร ข้อ 5.4)
+2. **เฟส 3.1 มาสคอต + ดาวสะสม** — ⏸ **พักไว้ก่อน (ยังดีไซน์ไม่เสร็จ — ผู้ใช้แจ้ง 2026-07-05)**. data/เสียงมี เหลือ asset ภาพ + provider รวมดาว
+3. **เฟส 2.1 คลังคำศัพท์คัสตอม** — ใหญ่สุด ต้อง design ก่อน (local DB + image_picker + permission; TTS ใช้ `DeviceTtsService` พูดคำที่พิมพ์ได้เลย)
 
 **งาน asset/build/decision (พึ่งทีม):**
 - เจนเสียง **225 คลิป** (ดู `docs/TTS_CLIPS.md` — ตัวเลข 65 เก่าแล้ว)

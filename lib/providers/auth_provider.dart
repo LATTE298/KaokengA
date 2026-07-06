@@ -64,6 +64,16 @@ class ParentAuthController extends AsyncNotifier<void> {
       () => ref.read(authServiceProvider).signOutParent(),
     );
   }
+
+  /// ลบบัญชี + ข้อมูลทั้งหมด (PDPA). โยน error ต่อถ้าล้มเหลว (เช่น
+  /// requires-recent-login) ให้ UI แสดงข้อความ
+  Future<void> deleteAccount() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(authServiceProvider).deleteAccountAndData(),
+    );
+    if (state.hasError) throw state.error!;
+  }
 }
 
 class ParentAuthRequiredException implements Exception {

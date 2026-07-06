@@ -70,6 +70,22 @@ void main() {
 
     expect(find.byKey(const Key('parent-logout-submit')), findsOneWidget);
   });
+
+  testWidgets('DashboardScreen delete account requires confirmation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_dashboardWrap());
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('ออกจากระบบ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('parent-delete-account')));
+    await tester.pumpAndSettle();
+
+    // ต้องมี dialog ยืนยันชั้นสอง (ลบถาวร) + คำเตือนกู้คืนไม่ได้
+    expect(find.byKey(const Key('parent-delete-confirm')), findsOneWidget);
+    expect(find.textContaining('ไม่สามารถกู้คืน'), findsOneWidget);
+  });
 }
 
 Widget _dashboardWrap({_FakeScenarioSettingsStore? settings}) {
@@ -128,6 +144,9 @@ class _FakeAuthService implements ParentAuthService {
 
   @override
   Future<void> signOutParent() async {}
+
+  @override
+  Future<void> deleteAccountAndData() async {}
 }
 
 class _FakeActivityLogReader implements ActivityLogReader {

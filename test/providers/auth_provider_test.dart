@@ -54,6 +54,37 @@ void main() {
 
       expect(auth.logoutCount, 1);
     });
+
+    test('deleteAccount delegates to auth service', () async {
+      final auth = _FakeParentAuthService();
+      final container = ProviderContainer(
+        overrides: [authServiceProvider.overrideWithValue(auth)],
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(parentAuthControllerProvider.notifier)
+          .deleteAccount();
+
+      expect(auth.deleteCount, 1);
+    });
+
+    test('deleteAccount rethrows service errors (e.g. recent-login)', () async {
+      final auth =
+          _FakeParentAuthService()
+            ..deleteError = FirebaseAuthException(
+              code: 'requires-recent-login',
+            );
+      final container = ProviderContainer(
+        overrides: [authServiceProvider.overrideWithValue(auth)],
+      );
+      addTearDown(container.dispose);
+
+      await expectLater(
+        container.read(parentAuthControllerProvider.notifier).deleteAccount(),
+        throwsA(isA<FirebaseAuthException>()),
+      );
+    });
   });
 }
 
@@ -61,7 +92,9 @@ class _FakeParentAuthService implements ParentAuthService {
   final registers = <(String email, String password)>[];
   final logins = <(String email, String password)>[];
   Object? loginError;
+  Object? deleteError;
   var logoutCount = 0;
+  var deleteCount = 0;
 
   @override
   String? get currentUid => 'uid-1';
@@ -100,5 +133,12 @@ class _FakeParentAuthService implements ParentAuthService {
   @override
   Future<void> signOutParent() async {
     logoutCount++;
+  }
+
+  @override
+  Future<void> deleteAccountAndData() async {
+    deleteCount++;
+    final error = deleteError;
+    if (error != null) throw error;
   }
 }
