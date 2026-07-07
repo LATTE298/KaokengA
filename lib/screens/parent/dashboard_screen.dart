@@ -55,6 +55,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Scaffold(
       backgroundColor: kWarmWhite,
       appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'กลับหน้าเล่นเกม',
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => context.go(kRouteModeSelect),
+        ),
         title: Text(_tabs[_tab].titleTh),
         actions: [
           if (isLandscape)
@@ -96,9 +101,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Future<void> _showLogoutSheet() async {
     await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       builder:
           (context) => SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(kSpace6),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
