@@ -55,7 +55,7 @@
 - [x] Riverpod + Flame + Freezed + go_router
 - [x] Time-Limiter เตือนพักทุก 15 นาที
 - [x] ธีม Yellow+Blue, Sarabun, haptic, tap target 64dp
-- [x] pipeline ตัดพื้นหลังรูป (flood-fill C# ใน PowerShell — scratchpad)
+- [x] pipeline ตัดพื้นหลังรูป (flood-fill C# ใน PowerShell) → `tool/cutout_images.ps1` (generic, reusable)
 - [~] Firebase Storage (ต้อง Blaze — ใช้ bundled assets แทน)
 
 ---
