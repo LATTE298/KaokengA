@@ -222,13 +222,12 @@ bug เดิมข้อ crash ไม่มีเน็ต / session cache / TT
 - เจนเสียง **225 คลิป** (ดู `docs/TTS_CLIPS.md` — ตัวเลข 65 เก่าแล้ว)
 - หมวดน้ำ 15 ภาพเป็นการ์ตูน (ตอนนี้ภาพถ่าย ตัดพื้นไม่ได้)
 - build APK + ทดสอบ Android จริง (เครื่อง dev ไม่มี Android SDK)
-- **Firebase Console setup สำหรับ login (ทำใน console — โค้ด/config ฝั่ง Android เสร็จหมดแล้ว):**
-  1. Authentication → Sign-in method → เปิด **Email/Password** (แก้ `configuration-not-found`)
-  2. เปิด **Google** provider (เลือก support email)
-  3. Project Settings → app `com.kaokeng.daily_life` → Add fingerprint → ใส่ **SHA-1 (debug เครื่อง dev นี้):** `2B:6F:C9:F2:52:BD:13:EB:22:D8:63:01:36:76:82:BD:6A:BE:41:F5` (build เครื่องอื่น/release ต้องเพิ่ม SHA-1 ของเครื่องนั้นด้วย — หาใหม่: `keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -storepass android -alias androiddebugkey`)
-  4. **Download `google-services.json` ใหม่** → แทนที่ `android/app/google-services.json` → **verify ว่า `oauth_client` ไม่ใช่ `[]`** (ตอนนี้ว่าง = Google Sign-In fail แน่นอน: `idToken` เป็น null)
-  5. `flutter clean && flutter run` (Android จริง/emulator) → ทดสอบสมัคร/login/Google
-  - ⚠️ **web appId ใน `firebase_options.dart` เป็น placeholder ปลอม** (`...7g8h` ไม่ใช่ hex) → test email/password บน web ไม่ได้จนกว่าจะ register web app ใน console (หรือรัน `flutterfire configure`). Android ใช้ config ที่ถูก — ทดสอบบน Android ได้เลย
+- **⏸️ เชื่อม Firebase project ใหม่ `kaokeng-app` (เริ่ม 2026-07-07) — ค้างที่ขั้น 6/7 กลับมาทำต่อ:**
+  บริบท: project เดิม `tenacious-veld-453115-u8` เป็นของเพื่อนที่ลาออก เข้า console ไม่ได้ → สร้าง `kaokeng-app` ใหม่ (บัญชี latteyen2@gmail.com, Spark/ฟรี, project number 305078404807, location asia-southeast1)
+  ✅ **เสร็จแล้ว:** ติดตั้ง firebase-tools + flutterfire_cli · `firebase login` · สร้าง project + add Firebase (ผ่าน console, ต้อง accept ToS ครั้งแรกไม่งั้น addFirebase 403) · `flutterfire configure --platforms=android,web` (register app, gen `firebase_options.dart` + `google-services.json` ชี้ kaokeng-app, ล้าง tenacious ออกหมด รวม web getter) · SHA-1 `2B:6F:C9:F2:52:BD:13:EB:22:D8:63:01:36:76:82:BD:6A:BE:41:F5` เพิ่มผ่าน CLI (`firebase apps:android:sha:create`) · เปิด Email/Password + Google provider (console) · **`oauth_client` มีครบ 2 ตัว** (client_type 1 ผูก SHA-1 + type 3 web — Google Sign-In พร้อม, idToken ไม่ null แล้ว)
+  🔜 **RESUME (ขั้น 6 ต่อ):** ผู้ใช้กำลังสร้าง Firestore database ผ่าน Console (Firestore Database → Create → **asia-southeast1** → production mode) เพราะ Cloud Firestore API ปิดใน project ใหม่ (`firestore:databases:create` เจอ 403). พอ database ขึ้น → **deploy กฎ:** `firebase deploy --only firestore:rules,firestore:indexes` (default project = kaokeng-app แล้ว จาก `firebase use`) → **ขั้น 7:** `flutter run` (Android) ทดสอบสมัคร/login/Google จริง
+  📌 **commits ค้าง push (4):** `git push origin main` (เชื่อม kaokeng-app, oauth_client, cutout tool, docs SHA-1) — ผมถูกบล็อก push main อัตโนมัติ ผู้ใช้ push เอง
+  - keytool: `C:\Program Files\Java\jre-1.8\bin` · flutterfire: `%LOCALAPPDATA%\Pub\Cache\bin` (เพิ่ม User PATH ถาวรแล้ว) · CWD ของ tool เพี้ยนเป็น `Kokeng01` (parent) บางครั้ง → Set-Location `...\Kokeng01\Kaokeng` ก่อนรันคำสั่ง
 
 ---
 
