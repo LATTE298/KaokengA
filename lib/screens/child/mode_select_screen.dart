@@ -9,98 +9,104 @@ import '../../services/haptic_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../widgets/child/module_card.dart';
+import '../../widgets/orientation_lock.dart';
 
 class ModeSelectScreen extends ConsumerWidget {
   const ModeSelectScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: kWarmWhite,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(
-              top: kSpace4,
-              right: kSpace4,
-              child: _LogoSmall(
-                onLongPressComplete: () {
-                  HapticService.parentGateComplete();
-                  context.push(kRouteParentGate);
-                },
-              ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: kSpace6,
-                  vertical: kSpace4,
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    // แบ่งความกว้างที่มีจริงให้การ์ด 3 ใบเท่าๆกัน หลังหักช่องว่าง 2 ช่อง
-                    // (spec 1.3) — เดิมการ์ดใช้ minWidth 140 ตายตัว รวมกันเกินจอแคบแล้วล้น
-                    // ตอนนี้การ์ดจะพอดีจอเสมอ ไม่ว่าจะ iPhone 12 Pro (390) หรือจออื่น
-                    const gap = kInteractiveGapMin;
-                    final totalGap = gap * 2;
-                    // จำกัดความกว้างรวมไม่ให้เกิน 900 บนแท็บเล็ตใหญ่ (การ์ดจะได้ไม่กว้างเวอร์)
-                    final usableWidth =
-                        constraints.maxWidth.clamp(0.0, 900.0);
-                    final cardWidth = (usableWidth - totalGap) / 3;
-
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ModuleCard(
-                          label: kLabelModuleA,
-                          description: 'ลองทำกิจกรรม',
-                          icon: Icons.home_rounded,
-                          background: kYellowLight,
-                          cardWidth: cardWidth,
-                          onTap: () {
-                            ref
-                                .read(ttsServiceProvider)
-                                .speak(kTtsModuleADesc);
-                            context.push(kRouteModuleA);
-                          },
-                        ),
-                        const SizedBox(width: gap),
-                        ModuleCard(
-                          label: kLabelModuleB,
-                          description: 'จับคู่รูปภาพ',
-                          icon: Icons.grid_view_rounded,
-                          background: kBlueLight,
-                          cardWidth: cardWidth,
-                          onTap: () {
-                            ref
-                                .read(ttsServiceProvider)
-                                .speak(kTtsModuleBDesc);
-                            context.push(kRouteModuleB);
-                          },
-                        ),
-                        const SizedBox(width: gap),
-                        ModuleCard(
-                          label: kLabelModuleC,
-                          description: 'เรียนคำศัพท์',
-                          icon: Icons.record_voice_over_rounded,
-                          background: kYellowAccent,
-                          cardWidth: cardWidth,
-                          onTap: () {
-                            ref
-                                .read(ttsServiceProvider)
-                                .speak(kTtsModuleCDesc);
-                            context.push(kRouteModuleC);
-                          },
-                        ),
-                      ],
-                    );
+    return OrientationLock(
+      portrait: false,
+      child: Scaffold(
+        backgroundColor: kWarmWhite,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Positioned(
+                top: kSpace4,
+                right: kSpace4,
+                child: _LogoSmall(
+                  onLongPressComplete: () {
+                    HapticService.parentGateComplete();
+                    context.push(kRouteParentGate);
                   },
                 ),
               ),
-            ),
-          ],
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: kSpace6,
+                    vertical: kSpace4,
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // แบ่งความกว้างที่มีจริงให้การ์ด 3 ใบเท่าๆกัน หลังหักช่องว่าง 2 ช่อง
+                      // (spec 1.3) — เดิมการ์ดใช้ minWidth 140 ตายตัว รวมกันเกินจอแคบแล้วล้น
+                      // ตอนนี้การ์ดจะพอดีจอเสมอ ไม่ว่าจะ iPhone 12 Pro (390) หรือจออื่น
+                      const gap = kInteractiveGapMin;
+                      final totalGap = gap * 2;
+                      // จำกัดความกว้างรวมไม่ให้เกิน 900 บนแท็บเล็ตใหญ่ (การ์ดจะได้ไม่กว้างเวอร์)
+                      final usableWidth = constraints.maxWidth.clamp(
+                        0.0,
+                        900.0,
+                      );
+                      final cardWidth = (usableWidth - totalGap) / 3;
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ModuleCard(
+                            label: kLabelModuleA,
+                            description: 'ลองทำกิจกรรม',
+                            icon: Icons.home_rounded,
+                            background: kYellowLight,
+                            cardWidth: cardWidth,
+                            onTap: () {
+                              ref
+                                  .read(ttsServiceProvider)
+                                  .speak(kTtsModuleADesc);
+                              context.push(kRouteModuleA);
+                            },
+                          ),
+                          const SizedBox(width: gap),
+                          ModuleCard(
+                            label: kLabelModuleB,
+                            description: 'จับคู่รูปภาพ',
+                            icon: Icons.grid_view_rounded,
+                            background: kBlueLight,
+                            cardWidth: cardWidth,
+                            onTap: () {
+                              ref
+                                  .read(ttsServiceProvider)
+                                  .speak(kTtsModuleBDesc);
+                              context.push(kRouteModuleB);
+                            },
+                          ),
+                          const SizedBox(width: gap),
+                          ModuleCard(
+                            label: kLabelModuleC,
+                            description: 'เรียนคำศัพท์',
+                            icon: Icons.record_voice_over_rounded,
+                            background: kYellowAccent,
+                            cardWidth: cardWidth,
+                            onTap: () {
+                              ref
+                                  .read(ttsServiceProvider)
+                                  .speak(kTtsModuleCDesc);
+                              context.push(kRouteModuleC);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -169,9 +175,7 @@ class _LogoSmallState extends State<_LogoSmall>
                   value: _ringController.value,
                   strokeWidth: 3,
                   backgroundColor: Colors.transparent,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    kBluePrimary,
-                  ),
+                  valueColor: const AlwaysStoppedAnimation<Color>(kBluePrimary),
                 ),
               );
             },

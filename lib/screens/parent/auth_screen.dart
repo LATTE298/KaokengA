@@ -9,6 +9,7 @@ import '../../services/auth_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
+import '../../widgets/orientation_lock.dart';
 
 // หน้าเข้าสู่ระบบ/สร้างบัญชีของผู้ปกครอง (ก้าวเก่ง) — email/password + Google
 // สลับโหมดด้วยลิงก์ล่างการ์ด (ไม่ใช่แท็บ) ตามดีไซน์การ์ดเดียว
@@ -45,101 +46,107 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       });
     }
 
-    return Scaffold(
-      backgroundColor: kBlueLight,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(kSpace6),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: Container(
-                padding: const EdgeInsets.all(kSpace8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: kRadiusXl,
-                  boxShadow: const [kShadowLg],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _logo(),
-                    const SizedBox(height: kSpace4),
-                    Text(
-                      _isRegister ? 'สร้างบัญชีใหม่' : 'ยินดีต้อนรับกลับ!',
-                      style: kTextLg,
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      _isRegister
-                          ? 'สร้างบัญชีเพื่อติดตามพัฒนาการของลูก'
-                          : 'เข้าสู่ระบบเพื่อติดตามพัฒนาการของลูก',
-                      style: kTextSm,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: kSpace6),
-
-                    Text('อีเมล', style: kTextSm.copyWith(color: kTextPrimary)),
-                    const SizedBox(height: kSpace1),
-                    TextField(
-                      key: const Key('parent-email-field'),
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      enabled: !busy,
-                      decoration: _fieldDecoration('your@email.com'),
-                    ),
-                    const SizedBox(height: kSpace4),
-
-                    Text(
-                      'รหัสผ่าน',
-                      style: kTextSm.copyWith(color: kTextPrimary),
-                    ),
-                    const SizedBox(height: kSpace1),
-                    TextField(
-                      key: const Key('parent-password-field'),
-                      controller: _passwordController,
-                      obscureText: true,
-                      autofillHints: const [AutofillHints.password],
-                      enabled: !busy,
-                      decoration: _fieldDecoration('••••••••'),
-                    ),
-
-                    if (!_isRegister)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          key: const Key('parent-forgot'),
-                          onPressed: busy ? null : _forgotPassword,
-                          child: Text(
-                            'ลืมรหัสผ่าน?',
-                            style: kTextSm.copyWith(color: kBluePrimary),
-                          ),
-                        ),
-                      ),
-
-                    if (_error != null) ...[
-                      const SizedBox(height: kSpace2),
+    return OrientationLock(
+      portrait: true,
+      child: Scaffold(
+        backgroundColor: kWarmWhite,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(kSpace6),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Container(
+                  padding: const EdgeInsets.all(kSpace8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: kRadiusXl,
+                    boxShadow: const [kShadowLg],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _logo(),
+                      const SizedBox(height: kSpace4),
                       Text(
-                        _error!,
-                        style: kTextSm.copyWith(color: kError),
+                        _isRegister ? 'สร้างบัญชีใหม่' : 'ยินดีต้อนรับกลับ!',
+                        style: kTextLg,
                         textAlign: TextAlign.center,
                       ),
+                      Text(
+                        _isRegister
+                            ? 'สร้างบัญชีเพื่อติดตามพัฒนาการของลูก'
+                            : 'เข้าสู่ระบบเพื่อติดตามพัฒนาการของลูก',
+                        style: kTextSm,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: kSpace6),
+
+                      Text(
+                        'อีเมล',
+                        style: kTextSm.copyWith(color: kTextPrimary),
+                      ),
+                      const SizedBox(height: kSpace1),
+                      TextField(
+                        key: const Key('parent-email-field'),
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email],
+                        enabled: !busy,
+                        decoration: _fieldDecoration('your@email.com'),
+                      ),
+                      const SizedBox(height: kSpace4),
+
+                      Text(
+                        'รหัสผ่าน',
+                        style: kTextSm.copyWith(color: kTextPrimary),
+                      ),
+                      const SizedBox(height: kSpace1),
+                      TextField(
+                        key: const Key('parent-password-field'),
+                        controller: _passwordController,
+                        obscureText: true,
+                        autofillHints: const [AutofillHints.password],
+                        enabled: !busy,
+                        decoration: _fieldDecoration('••••••••'),
+                      ),
+
+                      if (!_isRegister)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            key: const Key('parent-forgot'),
+                            onPressed: busy ? null : _forgotPassword,
+                            child: Text(
+                              'ลืมรหัสผ่าน?',
+                              style: kTextSm.copyWith(color: kBlueDark),
+                            ),
+                          ),
+                        ),
+
+                      if (_error != null) ...[
+                        const SizedBox(height: kSpace2),
+                        Text(
+                          _error!,
+                          style: kTextSm.copyWith(color: kError),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      const SizedBox(height: kSpace5),
+
+                      _primaryButton(busy),
+                      const SizedBox(height: kSpace5),
+
+                      _orDivider(),
+                      const SizedBox(height: kSpace5),
+
+                      _googleButton(busy),
+                      const SizedBox(height: kSpace5),
+
+                      _toggleRow(busy),
                     ],
-                    const SizedBox(height: kSpace5),
-
-                    _primaryButton(busy),
-                    const SizedBox(height: kSpace5),
-
-                    _orDivider(),
-                    const SizedBox(height: kSpace5),
-
-                    _googleButton(busy),
-                    const SizedBox(height: kSpace5),
-
-                    _toggleRow(busy),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -202,9 +209,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: kRadiusFull,
-        gradient: const LinearGradient(
-          colors: [kBluePrimary, kBlueDark],
-        ),
+        color: kYellowPrimary,
         boxShadow: const [kShadowMd],
       ),
       child: Material(
@@ -216,18 +221,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           child: Container(
             height: 56,
             alignment: Alignment.center,
-            child: busy
-                ? const SizedBox.square(
-                    dimension: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
+            child:
+                busy
+                    ? const SizedBox.square(
+                      dimension: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: kTextPrimary,
+                      ),
+                    )
+                    : Text(
+                      _isRegister ? 'สร้างบัญชี' : 'เข้าสู่ระบบ',
+                      style: kButtonLabel.copyWith(color: kTextPrimary),
                     ),
-                  )
-                : Text(
-                    _isRegister ? 'สร้างบัญชี' : 'เข้าสู่ระบบ',
-                    style: kButtonLabel.copyWith(color: Colors.white),
-                  ),
           ),
         ),
       ),
@@ -304,9 +310,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         ),
         TextButton(
           key: const Key('parent-toggle-mode'),
-          onPressed: busy
-              ? null
-              : () => setState(() {
+          onPressed:
+              busy
+                  ? null
+                  : () => setState(() {
                     _isRegister = !_isRegister;
                     _error = null;
                   }),
@@ -318,7 +325,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           child: Text(
             _isRegister ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก',
             style: kTextSm.copyWith(
-              color: kBluePrimary,
+              color: kBlueDark,
               fontWeight: FontWeight.w700,
             ),
           ),

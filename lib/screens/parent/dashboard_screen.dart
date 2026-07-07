@@ -14,6 +14,7 @@ import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child/child_async_view.dart';
+import '../../widgets/orientation_lock.dart';
 import 'progress_dashboard.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -34,6 +35,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return OrientationLock(portrait: true, child: _buildBody(context));
+  }
+
+  Widget _buildBody(BuildContext context) {
     final isParentAuthenticated = ref.watch(parentAuthenticatedProvider);
     if (!isParentAuthenticated) {
       return Scaffold(
@@ -82,19 +87,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         1 => const ProgressDashboard(),
         _ => const _ScenarioSettingsTab(),
       },
-      bottomNavigationBar: isLandscape
-          ? null
-          : NavigationBar(
-              selectedIndex: _tab,
-              onDestinationSelected: (i) => setState(() => _tab = i),
-              destinations: [
-                for (final t in _tabs)
-                  NavigationDestination(
-                    icon: Icon(t.icon),
-                    label: t.titleTh,
-                  ),
-              ],
-            ),
+      bottomNavigationBar:
+          isLandscape
+              ? null
+              : NavigationBar(
+                selectedIndex: _tab,
+                onDestinationSelected: (i) => setState(() => _tab = i),
+                destinations: [
+                  for (final t in _tabs)
+                    NavigationDestination(icon: Icon(t.icon), label: t.titleTh),
+                ],
+              ),
     );
   }
 
@@ -151,25 +154,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Future<void> _confirmDeleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('ลบบัญชีและข้อมูล'),
-        content: const Text(
-          'การลบจะลบประวัติการเล่นและบัญชีทั้งหมดอย่างถาวร '
-          'ไม่สามารถกู้คืนได้ ต้องการดำเนินการต่อหรือไม่?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('ยกเลิก'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('ลบบัญชีและข้อมูล'),
+            content: const Text(
+              'การลบจะลบประวัติการเล่นและบัญชีทั้งหมดอย่างถาวร '
+              'ไม่สามารถกู้คืนได้ ต้องการดำเนินการต่อหรือไม่?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('ยกเลิก'),
+              ),
+              FilledButton(
+                key: const Key('parent-delete-confirm'),
+                style: FilledButton.styleFrom(backgroundColor: kError),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('ลบถาวร'),
+              ),
+            ],
           ),
-          FilledButton(
-            key: const Key('parent-delete-confirm'),
-            style: FilledButton.styleFrom(backgroundColor: kError),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('ลบถาวร'),
-          ),
-        ],
-      ),
     );
     if (confirmed != true || !mounted) return;
     try {
@@ -178,9 +182,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       context.go(kRouteModeSelect);
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(parentAuthErrorMessage(error))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(parentAuthErrorMessage(error))));
     }
   }
 }
