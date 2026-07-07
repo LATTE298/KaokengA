@@ -222,7 +222,13 @@ bug เดิมข้อ crash ไม่มีเน็ต / session cache / TT
 - เจนเสียง **225 คลิป** (ดู `docs/TTS_CLIPS.md` — ตัวเลข 65 เก่าแล้ว)
 - หมวดน้ำ 15 ภาพเป็นการ์ตูน (ตอนนี้ภาพถ่าย ตัดพื้นไม่ได้)
 - build APK + ทดสอบ Android จริง (เครื่อง dev ไม่มี Android SDK)
-- **Firebase Console setup สำหรับ login (ทำใน console — ไม่ใช่โค้ด):** (1) เปิด **Email/Password provider** (แก้ `configuration-not-found`) (2) เปิด **Google provider** (3) เพิ่ม **SHA-1 fingerprint** (debug+release) ใน Project Settings สำหรับ Google Sign-In บน Android — โค้ด login จริง+Google เสร็จแล้ว (ดูข้อ 2) รอ setup ฝั่ง console
+- **Firebase Console setup สำหรับ login (ทำใน console — โค้ด/config ฝั่ง Android เสร็จหมดแล้ว):**
+  1. Authentication → Sign-in method → เปิด **Email/Password** (แก้ `configuration-not-found`)
+  2. เปิด **Google** provider (เลือก support email)
+  3. Project Settings → app `com.kaokeng.daily_life` → Add fingerprint → ใส่ **SHA-1 (debug เครื่อง dev นี้):** `2B:6F:C9:F2:52:BD:13:EB:22:D8:63:01:36:76:82:BD:6A:BE:41:F5` (build เครื่องอื่น/release ต้องเพิ่ม SHA-1 ของเครื่องนั้นด้วย — หาใหม่: `keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -storepass android -alias androiddebugkey`)
+  4. **Download `google-services.json` ใหม่** → แทนที่ `android/app/google-services.json` → **verify ว่า `oauth_client` ไม่ใช่ `[]`** (ตอนนี้ว่าง = Google Sign-In fail แน่นอน: `idToken` เป็น null)
+  5. `flutter clean && flutter run` (Android จริง/emulator) → ทดสอบสมัคร/login/Google
+  - ⚠️ **web appId ใน `firebase_options.dart` เป็น placeholder ปลอม** (`...7g8h` ไม่ใช่ hex) → test email/password บน web ไม่ได้จนกว่าจะ register web app ใน console (หรือรัน `flutterfire configure`). Android ใช้ config ที่ถูก — ทดสอบบน Android ได้เลย
 
 ---
 
