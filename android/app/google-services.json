@@ -12,7 +12,20 @@
           "package_name": "com.kaokeng.daily_life"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "305078404807-3f57vmjdvvhqq27e8rdj936vr5g4aee4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kaokeng.daily_life",
+            "certificate_hash": "2b6fc9f252bd13eb22d86301367682bd6abe41f5"
+          }
+        },
+        {
+          "client_id": "305078404807-mr716eeg96dikai3l9m5lhtm5c8803k1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDn_WP6GCnn4N_lEFA98iKOLHOTvoZyexI"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "305078404807-mr716eeg96dikai3l9m5lhtm5c8803k1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
