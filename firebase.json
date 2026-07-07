@@ -1,13 +1,1 @@
-{
-  "firestore": {
-    "database": "(default)",
-    "location": "asia-southeast1",
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
-  "auth": {
-    "providers": {
-      "emailPassword": true
-    }
-  }
-}
+{"firestore":{"database":"(default)","location":"asia-southeast1","rules":"firestore.rules","indexes":"firestore.indexes.json"},"auth":{"providers":{"emailPassword":true}},"flutter":{"platforms":{"android":{"default":{"projectId":"kaokeng-app","appId":"1:305078404807:android:97d296f474c4699700e0e2","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"kaokeng-app","configurations":{"android":"1:305078404807:android:97d296f474c4699700e0e2","web":"1:305078404807:web:f283a2ee0da94dec00e0e2"}}}}}}
