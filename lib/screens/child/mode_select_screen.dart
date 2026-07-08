@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import '../../services/haptic_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../widgets/child/module_card.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/orientation_lock.dart';
 
 class ModeSelectScreen extends ConsumerWidget {
@@ -53,62 +56,64 @@ class ModeSelectScreen extends ConsumerWidget {
                       );
                       final cardWidth = (usableWidth - totalGap) / 4;
 
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ModuleCard(
-                            label: kLabelModuleA,
-                            description: 'ลองทำกิจกรรม',
-                            icon: Icons.home_rounded,
-                            background: kYellowLight,
-                            cardWidth: cardWidth,
-                            onTap: () {
-                              ref
-                                  .read(ttsServiceProvider)
-                                  .speak(kTtsModuleADesc);
-                              context.push(kRouteModuleA);
-                            },
-                          ),
-                          const SizedBox(width: gap),
-                          ModuleCard(
-                            label: kLabelModuleB,
-                            description: 'จับคู่รูปภาพ',
-                            icon: Icons.grid_view_rounded,
-                            background: kBlueLight,
-                            cardWidth: cardWidth,
-                            onTap: () {
-                              ref
-                                  .read(ttsServiceProvider)
-                                  .speak(kTtsModuleBDesc);
-                              context.push(kRouteModuleB);
-                            },
-                          ),
-                          const SizedBox(width: gap),
-                          ModuleCard(
-                            label: kLabelModuleC,
-                            description: 'เรียนคำศัพท์',
-                            icon: Icons.record_voice_over_rounded,
-                            background: kYellowAccent,
-                            cardWidth: cardWidth,
-                            onTap: () {
-                              ref
-                                  .read(ttsServiceProvider)
-                                  .speak(kTtsModuleCDesc);
-                              context.push(kRouteModuleC);
-                            },
-                          ),
-                          const SizedBox(width: gap),
-                          ModuleCard(
-                            label: 'ครอบครัว',
-                            description: 'ทายว่าใครเป็นใคร',
-                            icon: Icons.diversity_3_rounded,
-                            background: kBlueLight,
-                            cardWidth: cardWidth,
-                            onTap: () => context.push(kRouteFamilyGame),
-                          ),
-                        ],
+                      return FadeSlideIn(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ModuleCard(
+                              label: kLabelModuleA,
+                              description: 'ลองทำกิจกรรม',
+                              icon: Icons.home_rounded,
+                              background: kYellowLight,
+                              cardWidth: cardWidth,
+                              onTap: () {
+                                ref
+                                    .read(ttsServiceProvider)
+                                    .speak(kTtsModuleADesc);
+                                context.push(kRouteModuleA);
+                              },
+                            ),
+                            const SizedBox(width: gap),
+                            ModuleCard(
+                              label: kLabelModuleB,
+                              description: 'จับคู่รูปภาพ',
+                              icon: Icons.grid_view_rounded,
+                              background: kBlueLight,
+                              cardWidth: cardWidth,
+                              onTap: () {
+                                ref
+                                    .read(ttsServiceProvider)
+                                    .speak(kTtsModuleBDesc);
+                                context.push(kRouteModuleB);
+                              },
+                            ),
+                            const SizedBox(width: gap),
+                            ModuleCard(
+                              label: kLabelModuleC,
+                              description: 'เรียนคำศัพท์',
+                              icon: Icons.record_voice_over_rounded,
+                              background: kYellowAccent,
+                              cardWidth: cardWidth,
+                              onTap: () {
+                                ref
+                                    .read(ttsServiceProvider)
+                                    .speak(kTtsModuleCDesc);
+                                context.push(kRouteModuleC);
+                              },
+                            ),
+                            const SizedBox(width: gap),
+                            ModuleCard(
+                              label: 'ครอบครัว',
+                              description: 'ทายว่าใครเป็นใคร',
+                              icon: Icons.diversity_3_rounded,
+                              background: kBlueLight,
+                              cardWidth: cardWidth,
+                              onTap: () => context.push(kRouteFamilyGame),
+                            ),
+                          ],
+                        ),
                       );
                     },
                   ),
@@ -189,17 +194,30 @@ class _LogoSmallState extends State<_LogoSmall>
               );
             },
           ),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: kYellowPrimary,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.wb_sunny_rounded,
-              size: 28,
-              color: kTextPrimary,
+          AnimatedBuilder(
+            animation: _ringController,
+            builder: (context, child) {
+              final v = _ringController.value;
+              // สั่นไหวเบาๆ: หมุนกลับไปมา (sine) + ขยายเล็กน้อย ยิ่งกดค้างนานยิ่งชัด
+              // คูณด้วย v ให้เริ่มจากนิ่งแล้วค่อยสั่นแรงขึ้น (นุ่ม ไม่กระตุกตอนเริ่มกด)
+              final wiggle = math.sin(v * math.pi * 8) * 0.05 * v;
+              return Transform.rotate(
+                angle: wiggle,
+                child: Transform.scale(scale: 1.0 + v * 0.12, child: child),
+              );
+            },
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: kYellowPrimary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.wb_sunny_rounded,
+                size: 28,
+                color: kTextPrimary,
+              ),
             ),
           ),
         ],

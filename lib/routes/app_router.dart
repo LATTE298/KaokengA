@@ -1,11 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../screens/child/family_game_screen.dart';
+import '../screens/child/memory_game_screen.dart';
 import '../screens/child/mode_select_screen.dart';
 import '../screens/child/module_a_screen.dart';
 import '../screens/child/module_b_screen.dart';
-import '../screens/child/memory_game_screen.dart';
-import '../screens/child/family_game_screen.dart';
 import '../screens/child/module_c_screen.dart';
 import '../screens/child/scenario_game_screen.dart';
 import '../screens/child/sound_board_screen.dart';
@@ -30,6 +30,23 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
 );
 
+// หน้าเปลี่ยนแบบจางนุ่มๆ (fade) แทน slide มาตรฐาน — ให้ทั้งแอปรู้สึก smooth ขึ้น
+// ระยะสั้น (250ms) curve นุ่ม เลี่ยงการเลื่อน/กระตุกที่กระตุ้นสายตาเด็กกลุ่มดาวน์ซินโดรม
+CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 250),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+        child: child,
+      );
+    },
+    child: child,
+  );
+}
+
 // GoRouter config (spec 02 §All Routes). Child routes and parent routes live
 // side-by-side; the parent gate screen handles the transition between modes.
 GoRouter buildAppRouter() {
@@ -37,60 +54,79 @@ GoRouter buildAppRouter() {
     navigatorKey: rootNavigatorKey,
     initialLocation: kRouteSplash,
     routes: [
-      GoRoute(path: kRouteSplash, builder: (_, __) => const SplashScreen()),
+      GoRoute(
+        path: kRouteSplash,
+        pageBuilder: (_, state) => _fadePage(state, const SplashScreen()),
+      ),
       GoRoute(
         path: kRouteModeSelect,
-        builder: (_, __) => const ModeSelectScreen(),
+        pageBuilder: (_, state) => _fadePage(state, const ModeSelectScreen()),
       ),
-      GoRoute(path: kRouteModuleA, builder: (_, __) => const ModuleAScreen()),
+      GoRoute(
+        path: kRouteModuleA,
+        pageBuilder: (_, state) => _fadePage(state, const ModuleAScreen()),
+      ),
       GoRoute(
         // Child deep-route format: /module-a/game/:scenarioId
         path: '$kRouteScenarioGame/:scenarioId',
-        builder:
-            (_, state) => ScenarioGameScreen(
-              scenarioId: state.pathParameters['scenarioId']!,
-            ),
+        pageBuilder: (_, state) => _fadePage(
+          state,
+          ScenarioGameScreen(scenarioId: state.pathParameters['scenarioId']!),
+        ),
       ),
-      GoRoute(path: kRouteModuleB, builder: (_, __) => const ModuleBScreen()),
+      GoRoute(
+        path: kRouteModuleB,
+        pageBuilder: (_, state) => _fadePage(state, const ModuleBScreen()),
+      ),
       GoRoute(
         // Child deep-route format: /module-b/game/:packId (แพ็ค = หมวดคำศัพท์)
         path: '$kRouteMemoryGame/:packId',
-        builder:
-            (_, state) =>
-                MemoryGameScreen(packId: state.pathParameters['packId']!),
+        pageBuilder: (_, state) => _fadePage(
+          state,
+          MemoryGameScreen(packId: state.pathParameters['packId']!),
+        ),
       ),
-      GoRoute(path: kRouteModuleC, builder: (_, __) => const ModuleCScreen()),
+      GoRoute(
+        path: kRouteModuleC,
+        pageBuilder: (_, state) => _fadePage(state, const ModuleCScreen()),
+      ),
       GoRoute(
         path: kRouteSoundBoard,
-        builder: (_, __) => const SoundBoardScreen(),
+        pageBuilder: (_, state) => _fadePage(state, const SoundBoardScreen()),
       ),
       GoRoute(
         path: kRouteVocabQuiz,
-        builder: (_, __) => const VocabQuizSelectScreen(),
+        pageBuilder: (_, state) =>
+            _fadePage(state, const VocabQuizSelectScreen()),
       ),
       GoRoute(
         // Child deep-route format: /module-c/quiz/:category (หมวดคำศัพท์)
         path: '$kRouteVocabQuiz/:category',
-        builder:
-            (_, state) =>
-                VocabQuizScreen(category: state.pathParameters['category']!),
+        pageBuilder: (_, state) => _fadePage(
+          state,
+          VocabQuizScreen(category: state.pathParameters['category']!),
+        ),
       ),
       GoRoute(
         path: kRouteFamilyGame,
-        builder: (_, __) => const FamilyGameScreen(),
+        pageBuilder: (_, state) => _fadePage(state, const FamilyGameScreen()),
       ),
       GoRoute(
         path: kRouteParentGate,
-        builder: (_, __) => const ParentGateScreen(),
+        pageBuilder: (_, state) => _fadePage(state, const ParentGateScreen()),
       ),
-      GoRoute(path: kRouteAuth, builder: (_, __) => const AuthScreen()),
+      GoRoute(
+        path: kRouteAuth,
+        pageBuilder: (_, state) => _fadePage(state, const AuthScreen()),
+      ),
       GoRoute(
         path: kRouteDashboard,
-        builder: (_, __) => const DashboardScreen(),
+        pageBuilder: (_, state) => _fadePage(state, const DashboardScreen()),
       ),
       GoRoute(
         path: kRouteFamilyManager,
-        builder: (_, __) => const FamilyManagerScreen(),
+        pageBuilder: (_, state) =>
+            _fadePage(state, const FamilyManagerScreen()),
       ),
     ],
   );

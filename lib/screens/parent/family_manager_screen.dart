@@ -10,6 +10,7 @@ import '../../routes/app_routes.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/orientation_lock.dart';
 
 // หน้าจัดการ "คลังครอบครัว" ของผู้ปกครอง (เฟส 2.1) — เพิ่ม/ลบการ์ด (รูปคนในบ้าน
@@ -57,7 +58,11 @@ class FamilyManagerScreen extends ConsumerWidget {
                         itemCount: cards.length,
                         separatorBuilder:
                             (_, __) => const SizedBox(height: kSpace3),
-                        itemBuilder: (context, i) => _CardTile(card: cards[i]),
+                        itemBuilder:
+                            (context, i) => FadeSlideIn(
+                              delay: Duration(milliseconds: i * 60),
+                              child: _CardTile(card: cards[i]),
+                            ),
                       ),
         ),
         floatingActionButton: FloatingActionButton.extended(
