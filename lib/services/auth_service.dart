@@ -146,9 +146,17 @@ class AuthService implements ParentAuthService {
 
   @override
   Future<void> signOutParent() async {
-    // ออกจากทั้ง Firebase และ Google (ไม่งั้นครั้งหน้าเด้งบัญชีเดิมทันที)
-    await _googleSignIn.signOut();
+    // Firebase signOut สำคัญสุด — ทำก่อนและต้องไม่ถูกบล็อก. (เดิมเรียก Google ก่อน
+    // แต่บนเว็บที่ล็อกอินด้วยอีเมล/รหัสผ่าน googleSignIn.signOut() โยน error ทำให้
+    // _auth.signOut() ไม่ถูกเรียก → กลับมายังเป็นบัญชีเดิม)
     await _auth.signOut();
+    // ออกจาก Google ด้วย (กันครั้งหน้าเด้งบัญชีเดิมตอนล็อกอิน Google บน Android)
+    // best-effort: ไม่มี session Google หรือเว็บยังไม่ตั้ง clientId ก็ข้ามไป
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {
+      // เงียบไว้ — ผู้ใช้อาจล็อกอินด้วยอีเมล/รหัสผ่าน ไม่มี session Google ให้ออก
+    }
   }
 
   @override
