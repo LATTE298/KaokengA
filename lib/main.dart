@@ -7,15 +7,21 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'firebase_options.dart';
 import 'routes/app_router.dart';
 import 'services/auth_service.dart';
+import 'services/family_card_repository.dart';
 import 'theme/app_theme.dart';
 import 'widgets/usage_timer_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Hive local storage (เฟส 2.1 — คลังการ์ดหมวดครอบครัวของผู้ปกครอง เก็บ offline)
+  await Hive.initFlutter();
+  await Hive.openBox<dynamic>(FamilyCardRepository.boxName);
 
   // Lock orientation to landscape — primary platform is 10" tablet (spec 01).
   // Skip on web (not applicable).

@@ -11,6 +11,7 @@ const String kRouteMemoryGame = '/module-b/game';
 const String kRouteModuleC = '/module-c';
 const String kRouteSoundBoard = '/module-c/sound-board';
 const String kRouteVocabQuiz = '/module-c/quiz';
+const String kRouteFamilyGame = '/family-game';
 
 // Parent routes
 const String kRouteParentGate = '/parent-gate';
@@ -19,3 +20,4 @@ const String kRouteDashboard = '/parent/dashboard';
 const String kRouteActivityLog = '/parent/log';
 const String kRouteProgress = '/parent/progress';
 const String kRouteScenarios = '/parent/scenarios';
+const String kRouteFamilyManager = '/parent/family';

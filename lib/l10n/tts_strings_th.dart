@@ -48,6 +48,9 @@ const String kTtsQuizAskPlaces = 'นี่คือที่ไหน';
 const String kTtsQuizAskOccupations = 'นี่คืออาชีพอะไร';
 const String kTtsQuizAskGeneric = 'นี่คืออะไร';
 
+// เกมหมวดครอบครัว (เฟส 2.1) — ถามว่ารูปคนในครอบครัวรูปนี้คือใคร
+const String kTtsFamilyAsk = 'นี่คือใคร';
+
 /// ประโยคคำถามตามหมวดคำศัพท์ (หมวดตรงกับ vocabulary.json ชุดจริง 6 หมวดของทีม)
 /// — UI เอาไปเติม "?" ตอนแสดงผลเองได้ แต่ตัว TTS ใช้ข้อความนี้ตรงๆ (เป็น key
 /// ของคลิปใน manifest). หมวด everyday ปนคำกริยา/ความรู้สึก จึงใช้คำถามกลางๆ

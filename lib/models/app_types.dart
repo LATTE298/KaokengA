@@ -1,6 +1,7 @@
 const kModuleDailyLife = 'daily_life';
 const kModuleMemory = 'memory';
 const kModuleVocab = 'vocab';
+const kModuleFamily = 'family';
 
 // หมวดคำศัพท์ 6 หมวดตาม vocabulary.json (คลังคำจริงของทีม) — ลำดับนี้ใช้เรียง
 // การ์ดเลือกหมวดทั้งในเกมจับคู่ภาพและเกมตอบคำถาม และเป็นชุด key ที่

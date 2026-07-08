@@ -52,6 +52,14 @@ dependencies:
   # GOOGLE_TTS_API_KEY หรือ Cloud TTS ล้มเหลว (เช่น ออฟไลน์) แอปจะได้ไม่เงียบสนิท
   flutter_tts: ^4.2.0
 
+  # เกมหมวดครอบครัว (เฟส 2.1) — คลังคำคัสตอมของผู้ปกครองเก็บ offline ในเครื่อง
+  # Hive = local NoSQL cross-platform (Android+web) เก็บ bytes ได้ · image_picker
+  # เลือกรูปจากแกลเลอรี/กล้อง · image = resize รูปก่อนเก็บ (คุมขนาด box)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  image_picker: ^1.1.2
+  image: ^4.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

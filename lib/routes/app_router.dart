@@ -5,6 +5,7 @@ import '../screens/child/mode_select_screen.dart';
 import '../screens/child/module_a_screen.dart';
 import '../screens/child/module_b_screen.dart';
 import '../screens/child/memory_game_screen.dart';
+import '../screens/child/family_game_screen.dart';
 import '../screens/child/module_c_screen.dart';
 import '../screens/child/scenario_game_screen.dart';
 import '../screens/child/sound_board_screen.dart';
@@ -13,6 +14,7 @@ import '../screens/child/vocab_quiz_screen.dart';
 import '../screens/child/vocab_quiz_select_screen.dart';
 import '../screens/parent/auth_screen.dart';
 import '../screens/parent/dashboard_screen.dart';
+import '../screens/parent/family_manager_screen.dart';
 import '../screens/parent/parent_gate_screen.dart';
 import 'app_routes.dart';
 
@@ -73,6 +75,10 @@ GoRouter buildAppRouter() {
                 VocabQuizScreen(category: state.pathParameters['category']!),
       ),
       GoRoute(
+        path: kRouteFamilyGame,
+        builder: (_, __) => const FamilyGameScreen(),
+      ),
+      GoRoute(
         path: kRouteParentGate,
         builder: (_, __) => const ParentGateScreen(),
       ),
@@ -80,6 +86,10 @@ GoRouter buildAppRouter() {
       GoRoute(
         path: kRouteDashboard,
         builder: (_, __) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: kRouteFamilyManager,
+        builder: (_, __) => const FamilyManagerScreen(),
       ),
     ],
   );

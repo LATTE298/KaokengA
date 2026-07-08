@@ -45,13 +45,13 @@ class ModeSelectScreen extends ConsumerWidget {
                       // (spec 1.3) — เดิมการ์ดใช้ minWidth 140 ตายตัว รวมกันเกินจอแคบแล้วล้น
                       // ตอนนี้การ์ดจะพอดีจอเสมอ ไม่ว่าจะ iPhone 12 Pro (390) หรือจออื่น
                       const gap = kInteractiveGapMin;
-                      final totalGap = gap * 2;
-                      // จำกัดความกว้างรวมไม่ให้เกิน 900 บนแท็บเล็ตใหญ่ (การ์ดจะได้ไม่กว้างเวอร์)
+                      final totalGap = gap * 3;
+                      // จำกัดความกว้างรวมไม่ให้เกิน 1160 บนแท็บเล็ตใหญ่ (4 การ์ดไม่กว้างเวอร์)
                       final usableWidth = constraints.maxWidth.clamp(
                         0.0,
-                        900.0,
+                        1160.0,
                       );
-                      final cardWidth = (usableWidth - totalGap) / 3;
+                      final cardWidth = (usableWidth - totalGap) / 4;
 
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -98,6 +98,15 @@ class ModeSelectScreen extends ConsumerWidget {
                                   .speak(kTtsModuleCDesc);
                               context.push(kRouteModuleC);
                             },
+                          ),
+                          const SizedBox(width: gap),
+                          ModuleCard(
+                            label: 'ครอบครัว',
+                            description: 'ทายว่าใครเป็นใคร',
+                            icon: Icons.diversity_3_rounded,
+                            background: kBlueLight,
+                            cardWidth: cardWidth,
+                            onTap: () => context.push(kRouteFamilyGame),
                           ),
                         ],
                       );

@@ -85,6 +85,22 @@ class VocabQuizCompletedEvent {
   final int stars;
 }
 
+class FamilyQuizCompletedEvent {
+  const FamilyQuizCompletedEvent({
+    required this.session,
+    required this.answerEvents,
+    required this.score,
+    required this.stars,
+  });
+
+  final ActiveSession session;
+
+  /// การตอบทุกครั้ง (pairId = id การ์ดครอบครัว, matched = ตอบถูกไหม)
+  final List<MatchEvent> answerEvents;
+  final int score;
+  final int stars;
+}
+
 class SessionRecorder {
   const SessionRecorder({
     required SessionWriter repository,
@@ -144,6 +160,28 @@ class SessionRecorder {
       uid: uid,
       scenarioId: event.session.contentId,
       module: kModuleVocab,
+      startedAt: startedAt.toIso8601String(),
+      endedAt: endedAt.toIso8601String(),
+      durationMs: endedAt.difference(startedAt).inMilliseconds,
+      completed: true,
+      score: event.score,
+      stars: event.stars,
+      matchEvents: List.unmodifiable(event.answerEvents),
+    );
+    return _repository.writeSession(record);
+  }
+
+  Future<void> recordFamilyQuizCompleted(FamilyQuizCompletedEvent event) {
+    final uid = event.session.uid;
+    if (uid == null) return Future<void>.value();
+
+    final endedAt = _clock().toUtc();
+    final startedAt = event.session.startedAt.toUtc();
+    final record = SessionRecord(
+      sessionId: event.session.sessionId,
+      uid: uid,
+      scenarioId: event.session.contentId,
+      module: kModuleFamily,
       startedAt: startedAt.toIso8601String(),
       endedAt: endedAt.toIso8601String(),
       durationMs: endedAt.difference(startedAt).inMilliseconds,

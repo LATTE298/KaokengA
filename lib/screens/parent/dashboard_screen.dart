@@ -76,6 +76,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 onPressed: () => setState(() => _tab = i),
               ),
           IconButton(
+            tooltip: 'คลังครอบครัว',
+            icon: const Icon(Icons.diversity_3_rounded),
+            onPressed: () => context.push(kRouteFamilyManager),
+          ),
+          IconButton(
             tooltip: 'ออกจากระบบ',
             icon: const Icon(Icons.account_circle_rounded),
             onPressed: _showLogoutSheet,
@@ -332,6 +337,7 @@ String _moduleLabel(String module) {
     kModuleDailyLife => 'ชีวิตประจำวัน',
     kModuleMemory => 'จับคู่ภาพ',
     kModuleVocab => 'เกมตอบคำถามคำศัพท์',
+    kModuleFamily => 'ครอบครัว',
     _ => module,
   };
 }
