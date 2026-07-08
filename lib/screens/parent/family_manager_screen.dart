@@ -181,6 +181,7 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
   final _distractor1Controller = TextEditingController();
   final _distractor2Controller = TextEditingController();
   bool _saving = false;
+  bool _randomMode = false; // เปิด = สุ่มตัวลวงจากสมาชิกคนอื่นตอนเล่น
   String? _error;
 
   @override
@@ -206,13 +207,21 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
       setState(() => _error = 'เลือกรูปก่อนนะครับ');
       return;
     }
-    if (answer.isEmpty || d1.isEmpty || d2.isEmpty) {
-      setState(() => _error = 'กรอกคำตอบและตัวเลือกให้ครบ');
+    if (answer.isEmpty) {
+      setState(() => _error = 'กรอกคำตอบ (นี่คือใคร) ก่อนนะครับ');
       return;
     }
-    if ({answer, d1, d2}.length < 3) {
-      setState(() => _error = 'คำตอบและตัวเลือกต้องไม่ซ้ำกัน');
-      return;
+    if (!_randomMode) {
+      if (d1.isEmpty || d2.isEmpty) {
+        setState(
+          () => _error = 'กรอกตัวเลือกลวงให้ครบ 2 อัน (หรือเปิดโหมดสุ่ม)',
+        );
+        return;
+      }
+      if ({answer, d1, d2}.length < 3) {
+        setState(() => _error = 'คำตอบและตัวเลือกต้องไม่ซ้ำกัน');
+        return;
+      }
     }
 
     setState(() {
@@ -224,7 +233,8 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
         .addCard(
           imageBytes: _imageBytes!,
           answer: answer,
-          distractors: [d1, d2],
+          distractors: _randomMode ? const [] : [d1, d2],
+          randomChoices: _randomMode,
         );
     if (mounted) Navigator.of(context).pop();
   }
@@ -242,7 +252,44 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('เพิ่มคนในครอบครัว', style: kTextLg),
+              Row(
+                children: [
+                  Expanded(child: Text('เพิ่มคนในครอบครัว', style: kTextLg)),
+                  // ปุ่มลูกเต๋า = สลับโหมดสุ่มตัวเลือก (ขอบเขียว=เปิด, แดง=ปิด)
+                  GestureDetector(
+                    key: const Key('family-dice-toggle'),
+                    onTap:
+                        _saving
+                            ? null
+                            : () => setState(() {
+                              _randomMode = !_randomMode;
+                              _error = null;
+                            }),
+                    child: Container(
+                      padding: const EdgeInsets.all(kSpace2),
+                      decoration: BoxDecoration(
+                        color: _randomMode ? kSuccessLight : kErrorLight,
+                        borderRadius: kRadiusMd,
+                        border: Border.all(
+                          color: _randomMode ? kSuccess : kError,
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.casino_rounded,
+                        color: _randomMode ? kSuccess : kError,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: kSpace2),
+              Text(
+                _randomMode
+                    ? 'โหมดสุ่มเปิด: ตัวเลือกลวงจะสุ่มจากสมาชิกคนอื่นให้ตอนเล่น'
+                    : 'กดลูกเต๋าเพื่อสุ่มตัวเลือกลวงจากสมาชิกคนอื่นอัตโนมัติ',
+                style: kTextXs.copyWith(color: kTextSecondary),
+              ),
               const SizedBox(height: kSpace4),
 
               // เลือกรูป + พรีวิว
@@ -290,14 +337,16 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
                 key: const Key('family-distractor-1'),
                 controller: _distractor1Controller,
                 label: 'ตัวเลือกลวง 1',
-                hint: 'เช่น พ่อ',
+                hint: _randomMode ? 'สุ่มให้อัตโนมัติ' : 'เช่น พ่อ',
+                enabled: !_randomMode,
               ),
               const SizedBox(height: kSpace4),
               _field(
                 key: const Key('family-distractor-2'),
                 controller: _distractor2Controller,
                 label: 'ตัวเลือกลวง 2',
-                hint: 'เช่น พี่',
+                hint: _randomMode ? 'สุ่มให้อัตโนมัติ' : 'เช่น พี่',
+                enabled: !_randomMode,
               ),
 
               if (_error != null) ...[
@@ -333,6 +382,7 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
     required TextEditingController controller,
     required String label,
     required String hint,
+    bool enabled = true,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +392,7 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
         TextField(
           key: key,
           controller: controller,
-          enabled: !_saving,
+          enabled: !_saving && enabled,
           decoration: InputDecoration(hintText: hint),
         ),
       ],

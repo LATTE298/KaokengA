@@ -5,14 +5,19 @@ import 'package:daily_life/features/family_quiz/family_quiz_controller.dart';
 import 'package:daily_life/models/family_card.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-FamilyCard _card(String id, String answer, List<String> distractors) =>
-    FamilyCard(
-      id: id,
-      imageBytes: Uint8List(0),
-      answer: answer,
-      distractors: distractors,
-      createdAt: 0,
-    );
+FamilyCard _card(
+  String id,
+  String answer,
+  List<String> distractors, {
+  bool random = false,
+}) => FamilyCard(
+  id: id,
+  imageBytes: Uint8List(0),
+  answer: answer,
+  distractors: distractors,
+  randomChoices: random,
+  createdAt: 0,
+);
 
 void main() {
   group('FamilyQuizController', () {
@@ -72,5 +77,30 @@ void main() {
       expect(c.answerEvents, hasLength(2));
       expect(c.answerEvents.where((e) => e.matched), hasLength(1));
     });
+
+    test(
+      'โหมดสุ่ม: ตัวลวงดึงจากคำตอบสมาชิกคนอื่น ไม่ใช่ distractors ตัวเอง',
+      () {
+        final cards = [
+          _card('1', 'แม่', const [], random: true),
+          _card('2', 'พ่อ', const ['x', 'y']),
+          _card('3', 'พี่', const ['a', 'b']),
+        ];
+        final c = FamilyQuizController(
+          cards: cards,
+          questionCount: 3,
+          random: Random(5),
+        );
+        final momChoices = <String>[];
+        for (var i = 0; i < c.totalQuestions; i++) {
+          final q = c.currentQuestion;
+          if (q.card.answer == 'แม่') momChoices.addAll(q.choices);
+          c.answer(q.card.answer);
+        }
+        expect(momChoices, contains('แม่'));
+        final distractors = momChoices.where((ch) => ch != 'แม่');
+        expect(distractors.every((ch) => ['พ่อ', 'พี่'].contains(ch)), isTrue);
+      },
+    );
   });
 }

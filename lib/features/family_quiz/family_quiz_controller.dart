@@ -120,8 +120,31 @@ class FamilyQuizController {
     final pool = [...cards]..shuffle(random);
     final chosen = pool.take(min(questionCount, pool.length)).toList();
     return chosen.map((card) {
-      final choices = [card.answer, ...card.distractors]..shuffle(random);
+      // โหมดสุ่ม: ตัวลวงมาจากคำตอบของสมาชิกครอบครัวคนอื่น (สุ่มไม่เกิน 2)
+      // โหมดปกติ: ใช้ตัวลวงที่ผู้ปกครองกรอกเอง
+      final distractors =
+          card.randomChoices
+              ? _randomDistractors(card, cards, random)
+              : card.distractors;
+      final choices = [card.answer, ...distractors]..shuffle(random);
       return FamilyQuizQuestion(card: card, choices: choices);
     }).toList();
+  }
+
+  // ดึงคำตอบของการ์ดอื่น (ไม่ซ้ำคำตอบข้อนี้) มาเป็นตัวลวงแบบสุ่ม สูงสุด 2 ตัว
+  // ถ้ามีสมาชิกน้อยกว่า 3 คน ตัวเลือกจะน้อยตาม — UI จะแนะนำให้เพิ่มก่อนเปิดโหมดนี้
+  List<String> _randomDistractors(
+    FamilyCard card,
+    List<FamilyCard> allCards,
+    Random random,
+  ) {
+    final others =
+        allCards
+            .map((c) => c.answer)
+            .where((name) => name != card.answer)
+            .toSet()
+            .toList()
+          ..shuffle(random);
+    return others.take(2).toList();
   }
 }

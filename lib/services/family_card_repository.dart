@@ -30,6 +30,7 @@ class FamilyCardRepository {
     required Uint8List imageBytes,
     required String answer,
     required List<String> distractors,
+    bool randomChoices = false,
   }) async {
     final id = _uuid.v4();
     final card = FamilyCard(
@@ -37,6 +38,7 @@ class FamilyCardRepository {
       imageBytes: imageBytes,
       answer: answer,
       distractors: distractors,
+      randomChoices: randomChoices,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
     await _box.put(id, card.toMap());
@@ -56,8 +58,9 @@ class FamilyCardRepository {
   /// static เพื่อให้ unit test เรียกได้ตรงๆ ไม่ต้องมี ImagePicker
   static Uint8List resizeImage(Uint8List bytes) {
     final decoded = img.decodeImage(bytes);
-    if (decoded == null)
+    if (decoded == null) {
       return bytes; // ถอดรหัสไม่ได้ (เช่น format แปลก) — เก็บดิบ
+    }
     final resized =
         decoded.width >= decoded.height
             ? img.copyResize(decoded, width: 600)
