@@ -59,7 +59,9 @@ void main() {
 
       await cache.put(oldKey, Uint8List.fromList([1, 1, 1]));
       // Touch the mtime manually via the underlying file so eviction order is deterministic.
-      final cacheDir = Directory('${tempDir.path}${Platform.pathSeparator}tts_cache');
+      final cacheDir = Directory(
+        '${tempDir.path}${Platform.pathSeparator}tts_cache',
+      );
       final oldFile = File('${cacheDir.path}${Platform.pathSeparator}$oldKey');
       await oldFile.setLastModified(DateTime.utc(2026, 1, 1));
 

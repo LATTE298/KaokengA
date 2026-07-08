@@ -16,7 +16,11 @@ void main() {
       final seenAnswers = <String>{};
       for (var i = 0; i < controller.totalQuestions; i++) {
         final q = controller.currentQuestion;
-        expect(seenAnswers.add(q.answer.itemId), isTrue, reason: 'โจทย์ห้ามซ้ำ');
+        expect(
+          seenAnswers.add(q.answer.itemId),
+          isTrue,
+          reason: 'โจทย์ห้ามซ้ำ',
+        );
         expect(q.choices, hasLength(3));
         expect(
           q.choices.map((c) => c.itemId).toSet(),
@@ -116,9 +120,7 @@ void main() {
           final q = controller.currentQuestion;
           if (remainingWrongs > 0) {
             final wrongId =
-                q.choices
-                    .firstWhere((c) => c.itemId != q.answer.itemId)
-                    .itemId;
+                q.choices.firstWhere((c) => c.itemId != q.answer.itemId).itemId;
             controller.answer(wrongId);
             remainingWrongs--;
           }

@@ -27,8 +27,20 @@ void main() {
 
     await tester.pumpWidget(
       _wrap([
-        _record('s1', kModuleMemory, 'memory_animals', 9, '2026-06-16T10:00:00'),
-        _record('s2', kModuleDailyLife, '711_milk_001', 6, '2026-06-16T11:00:00'),
+        _record(
+          's1',
+          kModuleMemory,
+          'memory_animals',
+          9,
+          '2026-06-16T10:00:00',
+        ),
+        _record(
+          's2',
+          kModuleDailyLife,
+          '711_milk_001',
+          6,
+          '2026-06-16T11:00:00',
+        ),
         _record('s3', kModuleVocab, 'quiz_food', 8, '2026-06-16T12:00:00'),
       ]),
     );
@@ -65,8 +77,20 @@ void main() {
     // เพื่อให้ dense layout ต้อง fit body area จริง (เตี้ยกว่าทั้งจอ ~136px)
     await tester.pumpWidget(
       _wrapInApp([
-        _record('s1', kModuleMemory, 'memory_animals', 9, '2026-06-16T10:00:00'),
-        _record('s2', kModuleDailyLife, '711_milk_001', 6, '2026-06-16T11:00:00'),
+        _record(
+          's1',
+          kModuleMemory,
+          'memory_animals',
+          9,
+          '2026-06-16T10:00:00',
+        ),
+        _record(
+          's2',
+          kModuleDailyLife,
+          '711_milk_001',
+          6,
+          '2026-06-16T11:00:00',
+        ),
         _record('s3', kModuleVocab, 'quiz_food', 8, '2026-06-16T12:00:00'),
       ]),
     );

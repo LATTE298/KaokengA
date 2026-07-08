@@ -75,16 +75,17 @@ class _UsageTimerGateState extends ConsumerState<UsageTimerGate>
     await showDialog<void>(
       context: navContext,
       barrierDismissible: false,
-      builder: (_) => BreakReminderDialog(
-        onAcknowledged: () {
-          ref.read(usageTimerProvider.notifier).reset();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ref.read(usageTimerProvider.notifier).resume();
-            }
-          });
-        },
-      ),
+      builder:
+          (_) => BreakReminderDialog(
+            onAcknowledged: () {
+              ref.read(usageTimerProvider.notifier).reset();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  ref.read(usageTimerProvider.notifier).resume();
+                }
+              });
+            },
+          ),
     );
 
     _dialogShowing = false;

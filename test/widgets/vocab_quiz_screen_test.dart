@@ -70,8 +70,9 @@ void main() {
       await _pumpQuiz(tester, _FakeSessionWriter(), _FakeSpeaker());
 
       final answer = _currentAnswerItem(tester);
-      final wrongId = _visibleChoiceIds(tester)
-          .firstWhere((id) => id != answer.itemId);
+      final wrongId = _visibleChoiceIds(
+        tester,
+      ).firstWhere((id) => id != answer.itemId);
       await tester.tap(find.byKey(Key('choice_$wrongId')));
       await tester.pump();
       await tester.pump(kTapCooldown);

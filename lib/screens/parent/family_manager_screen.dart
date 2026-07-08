@@ -41,32 +41,36 @@ class FamilyManagerScreen extends ConsumerWidget {
         ),
         body: cardsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) =>
-              Center(child: Text('โหลดไม่สำเร็จ', style: kTextMd)),
-          data: (cards) => cards.isEmpty
-              ? const _EmptyState()
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(
-                    kSpace6,
-                    kSpace6,
-                    kSpace6,
-                    kSpace12 + kSpace10, // เว้นพื้นที่ให้ปุ่มลอยด้านล่าง
-                  ),
-                  itemCount: cards.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: kSpace3),
-                  itemBuilder: (context, i) => _CardTile(card: cards[i]),
-                ),
+          error:
+              (_, __) => Center(child: Text('โหลดไม่สำเร็จ', style: kTextMd)),
+          data:
+              (cards) =>
+                  cards.isEmpty
+                      ? const _EmptyState()
+                      : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(
+                          kSpace6,
+                          kSpace6,
+                          kSpace6,
+                          kSpace12 + kSpace10, // เว้นพื้นที่ให้ปุ่มลอยด้านล่าง
+                        ),
+                        itemCount: cards.length,
+                        separatorBuilder:
+                            (_, __) => const SizedBox(height: kSpace3),
+                        itemBuilder: (context, i) => _CardTile(card: cards[i]),
+                      ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           key: const Key('family-add'),
           backgroundColor: kYellowPrimary,
           foregroundColor: kTextPrimary,
-          onPressed: () => showModalBottomSheet<void>(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: kWarmWhite,
-            builder: (_) => const _AddFamilyCardSheet(),
-          ),
+          onPressed:
+              () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: kWarmWhite,
+                builder: (_) => const _AddFamilyCardSheet(),
+              ),
           icon: const Icon(Icons.add_a_photo_rounded),
           label: const Text('เพิ่มคนในครอบครัว'),
         ),
@@ -152,9 +156,9 @@ class _CardTile extends ConsumerWidget {
             key: Key('family-delete-${card.id}'),
             tooltip: 'ลบ',
             icon: const Icon(Icons.delete_outline_rounded, color: kError),
-            onPressed: () => ref
-                .read(familyCardRepositoryProvider)
-                .deleteCard(card.id),
+            onPressed:
+                () =>
+                    ref.read(familyCardRepositoryProvider).deleteCard(card.id),
           ),
         ],
       ),
@@ -215,7 +219,9 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
       _saving = true;
       _error = null;
     });
-    await ref.read(familyCardRepositoryProvider).addCard(
+    await ref
+        .read(familyCardRepositoryProvider)
+        .addCard(
           imageBytes: _imageBytes!,
           answer: answer,
           distractors: [d1, d2],
@@ -253,20 +259,21 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
                       border: Border.all(color: kWarmBorder, width: 1.5),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: _imageBytes == null
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.add_a_photo_rounded,
-                                size: 32,
-                                color: kWarmMuted,
-                              ),
-                              const SizedBox(height: kSpace1),
-                              Text('เลือกรูป', style: kTextXs),
-                            ],
-                          )
-                        : Image.memory(_imageBytes!, fit: BoxFit.cover),
+                    child:
+                        _imageBytes == null
+                            ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.add_a_photo_rounded,
+                                  size: 32,
+                                  color: kWarmMuted,
+                                ),
+                                const SizedBox(height: kSpace1),
+                                Text('เลือกรูป', style: kTextXs),
+                              ],
+                            )
+                            : Image.memory(_imageBytes!, fit: BoxFit.cover),
                   ),
                 ),
               ),
@@ -306,12 +313,13 @@ class _AddFamilyCardSheetState extends ConsumerState<_AddFamilyCardSheet> {
               FilledButton(
                 key: const Key('family-save'),
                 onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const SizedBox.square(
-                        dimension: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('บันทึก'),
+                child:
+                    _saving
+                        ? const SizedBox.square(
+                          dimension: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Text('บันทึก'),
               ),
             ],
           ),

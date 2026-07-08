@@ -60,9 +60,10 @@ class GameResultDialog extends StatelessWidget {
                       child: Icon(
                         Icons.star_rounded,
                         size: 48,
-                        color: filled
-                            ? kYellowPrimary
-                            : kYellowPrimary.withValues(alpha: 0.2),
+                        color:
+                            filled
+                                ? kYellowPrimary
+                                : kYellowPrimary.withValues(alpha: 0.2),
                       ),
                     );
                   }),

@@ -131,7 +131,10 @@ class VocabQuizController {
     List<VocabularyItem> items,
     Random random,
   ) {
-    assert(items.length >= choiceCount, 'คลังคำต้องมีอย่างน้อย $choiceCount คำ');
+    assert(
+      items.length >= choiceCount,
+      'คลังคำต้องมีอย่างน้อย $choiceCount คำ',
+    );
     final pool = [...items]..shuffle(random);
     final answers = pool.take(min(questionCount, pool.length)).toList();
 
@@ -143,8 +146,7 @@ class VocabQuizController {
           items
               .where(
                 (i) =>
-                    i.category == answer.category &&
-                    i.itemId != answer.itemId,
+                    i.category == answer.category && i.itemId != answer.itemId,
               )
               .toList()
             ..shuffle(random);
@@ -152,8 +154,7 @@ class VocabQuizController {
           items
               .where(
                 (i) =>
-                    i.category != answer.category &&
-                    i.itemId != answer.itemId,
+                    i.category != answer.category && i.itemId != answer.itemId,
               )
               .toList()
             ..shuffle(random);

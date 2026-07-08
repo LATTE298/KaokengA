@@ -47,8 +47,7 @@ class ScenarioGameScreen extends ConsumerWidget {
           // สุ่ม target ใหม่ทุกครั้งที่โหลดด่าน
           final randomized = _randomizeTarget(loadedScenario);
           final config = randomized.config;
-          final targetItem =
-              config.interactables.firstWhere((i) => i.isTarget);
+          final targetItem = config.interactables.firstWhere((i) => i.isTarget);
 
           final session = ref.watch(
             activeSessionProvider(
@@ -116,10 +115,11 @@ LoadedScenarioConfig _randomizeTarget(LoadedScenarioConfig original) {
   if (items.length <= 1) return original;
 
   final randomIndex = Random().nextInt(items.length);
-  final newInteractables = items.indexed.map((entry) {
-    final (i, item) = entry;
-    return item.copyWith(isTarget: i == randomIndex);
-  }).toList();
+  final newInteractables =
+      items.indexed.map((entry) {
+        final (i, item) = entry;
+        return item.copyWith(isTarget: i == randomIndex);
+      }).toList();
 
   final newConfig = original.config.copyWith(
     interactables: newInteractables,
@@ -165,10 +165,7 @@ String _thaiNameFor(String id) {
 
 // แถบหัวข้อโจทย์ด้านบน — บอกว่าต้องหยิบอะไร
 class _ObjectiveBar extends StatelessWidget {
-  const _ObjectiveBar({
-    required this.targetId,
-    required this.scenarioTitle,
-  });
+  const _ObjectiveBar({required this.targetId, required this.scenarioTitle});
 
   final String targetId;
   final String scenarioTitle;
@@ -197,7 +194,11 @@ class _ObjectiveBar extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.shopping_basket_rounded, size: 20, color: kTextPrimary),
+          const Icon(
+            Icons.shopping_basket_rounded,
+            size: 20,
+            color: kTextPrimary,
+          ),
           const SizedBox(width: kSpace2),
           Text(
             'หยิบ: $targetName',
@@ -243,10 +244,7 @@ class _DailyLifeResultDialog extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
         child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: kSpace8,
-            vertical: kSpace5,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: kSpace8, vertical: kSpace5),
           decoration: BoxDecoration(
             color: kWarmWhite,
             borderRadius: kRadiusLg,
@@ -267,9 +265,10 @@ class _DailyLifeResultDialog extends StatelessWidget {
                       child: Icon(
                         Icons.star_rounded,
                         size: 48,
-                        color: filled
-                            ? kYellowPrimary
-                            : kYellowPrimary.withValues(alpha: 0.2),
+                        color:
+                            filled
+                                ? kYellowPrimary
+                                : kYellowPrimary.withValues(alpha: 0.2),
                       ),
                     );
                   }),

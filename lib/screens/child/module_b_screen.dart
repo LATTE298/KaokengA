@@ -61,4 +61,3 @@ class ModuleBScreen extends ConsumerWidget {
     );
   }
 }
-

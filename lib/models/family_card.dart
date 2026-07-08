@@ -18,7 +18,8 @@ class FamilyCard {
   final String id;
   final Uint8List imageBytes; // รูปคนในครอบครัว (resize แล้ว ~600px JPEG)
   final String answer; // คำตอบที่ถูก (เช่น "แม่")
-  final List<String> distractors; // ตัวลวงที่ผู้ปกครองกำหนด (เช่น ["พ่อ", "พี่"])
+  final List<String>
+  distractors; // ตัวลวงที่ผู้ปกครองกำหนด (เช่น ["พ่อ", "พี่"])
   final int createdAt; // epoch ms — ใช้เรียงลำดับการ์ด
 
   Map<String, dynamic> toMap() => {

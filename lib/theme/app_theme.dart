@@ -19,10 +19,7 @@ ThemeData buildAppTheme() {
     disabledBackgroundColor: kDisabledSurface,
     disabledForegroundColor: kDisabledText,
     minimumSize: const Size(120, kTouchTargetMin),
-    padding: const EdgeInsets.symmetric(
-      horizontal: kSpace6,
-      vertical: kSpace3,
-    ),
+    padding: const EdgeInsets.symmetric(horizontal: kSpace6, vertical: kSpace3),
     shape: RoundedRectangleBorder(borderRadius: kRadiusMd),
     textStyle: kButtonLabel,
   );
@@ -30,10 +27,7 @@ ThemeData buildAppTheme() {
   final outlinedButtonStyle = OutlinedButton.styleFrom(
     foregroundColor: kTextPrimary,
     minimumSize: const Size(120, kTouchTargetMin),
-    padding: const EdgeInsets.symmetric(
-      horizontal: kSpace6,
-      vertical: kSpace3,
-    ),
+    padding: const EdgeInsets.symmetric(horizontal: kSpace6, vertical: kSpace3),
     side: const BorderSide(color: kWarmBorder, width: 1.5),
     shape: RoundedRectangleBorder(borderRadius: kRadiusMd),
     textStyle: kButtonLabel.copyWith(fontWeight: FontWeight.w600),
@@ -42,10 +36,7 @@ ThemeData buildAppTheme() {
   final textButtonStyle = TextButton.styleFrom(
     foregroundColor: kBlueDark,
     minimumSize: const Size(88, kTouchTargetMin),
-    padding: const EdgeInsets.symmetric(
-      horizontal: kSpace4,
-      vertical: kSpace3,
-    ),
+    padding: const EdgeInsets.symmetric(horizontal: kSpace4, vertical: kSpace3),
     textStyle: kTextMd.copyWith(fontWeight: FontWeight.w600),
   );
 

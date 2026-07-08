@@ -36,10 +36,14 @@ class FamilyGameScreen extends ConsumerWidget {
           children: [
             ChildAsyncView(
               value: cardsAsync,
-              error: (_, __) =>
-                  Center(child: Text('โหลดไม่สำเร็จ', style: kTextLg)),
-              data: (cards) =>
-                  cards.isEmpty ? const _EmptyState() : _FamilyBoard(cards: cards),
+              error:
+                  (_, __) =>
+                      Center(child: Text('โหลดไม่สำเร็จ', style: kTextLg)),
+              data:
+                  (cards) =>
+                      cards.isEmpty
+                          ? const _EmptyState()
+                          : _FamilyBoard(cards: cards),
             ),
             const Positioned(top: 8, left: 8, child: ChildBackButton()),
           ],
@@ -99,19 +103,18 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
     super.initState();
     _session = ref.read(
       activeSessionProvider(
-        const ActiveSessionKey(
-          module: kModuleFamily,
-          contentId: 'family_quiz',
-        ),
+        const ActiveSessionKey(module: kModuleFamily, contentId: 'family_quiz'),
       ),
     );
     _controller = FamilyQuizController(
       cards: widget.cards,
-      elapsedMs: () => ref
-          .read(clockProvider)()
-          .toUtc()
-          .difference(_session.startedAt)
-          .inMilliseconds,
+      elapsedMs:
+          () =>
+              ref
+                  .read(clockProvider)()
+                  .toUtc()
+                  .difference(_session.startedAt)
+                  .inMilliseconds,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(ttsServiceProvider).speak(kTtsQuizStart);
@@ -142,7 +145,9 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
 
     if (result.completed) {
       ref.read(ttsServiceProvider).speak(kTtsQuizComplete);
-      await ref.read(sessionRecorderProvider).recordFamilyQuizCompleted(
+      await ref
+          .read(sessionRecorderProvider)
+          .recordFamilyQuizCompleted(
             FamilyQuizCompletedEvent(
               session: _session,
               answerEvents: _controller.answerEvents,
@@ -172,15 +177,16 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => GameResultDialog(
-        stars: _controller.starRating,
-        score: _controller.score,
-        detail: 'ตอบครบ ${_controller.totalQuestions} ข้อ',
-        onClose: () {
-          Navigator.of(context).pop();
-          if (context.mounted && context.canPop()) context.pop();
-        },
-      ),
+      builder:
+          (context) => GameResultDialog(
+            stars: _controller.starRating,
+            score: _controller.score,
+            detail: 'ตอบครบ ${_controller.totalQuestions} ข้อ',
+            onClose: () {
+              Navigator.of(context).pop();
+              if (context.mounted && context.canPop()) context.pop();
+            },
+          ),
     );
   }
 
@@ -225,7 +231,10 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: kRadiusLg,
-                              border: Border.all(color: kWarmBorder, width: 1.5),
+                              border: Border.all(
+                                color: kWarmBorder,
+                                width: 1.5,
+                              ),
                               boxShadow: const [kShadowMd],
                             ),
                             child: ClipRRect(
@@ -263,12 +272,15 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
                         Expanded(
                           child: _ChoicePill(
                             key: Key('family_choice_${question.choices[i]}'),
-                            prefix: _kChoicePrefixes[i % _kChoicePrefixes.length],
+                            prefix:
+                                _kChoicePrefixes[i % _kChoicePrefixes.length],
                             label: question.choices[i],
-                            background: _kChoiceBackgrounds[
-                                i % _kChoiceBackgrounds.length],
-                            locked: _controller.lockedChoices
-                                .contains(question.choices[i]),
+                            background:
+                                _kChoiceBackgrounds[i %
+                                    _kChoiceBackgrounds.length],
+                            locked: _controller.lockedChoices.contains(
+                              question.choices[i],
+                            ),
                             correctFlash: _correctFlash == question.choices[i],
                             onTap: () => _onChoiceTap(question.choices[i]),
                           ),
@@ -319,9 +331,10 @@ class _ChoicePill extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: kSpace5),
           decoration: BoxDecoration(
-            color: correctFlash
-                ? kSuccessLight
-                : locked
+            color:
+                correctFlash
+                    ? kSuccessLight
+                    : locked
                     ? kDisabledSurface
                     : background,
             borderRadius: kRadiusFull,
@@ -333,13 +346,18 @@ class _ChoicePill extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final labelStyle = constraints.maxHeight < 72
-                  ? kChildLabel.copyWith(fontSize: 18, height: 1.2)
-                  : kChildLabel;
+              final labelStyle =
+                  constraints.maxHeight < 72
+                      ? kChildLabel.copyWith(fontSize: 18, height: 1.2)
+                      : kChildLabel;
               return Center(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text('$prefix. $label', style: labelStyle, maxLines: 1),
+                  child: Text(
+                    '$prefix. $label',
+                    style: labelStyle,
+                    maxLines: 1,
+                  ),
                 ),
               );
             },

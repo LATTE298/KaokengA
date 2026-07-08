@@ -42,9 +42,10 @@ class ScenarioCard extends StatelessWidget {
 
     // ย่อขนาดฟอนต์หัวข้อลงตามส่วนเมื่อจอเตี้ยมาก (ถ้าพื้นที่ข้อความ < 110px จะเริ่มย่อ)
     // ป้องกันข้อความ 2 บรรทัด + ป้ายหมวดหมู่ ดันกันจนล้นในจอเล็กสุด
-    final titleStyle = textAreaHeight < 110
-        ? kChildLabel.copyWith(fontSize: 18, height: 1.2)
-        : kChildLabel;
+    final titleStyle =
+        textAreaHeight < 110
+            ? kChildLabel.copyWith(fontSize: 18, height: 1.2)
+            : kChildLabel;
 
     return PressableChildCard(
       onTap: onTap,

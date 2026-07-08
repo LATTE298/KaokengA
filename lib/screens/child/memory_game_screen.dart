@@ -157,15 +157,17 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => GameResultDialog(
-        stars: stars,
-        score: score,
-        detail: 'เปิดการ์ดทั้งหมด ${_controller.totalFlips} ครั้ง',
-        onClose: () {
-          Navigator.of(context).pop(); // ปิด dialog
-          if (context.mounted && context.canPop()) context.pop(); // กลับหน้าหลัก
-        },
-      ),
+      builder:
+          (context) => GameResultDialog(
+            stars: stars,
+            score: score,
+            detail: 'เปิดการ์ดทั้งหมด ${_controller.totalFlips} ครั้ง',
+            onClose: () {
+              Navigator.of(context).pop(); // ปิด dialog
+              if (context.mounted && context.canPop())
+                context.pop(); // กลับหน้าหลัก
+            },
+          ),
     );
   }
 
@@ -188,8 +190,7 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
         // คำนวณขนาดการ์ดให้พอดีทั้งความกว้างและความสูงของจอเสมอ
         // ป้องกันปัญหาการ์ดล้นจอจนต้องเลื่อนดู (spec 1.3 — ปรับ UI ให้เหมาะเด็ก).
         final tileWidth =
-            (availableWidth - spacing * (crossAxisCount - 1)) /
-            crossAxisCount;
+            (availableWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
         final tileHeight =
             (availableHeight - spacing * (rowCount - 1)) / rowCount;
         final tileSize = tileWidth < tileHeight ? tileWidth : tileHeight;
@@ -287,5 +288,3 @@ class _MemoryTileView extends StatelessWidget {
     );
   }
 }
-
-

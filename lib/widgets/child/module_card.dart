@@ -33,17 +33,19 @@ class ModuleCard extends StatelessWidget {
     // ย่อไอคอน/ฟอนต์ลงเมื่อการ์ดแคบมาก (< 130px) กันเนื้อหาเบียดจนล้น
     final isNarrow = cardWidth != null && cardWidth! < 130;
     final iconSize = isNarrow ? 42.0 : 56.0;
-    final labelStyle = (isNarrow ? kTextMd : kTextLg)
-        .copyWith(fontWeight: FontWeight.bold);
+    final labelStyle = (isNarrow ? kTextMd : kTextLg).copyWith(
+      fontWeight: FontWeight.bold,
+    );
 
     return PressableChildCard(
       onTap: onTap,
       playClickSound: true,
       child: Container(
         width: cardWidth,
-        constraints: cardWidth == null
-            ? const BoxConstraints(minWidth: 140, maxWidth: 340)
-            : null,
+        constraints:
+            cardWidth == null
+                ? const BoxConstraints(minWidth: 140, maxWidth: 340)
+                : null,
         padding: EdgeInsets.symmetric(
           horizontal: isNarrow ? kSpace2 : kSpace4,
           vertical: kSpace5,

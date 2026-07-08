@@ -107,7 +107,9 @@ void main() {
       final fallback = _FakeSpeaker();
       final player = _FakeTtsAudioPlayer();
       final service = TtsService(
-        client: _FakeTtsClient({}), // ทุกคำได้ bytes ว่าง (พฤติกรรมเดียวกับ NoOp)
+        client: _FakeTtsClient(
+          {},
+        ), // ทุกคำได้ bytes ว่าง (พฤติกรรมเดียวกับ NoOp)
         cache: LocalTtsAudioCache(directoryProvider: () async => tempDir),
         player: player,
         fallback: fallback,

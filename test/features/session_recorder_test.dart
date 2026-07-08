@@ -83,43 +83,46 @@ void main() {
       expect(record.matchEvents, events);
     });
 
-    test('records vocab quiz completion with score and answer events', () async {
-      final writer = _FakeSessionWriter();
-      final recorder = SessionRecorder(
-        repository: writer,
-        clock: () => DateTime.utc(2026, 4, 20, 10, 1, 30),
-        uuidFactory: () => 'unused',
-      );
-      const events = [
-        MatchEvent(pairId: 'cat', matched: false, atMs: 1000),
-        MatchEvent(pairId: 'cat', matched: true, atMs: 2500),
-      ];
+    test(
+      'records vocab quiz completion with score and answer events',
+      () async {
+        final writer = _FakeSessionWriter();
+        final recorder = SessionRecorder(
+          repository: writer,
+          clock: () => DateTime.utc(2026, 4, 20, 10, 1, 30),
+          uuidFactory: () => 'unused',
+        );
+        const events = [
+          MatchEvent(pairId: 'cat', matched: false, atMs: 1000),
+          MatchEvent(pairId: 'cat', matched: true, atMs: 2500),
+        ];
 
-      await recorder.recordVocabQuizCompleted(
-        VocabQuizCompletedEvent(
-          session: ActiveSession(
-            sessionId: 'session-4',
-            uid: 'uid-1',
-            module: kModuleVocab,
-            contentId: 'quiz_animals',
-            startedAt: DateTime.utc(2026, 4, 20, 10),
+        await recorder.recordVocabQuizCompleted(
+          VocabQuizCompletedEvent(
+            session: ActiveSession(
+              sessionId: 'session-4',
+              uid: 'uid-1',
+              module: kModuleVocab,
+              contentId: 'quiz_animals',
+              startedAt: DateTime.utc(2026, 4, 20, 10),
+            ),
+            answerEvents: events,
+            score: 8,
+            stars: 2,
           ),
-          answerEvents: events,
-          score: 8,
-          stars: 2,
-        ),
-      );
+        );
 
-      final record = writer.records.single;
-      expect(record.sessionId, 'session-4');
-      expect(record.module, kModuleVocab);
-      expect(record.scenarioId, 'quiz_animals');
-      expect(record.durationMs, 90000);
-      expect(record.completed, isTrue);
-      expect(record.score, 8);
-      expect(record.stars, 2);
-      expect(record.matchEvents, events);
-    });
+        final record = writer.records.single;
+        expect(record.sessionId, 'session-4');
+        expect(record.module, kModuleVocab);
+        expect(record.scenarioId, 'quiz_animals');
+        expect(record.durationMs, 90000);
+        expect(record.completed, isTrue);
+        expect(record.score, 8);
+        expect(record.stars, 2);
+        expect(record.matchEvents, events);
+      },
+    );
 
     test('null uid skips repository writes', () async {
       final writer = _FakeSessionWriter();

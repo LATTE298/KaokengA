@@ -33,7 +33,7 @@ class InteractableComponent extends PositionComponent
   final bool reduceMotion;
   final Set<String> placeholderImagePaths;
   final void Function(Vector2 point)? onPathSample;
-  final void Function()? onMistake;   // เพิ่ม
+  final void Function()? onMistake; // เพิ่ม
 
   final Vector2 _startPosition;
   bool _isBeingDragged = false;

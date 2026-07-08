@@ -62,7 +62,8 @@ class _BreakReminderDialogState extends ConsumerState<BreakReminderDialog> {
     final gapBetweenButtons = compact ? kSpace1 : kSpace2;
     final vPadding = compact ? kSpace3 : kSpace4;
 
-    final titleStyle = compact ? kTextMd.copyWith(fontWeight: FontWeight.w700) : kTextLg;
+    final titleStyle =
+        compact ? kTextMd.copyWith(fontWeight: FontWeight.w700) : kTextLg;
     final bodyStyle = (compact ? kTextXs : kTextSm).copyWith(
       color: kTextSecondary,
     );

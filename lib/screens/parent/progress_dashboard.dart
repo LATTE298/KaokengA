@@ -41,9 +41,7 @@ class ProgressDashboard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final records = ref.watch(activityLogProvider);
     final scenarios = ref.watch(scenarioListProvider).valueOrNull ?? const [];
-    final titles = {
-      for (final s in scenarios) s.scenarioId: s.titleTh,
-    };
+    final titles = {for (final s in scenarios) s.scenarioId: s.titleTh};
 
     return ChildAsyncView<List<SessionRecord>>(
       value: records,
@@ -51,7 +49,10 @@ class ProgressDashboard extends ConsumerWidget {
       error:
           (_, __) => Center(child: Text('โหลดข้อมูลไม่สำเร็จ', style: kTextMd)),
       data: (items) {
-        final summary = computeDashboardSummary(items, now: now ?? DateTime.now());
+        final summary = computeDashboardSummary(
+          items,
+          now: now ?? DateTime.now(),
+        );
         if (!summary.hasData) {
           return Center(
             child: Padding(
@@ -104,11 +105,7 @@ class _DashboardBody extends StatelessWidget {
                   )
                   : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      main,
-                      const SizedBox(height: kSpace5),
-                      tips,
-                    ],
+                    children: [main, const SizedBox(height: kSpace5), tips],
                   ),
         );
       },
@@ -352,9 +349,7 @@ class _DenseSkillChip extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 CircularProgressIndicator(
-                  value: percent == null
-                      ? 0
-                      : (percent / 100).clamp(0.0, 1.0),
+                  value: percent == null ? 0 : (percent / 100).clamp(0.0, 1.0),
                   strokeWidth: 5,
                   backgroundColor: kWarmSurface,
                   valueColor: AlwaysStoppedAnimation(color),
@@ -405,9 +400,7 @@ class _DenseTrend extends StatelessWidget {
           Expanded(
             child:
                 trend.length < 2
-                    ? Center(
-                      child: Text('เล่นอย่างน้อย 2 วัน', style: kTextXs),
-                    )
+                    ? Center(child: Text('เล่นอย่างน้อย 2 วัน', style: kTextXs))
                     : CustomPaint(
                       size: Size.infinite,
                       painter: _TrendPainter(trend),
@@ -511,9 +504,10 @@ class _DenseTipsState extends State<_DenseTips> {
   Widget _tipPage(SkillTip tip) {
     final color =
         tip.dimension == null ? kYellowDark : _skillColors[tip.dimension]!;
-    final icon = tip.dimension == null
-        ? Icons.schedule_rounded
-        : _skillIcons[tip.dimension]!;
+    final icon =
+        tip.dimension == null
+            ? Icons.schedule_rounded
+            : _skillIcons[tip.dimension]!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kSpace2),
       child: Column(
@@ -567,11 +561,7 @@ class _NavArrow extends StatelessWidget {
     return InkResponse(
       onTap: enabled ? onTap : null,
       radius: 20,
-      child: Icon(
-        icon,
-        size: 26,
-        color: enabled ? kYellowDark : kWarmBorder,
-      ),
+      child: Icon(icon, size: 26, color: enabled ? kYellowDark : kWarmBorder),
     );
   }
 }
@@ -595,9 +585,10 @@ class _DenseGames extends StatelessWidget {
               Expanded(child: _denseGameChip(games[i])),
               const SizedBox(width: kSpace2),
               Expanded(
-                child: i + 1 < games.length
-                    ? _denseGameChip(games[i + 1])
-                    : const SizedBox.shrink(),
+                child:
+                    i + 1 < games.length
+                        ? _denseGameChip(games[i + 1])
+                        : const SizedBox.shrink(),
               ),
             ],
           ),
@@ -608,7 +599,10 @@ class _DenseGames extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('เกมที่เล่นล่าสุด', style: kTextXs.copyWith(color: kTextPrimary)),
+          Text(
+            'เกมที่เล่นล่าสุด',
+            style: kTextXs.copyWith(color: kTextPrimary),
+          ),
           const SizedBox(height: kSpace1),
           Expanded(child: Column(children: rows)),
         ],
@@ -766,10 +760,7 @@ class _SkillRow extends StatelessWidget {
           runSpacing: kSpace3,
           children: [
             for (final skill in skills)
-              SizedBox(
-                width: cardWidth,
-                child: _SkillCard(skill: skill),
-              ),
+              SizedBox(width: cardWidth, child: _SkillCard(skill: skill)),
           ],
         );
       },
@@ -814,7 +805,8 @@ class _SkillCard extends StatelessWidget {
                   width: 84,
                   height: 84,
                   child: CircularProgressIndicator(
-                    value: percent == null ? 0 : (percent / 100).clamp(0.0, 1.0),
+                    value:
+                        percent == null ? 0 : (percent / 100).clamp(0.0, 1.0),
                     strokeWidth: 8,
                     backgroundColor: kWarmSurface,
                     valueColor: AlwaysStoppedAnimation(color),
@@ -851,7 +843,10 @@ class _TrendCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('แนวโน้มพัฒนาการ (${trend.length} วันที่มีข้อมูล)', style: kTextMd),
+          Text(
+            'แนวโน้มพัฒนาการ (${trend.length} วันที่มีข้อมูล)',
+            style: kTextMd,
+          ),
           const SizedBox(height: kSpace4),
           SizedBox(
             height: 160,
@@ -884,31 +879,42 @@ class _TrendPainter extends CustomPainter {
     final chartW = size.width - leftPad;
     final chartH = size.height - bottomPad;
 
-    final gridPaint = Paint()
-      ..color = kBluePrimary.withValues(alpha: 0.15)
-      ..strokeWidth = 1;
+    final gridPaint =
+        Paint()
+          ..color = kBluePrimary.withValues(alpha: 0.15)
+          ..strokeWidth = 1;
     final axisStyle = kTextXs;
 
     // เส้นแนวนอน + ป้าย % ที่ 0/50/100
     for (final pct in [0, 50, 100]) {
       final y = chartH - (pct / 100) * chartH;
       canvas.drawLine(Offset(leftPad, y), Offset(size.width, y), gridPaint);
-      _paintText(canvas, '$pct%', Offset(0, y - 7), axisStyle, width: leftPad - 6, alignRight: true);
+      _paintText(
+        canvas,
+        '$pct%',
+        Offset(0, y - 7),
+        axisStyle,
+        width: leftPad - 6,
+        alignRight: true,
+      );
     }
 
     // เส้นแนวโน้ม
     final points = <Offset>[];
     for (var i = 0; i < trend.length; i++) {
-      final x = leftPad + (trend.length == 1 ? chartW / 2 : chartW * i / (trend.length - 1));
+      final x =
+          leftPad +
+          (trend.length == 1 ? chartW / 2 : chartW * i / (trend.length - 1));
       final y = chartH - (trend[i].percent / 100).clamp(0.0, 1.0) * chartH;
       points.add(Offset(x, y));
     }
 
-    final linePaint = Paint()
-      ..color = kBluePrimary
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeJoin = StrokeJoin.round;
+    final linePaint =
+        Paint()
+          ..color = kBluePrimary
+          ..strokeWidth = 3
+          ..style = PaintingStyle.stroke
+          ..strokeJoin = StrokeJoin.round;
     final path = Path()..moveTo(points.first.dx, points.first.dy);
     for (final p in points.skip(1)) {
       path.lineTo(p.dx, p.dy);
@@ -949,9 +955,10 @@ class _TrendPainter extends CustomPainter {
     final tp = TextPainter(
       text: TextSpan(text: text, style: style),
       textDirection: TextDirection.ltr,
-      textAlign: alignRight
-          ? TextAlign.right
-          : center
+      textAlign:
+          alignRight
+              ? TextAlign.right
+              : center
               ? TextAlign.center
               : TextAlign.left,
     )..layout(minWidth: width ?? 0, maxWidth: width ?? double.infinity);
@@ -992,10 +999,7 @@ class _RecentGames extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Text(
-                          'คะแนน ${game.score}/10',
-                          style: kTextXs,
-                        ),
+                        Text('คะแนน ${game.score}/10', style: kTextXs),
                       ],
                     ),
                   ),
@@ -1018,8 +1022,7 @@ IconData _gameIcon(String module) => switch (module) {
 String _gameLabel(RecentGame game, Map<String, String> titles) {
   return switch (game.module) {
     kModuleDailyLife => titles[game.scenarioId] ?? 'ชีวิตประจำวัน',
-    kModuleMemory =>
-      'จับคู่ภาพ${_categorySuffix(game.scenarioId, 'memory_')}',
+    kModuleMemory => 'จับคู่ภาพ${_categorySuffix(game.scenarioId, 'memory_')}',
     kModuleVocab => 'ตอบคำถาม${_categorySuffix(game.scenarioId, 'quiz_')}',
     _ => game.scenarioId,
   };

@@ -46,11 +46,7 @@ extension ResponsiveContext on BuildContext {
 
   /// เลือกค่าตามประเภทจอ — เขียนสั้นกว่า if/else เช่น
   /// `final cols = context.responsive(phone: 3, tablet: 4);`
-  T responsive<T>({
-    required T phone,
-    T? largePhone,
-    required T tablet,
-  }) {
+  T responsive<T>({required T phone, T? largePhone, required T tablet}) {
     switch (deviceSize) {
       case DeviceSize.phone:
         return phone;

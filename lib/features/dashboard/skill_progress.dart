@@ -210,9 +210,7 @@ List<SkillTip> skillTips(DashboardSummary summary) {
       summary.skills.where((s) => s.percent != null).toList()
         ..sort((a, b) => a.percent!.compareTo(b.percent!));
   final ordered =
-      scored.isEmpty
-          ? SkillDimension.values
-          : scored.map((s) => s.dimension);
+      scored.isEmpty ? SkillDimension.values : scored.map((s) => s.dimension);
   return [
     for (final dimension in ordered) _dimensionTips[dimension]!,
     _playtimeTip,
@@ -222,9 +220,7 @@ List<SkillTip> skillTips(DashboardSummary summary) {
 SkillScore _skillScore(List<SessionRecord> scored, SkillDimension dimension) {
   final relevant =
       scored
-          .where(
-            (r) => kModuleSkillMap[r.module]?.contains(dimension) ?? false,
-          )
+          .where((r) => kModuleSkillMap[r.module]?.contains(dimension) ?? false)
           .map((r) => r.score!)
           .toList();
   return SkillScore(

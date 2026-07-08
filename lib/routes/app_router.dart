@@ -26,8 +26,9 @@ import 'app_routes.dart';
 // อยู่ "เหนือ" Navigator ทำให้เรียก showDialog(context: ...) ตรงๆไม่ได้ (error: Navigator
 // operation requested with a context that does not include a Navigator) การมี key กลางที่
 // ชี้ไป Navigator โดยตรงจึงเป็นทางแก้ที่สะอาดที่สุด โดยไม่ต้องย้ายตำแหน่ง gate
-final GlobalKey<NavigatorState> rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
 
 // GoRouter config (spec 02 §All Routes). Child routes and parent routes live
 // side-by-side; the parent gate screen handles the transition between modes.

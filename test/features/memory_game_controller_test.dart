@@ -119,10 +119,7 @@ void main() {
         ],
       );
 
-      final controller = MemoryGameController(
-        pack: bigPack,
-        random: Random(1),
-      );
+      final controller = MemoryGameController(pack: bigPack, random: Random(1));
 
       expect(controller.tiles, hasLength(16));
       final pairIds = controller.tiles.map((t) => t.pair.id).toSet();

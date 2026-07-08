@@ -26,12 +26,13 @@ class ModuleCScreen extends ConsumerWidget {
                 builder: (context, constraints) {
                   // แบ่งความกว้างจริงให้การ์ด 2 ใบ + ช่องว่างกลาง (กฎ responsive
                   // ข้อ 3 — แบบเดียวกับ mode_select ที่หาร 3)
-                  final cardWidth = ((constraints.maxWidth -
-                              kInteractiveGapMin -
-                              kSpace6 * 2) /
-                          2)
-                      .clamp(140.0, 340.0)
-                      .toDouble();
+                  final cardWidth =
+                      ((constraints.maxWidth -
+                                  kInteractiveGapMin -
+                                  kSpace6 * 2) /
+                              2)
+                          .clamp(140.0, 340.0)
+                          .toDouble();
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

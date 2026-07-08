@@ -95,9 +95,7 @@ class LocalTtsAudioCache implements TtsAudioCache {
 
   Future<Directory> _cacheDirectory() async {
     final root = await _directoryProvider();
-    return Directory(
-      '${root.path}${Platform.pathSeparator}tts_cache',
-    );
+    return Directory('${root.path}${Platform.pathSeparator}tts_cache');
   }
 
   static Future<Directory> _defaultDirectoryProvider() {

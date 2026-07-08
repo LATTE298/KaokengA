@@ -86,8 +86,9 @@ class DailyLifeApp extends StatelessWidget {
       // ตั้งที่ระดับ MaterialApp.router(builder:) เพื่อให้ gate อยู่เหนือ Navigator แต่อยู่
       // ใต้ MaterialApp — มี Theme/Localizations/Overlay ให้ showDialog ใช้ได้ และ state ของ
       // gate ไม่ถูกทำลายเมื่อเปลี่ยนเส้นทาง (route)
-      builder: (context, child) =>
-          UsageTimerGate(child: child ?? const SizedBox.shrink()),
+      builder:
+          (context, child) =>
+              UsageTimerGate(child: child ?? const SizedBox.shrink()),
     );
   }
 }

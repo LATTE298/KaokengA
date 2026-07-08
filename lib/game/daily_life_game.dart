@@ -31,7 +31,8 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     List<GamePosition> dragPath,
     int score,
     int stars,
-  ) onComplete;
+  )
+  onComplete;
   final bool enablePromptTimers;
   final Set<String> _placeholderImagePaths;
 

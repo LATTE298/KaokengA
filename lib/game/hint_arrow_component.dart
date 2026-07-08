@@ -18,11 +18,12 @@ class HintArrowComponent extends PositionComponent {
   final bool reduceMotion;
 
   final _fill = Paint()..color = kYellowPrimary;
-  final _border = Paint()
-    ..color = kYellowDark
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 3
-    ..strokeJoin = StrokeJoin.round;
+  final _border =
+      Paint()
+        ..color = kYellowDark
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeJoin = StrokeJoin.round;
 
   @override
   Future<void> onLoad() async {
@@ -49,15 +50,16 @@ class HintArrowComponent extends PositionComponent {
     final stemW = w * 0.34;
 
     // ก้านลูกศร (มุมโค้ง) + หัวสามเหลี่ยมชี้ลง รวมเป็นรูปเดียว
-    final shape = Path()
-      ..moveTo((w - stemW) / 2, 0)
-      ..lineTo((w + stemW) / 2, 0)
-      ..lineTo((w + stemW) / 2, h * 0.5)
-      ..lineTo(w * 0.9, h * 0.5)
-      ..lineTo(w * 0.5, h)
-      ..lineTo(w * 0.1, h * 0.5)
-      ..lineTo((w - stemW) / 2, h * 0.5)
-      ..close();
+    final shape =
+        Path()
+          ..moveTo((w - stemW) / 2, 0)
+          ..lineTo((w + stemW) / 2, 0)
+          ..lineTo((w + stemW) / 2, h * 0.5)
+          ..lineTo(w * 0.9, h * 0.5)
+          ..lineTo(w * 0.5, h)
+          ..lineTo(w * 0.1, h * 0.5)
+          ..lineTo((w - stemW) / 2, h * 0.5)
+          ..close();
 
     canvas.drawPath(shape, _fill);
     canvas.drawPath(shape, _border);

@@ -50,8 +50,7 @@ class ModuleAScreen extends ConsumerWidget {
                       // เผื่อพื้นที่ปุ่มย้อนกลับด้านบนซ้ายเล็กน้อย แล้วใช้ความสูงที่เหลือ
                       // ทั้งหมดเป็นความสูงการ์ด (clamp กันเตี้ย/สูงเกินในเคสสุดขั้ว)
                       final availableHeight = constraints.maxHeight - kSpace8;
-                      final cardHeight =
-                          availableHeight.clamp(200.0, 420.0);
+                      final cardHeight = availableHeight.clamp(200.0, 420.0);
 
                       return Align(
                         alignment: Alignment.centerLeft,
@@ -59,8 +58,9 @@ class ModuleAScreen extends ConsumerWidget {
                           scrollDirection: Axis.horizontal,
                           shrinkWrap: true,
                           itemCount: scenarios.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: kInteractiveGapMin),
+                          separatorBuilder:
+                              (_, __) =>
+                                  const SizedBox(width: kInteractiveGapMin),
                           itemBuilder: (context, i) {
                             final s = scenarios[i];
                             return Center(
@@ -68,9 +68,7 @@ class ModuleAScreen extends ConsumerWidget {
                                 summary: s,
                                 cardHeight: cardHeight,
                                 onTap: () {
-                                  ref
-                                      .read(ttsServiceProvider)
-                                      .speak(s.titleTh);
+                                  ref.read(ttsServiceProvider).speak(s.titleTh);
                                   context.push(
                                     '$kRouteScenarioGame/${s.scenarioId}',
                                   );

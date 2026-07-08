@@ -10,7 +10,11 @@ void main() {
     test('overall percent averages all scored sessions (x10)', () {
       final summary = computeDashboardSummary([
         _rec(module: kModuleMemory, score: 10, endedAt: '2026-06-16T10:00:00'),
-        _rec(module: kModuleDailyLife, score: 6, endedAt: '2026-06-16T11:00:00'),
+        _rec(
+          module: kModuleDailyLife,
+          score: 6,
+          endedAt: '2026-06-16T11:00:00',
+        ),
       ], now: now);
 
       // (10 + 6) / 2 * 10 = 80
@@ -23,7 +27,11 @@ void main() {
       final summary = computeDashboardSummary([
         _rec(module: kModuleMemory, score: 9, endedAt: '2026-06-16T10:00:00'),
         _rec(module: kModuleVocab, score: 8, endedAt: '2026-06-16T11:00:00'),
-        _rec(module: kModuleDailyLife, score: 7, endedAt: '2026-06-16T12:00:00'),
+        _rec(
+          module: kModuleDailyLife,
+          score: 7,
+          endedAt: '2026-06-16T12:00:00',
+        ),
       ], now: now);
 
       final byDim = {for (final s in summary.skills) s.dimension: s};
@@ -32,10 +40,7 @@ void main() {
       expect(byDim[SkillDimension.communication]!.percent, 80);
       expect(byDim[SkillDimension.dailyLife]!.percent, 70);
       // ครบ 4 ด้านเสมอ เรียงตาม enum
-      expect(
-        summary.skills.map((s) => s.dimension),
-        SkillDimension.values,
-      );
+      expect(summary.skills.map((s) => s.dimension), SkillDimension.values);
     });
 
     test('a dimension with no sessions reports null percent', () {
@@ -64,10 +69,14 @@ void main() {
     });
 
     test('trend excludes sessions older than the window', () {
-      final summary = computeDashboardSummary([
-        _rec(module: kModuleMemory, score: 5, endedAt: '2026-06-01T09:00:00'),
-        _rec(module: kModuleMemory, score: 9, endedAt: '2026-06-16T09:00:00'),
-      ], now: now, trendDays: 14);
+      final summary = computeDashboardSummary(
+        [
+          _rec(module: kModuleMemory, score: 5, endedAt: '2026-06-01T09:00:00'),
+          _rec(module: kModuleMemory, score: 9, endedAt: '2026-06-16T09:00:00'),
+        ],
+        now: now,
+        trendDays: 14,
+      );
 
       // 1 มิ.ย. อยู่นอกช่วง 14 วันล่าสุด (3-16 มิ.ย.)
       expect(summary.trend, hasLength(1));
@@ -75,11 +84,19 @@ void main() {
     });
 
     test('recent games are newest-first and limited', () {
-      final summary = computeDashboardSummary([
-        _rec(module: kModuleMemory, score: 4, endedAt: '2026-06-16T08:00:00'),
-        _rec(module: kModuleVocab, score: 6, endedAt: '2026-06-16T09:00:00'),
-        _rec(module: kModuleDailyLife, score: 8, endedAt: '2026-06-16T10:00:00'),
-      ], now: now, recentGamesLimit: 2);
+      final summary = computeDashboardSummary(
+        [
+          _rec(module: kModuleMemory, score: 4, endedAt: '2026-06-16T08:00:00'),
+          _rec(module: kModuleVocab, score: 6, endedAt: '2026-06-16T09:00:00'),
+          _rec(
+            module: kModuleDailyLife,
+            score: 8,
+            endedAt: '2026-06-16T10:00:00',
+          ),
+        ],
+        now: now,
+        recentGamesLimit: 2,
+      );
 
       expect(summary.recentGames, hasLength(2));
       expect(summary.recentGames.first.module, kModuleDailyLife);
@@ -90,7 +107,11 @@ void main() {
 
     test('sessions without a score are ignored', () {
       final summary = computeDashboardSummary([
-        _rec(module: kModuleMemory, score: null, endedAt: '2026-06-16T10:00:00'),
+        _rec(
+          module: kModuleMemory,
+          score: null,
+          endedAt: '2026-06-16T10:00:00',
+        ),
         _rec(module: kModuleMemory, score: 10, endedAt: '2026-06-16T11:00:00'),
       ], now: now);
 

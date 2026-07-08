@@ -21,8 +21,7 @@ class FamilyCardRepository {
   final Uuid _uuid;
 
   List<FamilyCard> listCards() {
-    final cards =
-        _box.values.map((v) => FamilyCard.fromMap(v as Map)).toList();
+    final cards = _box.values.map((v) => FamilyCard.fromMap(v as Map)).toList();
     cards.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return cards;
   }
@@ -57,7 +56,8 @@ class FamilyCardRepository {
   /// static เพื่อให้ unit test เรียกได้ตรงๆ ไม่ต้องมี ImagePicker
   static Uint8List resizeImage(Uint8List bytes) {
     final decoded = img.decodeImage(bytes);
-    if (decoded == null) return bytes; // ถอดรหัสไม่ได้ (เช่น format แปลก) — เก็บดิบ
+    if (decoded == null)
+      return bytes; // ถอดรหัสไม่ได้ (เช่น format แปลก) — เก็บดิบ
     final resized =
         decoded.width >= decoded.height
             ? img.copyResize(decoded, width: 600)

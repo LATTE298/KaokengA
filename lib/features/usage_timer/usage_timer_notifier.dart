@@ -41,11 +41,7 @@ class UsageTimerState {
     breakDue: false,
   );
 
-  UsageTimerState copyWith({
-    Duration? elapsed,
-    bool? running,
-    bool? breakDue,
-  }) {
+  UsageTimerState copyWith({Duration? elapsed, bool? running, bool? breakDue}) {
     return UsageTimerState(
       elapsed: elapsed ?? this.elapsed,
       running: running ?? this.running,
@@ -118,11 +114,7 @@ class UsageTimerNotifier extends StateNotifier<UsageTimerState> {
       _timer?.cancel();
       _timer = null;
       _resumeAt = null;
-      state = state.copyWith(
-        elapsed: limit,
-        running: false,
-        breakDue: true,
-      );
+      state = state.copyWith(elapsed: limit, running: false, breakDue: true);
     }
   }
 
@@ -141,5 +133,5 @@ final usageTimerLimitProvider = Provider<Duration>(
 
 final usageTimerProvider =
     StateNotifierProvider<UsageTimerNotifier, UsageTimerState>((ref) {
-  return UsageTimerNotifier(limit: ref.watch(usageTimerLimitProvider));
-});
+      return UsageTimerNotifier(limit: ref.watch(usageTimerLimitProvider));
+    });

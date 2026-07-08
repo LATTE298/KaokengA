@@ -174,15 +174,16 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => GameResultDialog(
-        stars: _controller.starRating,
-        score: _controller.score,
-        detail: 'ตอบครบ ${_controller.totalQuestions} ข้อ',
-        onClose: () {
-          Navigator.of(context).pop();
-          if (context.mounted && context.canPop()) context.pop();
-        },
-      ),
+      builder:
+          (context) => GameResultDialog(
+            stars: _controller.starRating,
+            score: _controller.score,
+            detail: 'ตอบครบ ${_controller.totalQuestions} ข้อ',
+            onClose: () {
+              Navigator.of(context).pop();
+              if (context.mounted && context.canPop()) context.pop();
+            },
+          ),
     );
   }
 
