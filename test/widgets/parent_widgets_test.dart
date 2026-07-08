@@ -32,7 +32,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('parent-auth-submit')));
+    final submit = find.byKey(const Key('parent-auth-submit'));
+    await tester.ensureVisible(submit);
+    await tester.pumpAndSettle();
+    await tester.tap(submit);
     await tester.pump();
 
     expect(find.text('รูปแบบอีเมลไม่ถูกต้อง'), findsOneWidget);

@@ -50,6 +50,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       portrait: true,
       child: Scaffold(
         backgroundColor: kWarmWhite,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            tooltip: 'กลับ',
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(kRouteModeSelect);
+              }
+            },
+          ),
+        ),
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
