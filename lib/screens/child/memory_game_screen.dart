@@ -299,35 +299,13 @@ class _BackFace extends StatelessWidget {
           width: 2,
         ),
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 8,
-            right: 10,
-            child: Icon(
-              Icons.auto_awesome,
-              size: 13,
-              color: Colors.white.withValues(alpha: 0.4),
-            ),
+      child: Center(
+        child: FractionallySizedBox(
+          widthFactor: 0.5,
+          child: FittedBox(
+            child: Icon(Icons.star_rounded, color: kYellowPrimary),
           ),
-          Positioned(
-            bottom: 10,
-            left: 9,
-            child: Icon(
-              Icons.auto_awesome,
-              size: 9,
-              color: Colors.white.withValues(alpha: 0.28),
-            ),
-          ),
-          Center(
-            child: FractionallySizedBox(
-              widthFactor: 0.5,
-              child: FittedBox(
-                child: Icon(Icons.star_rounded, color: kYellowPrimary),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -351,11 +329,14 @@ class _FrontFace extends StatelessWidget {
           width: matched ? 3 : 2,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(kSpace1),
+      // รูปเต็มการ์ด (cover) ให้ใหญ่ชัด — clip ตามมุมโค้งการ์ด กันภาพล้นมุม
+      child: ClipRRect(
+        borderRadius: kRadiusLg,
         child: Image.asset(
           tile.pair.image,
-          fit: BoxFit.contain,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
           errorBuilder:
               (_, __, ___) => const Center(
                 child: Icon(
