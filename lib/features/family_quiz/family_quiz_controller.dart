@@ -131,8 +131,27 @@ class FamilyQuizController {
     }).toList();
   }
 
-  // ดึงคำตอบของการ์ดอื่น (ไม่ซ้ำคำตอบข้อนี้) มาเป็นตัวลวงแบบสุ่ม สูงสุด 2 ตัว
-  // ถ้ามีสมาชิกน้อยกว่า 3 คน ตัวเลือกจะน้อยตาม — UI จะแนะนำให้เพิ่มก่อนเปิดโหมดนี้
+  // คำเรียกญาติพื้นฐาน — ใช้เป็นตัวลวง "สำรอง" ในโหมดสุ่มเมื่อการ์ดในคลังยังน้อย
+  // (< 3 ใบ) เพื่อให้มีตัวเลือกครบ 3 ปุ่มเสมอ ไม่เจอเกมปุ่มเดียว. เป็นทางแก้ชั่วคราว
+  // จนกว่าจะมีสมาชิกจริงมากพอ — ตัวลวงจริงจากการ์ดอื่นถูกใช้ก่อนคำเหล่านี้เสมอ
+  static const List<String> basicFamilyWords = [
+    'พ่อ',
+    'แม่',
+    'พี่',
+    'น้อง',
+    'ปู่',
+    'ย่า',
+    'ตา',
+    'ยาย',
+    'ลุง',
+    'ป้า',
+    'น้า',
+    'อา',
+  ];
+
+  // ตัวลวงโหมดสุ่ม: เอา "คำตอบของการ์ดอื่น" มาก่อน (ไม่ซ้ำคำตอบข้อนี้) สูงสุด 2 ตัว
+  // ถ้ายังไม่ครบ 2 (การ์ดในคลัง < 3) เติมจาก basicFamilyWords ให้ครบ — กันซ้ำทั้ง
+  // คำตอบข้อนี้และตัวลวงที่เลือกไปแล้ว
   List<String> _randomDistractors(
     FamilyCard card,
     List<FamilyCard> allCards,
@@ -145,6 +164,19 @@ class FamilyQuizController {
             .toSet()
             .toList()
           ..shuffle(random);
-    return others.take(2).toList();
+    final chosen = <String>{...others.take(2)};
+
+    if (chosen.length < 2) {
+      final fillers =
+          basicFamilyWords
+              .where((w) => w != card.answer && !chosen.contains(w))
+              .toList()
+            ..shuffle(random);
+      for (final w in fillers) {
+        if (chosen.length >= 2) break;
+        chosen.add(w);
+      }
+    }
+    return chosen.toList();
   }
 }

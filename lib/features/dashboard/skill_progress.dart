@@ -26,6 +26,9 @@ const Map<String, List<SkillDimension>> kModuleSkillMap = {
   kModuleMemory: [SkillDimension.memory],
   kModuleVocab: [SkillDimension.observation, SkillDimension.communication],
   kModuleDailyLife: [SkillDimension.dailyLife],
+  // เกมครอบครัว "นี่คือใคร" ฝึกความจำ (จำคนที่รู้จักในบ้าน) + การสื่อสาร (เรียกชื่อ/
+  // ความสัมพันธ์ของคนในครอบครัว) — ต่างจาก vocab ที่เน้นการสังเกตของแปลกใหม่
+  kModuleFamily: [SkillDimension.memory, SkillDimension.communication],
 };
 
 /// แปลงเปอร์เซ็นต์ (0-100) เป็นระดับคำอธิบายภาษาไทย (ใช้ทั้งภาพรวมและรายด้าน)

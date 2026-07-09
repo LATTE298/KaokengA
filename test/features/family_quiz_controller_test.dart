@@ -102,5 +102,45 @@ void main() {
         expect(distractors.every((ch) => ['พ่อ', 'พี่'].contains(ch)), isTrue);
       },
     );
+
+    test('โหมดสุ่ม: การ์ดใบเดียวก็ได้ตัวเลือกครบ 3 (เติมคำญาติพื้นฐาน)', () {
+      final c = FamilyQuizController(
+        cards: [_card('1', 'แม่', const [], random: true)],
+        questionCount: 1,
+        random: Random(3),
+      );
+      final choices = c.currentQuestion.choices;
+      expect(choices, hasLength(3)); // ไม่เหลือปุ่มเดียวอีกต่อไป
+      expect(choices, contains('แม่'));
+      final distractors = choices.where((ch) => ch != 'แม่').toList();
+      expect(distractors.toSet(), hasLength(2)); // ตัวลวง 2 ตัว ไม่ซ้ำกัน
+      // ตัวลวงมาจากคลังคำญาติพื้นฐาน และไม่ใช่คำตอบ
+      expect(
+        distractors.every(
+          (d) =>
+              d != 'แม่' && FamilyQuizController.basicFamilyWords.contains(d),
+        ),
+        isTrue,
+      );
+    });
+
+    test('โหมดสุ่มการ์ด 2 ใบ: ใช้คำตอบคนอื่นก่อนแล้วเติมพื้นฐานให้ครบ 3', () {
+      final c = FamilyQuizController(
+        cards: [
+          _card('1', 'แม่', const [], random: true),
+          _card('2', 'ยาย', const [], random: true),
+        ],
+        questionCount: 2,
+        random: Random(9),
+      );
+      for (var i = 0; i < c.totalQuestions; i++) {
+        final q = c.currentQuestion;
+        expect(q.choices, hasLength(3)); // ทุกข้อครบ 3 ปุ่ม
+        // คำตอบของอีกการ์ด (ตัวลวงจริง) ต้องมาก่อนคำพื้นฐานเสมอ
+        final otherAnswer = q.card.answer == 'แม่' ? 'ยาย' : 'แม่';
+        expect(q.choices, contains(otherAnswer));
+        c.answer(q.card.answer);
+      }
+    });
   });
 }

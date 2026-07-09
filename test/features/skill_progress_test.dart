@@ -43,6 +43,19 @@ void main() {
       expect(summary.skills.map((s) => s.dimension), SkillDimension.values);
     });
 
+    test('family module feeds memory + communication', () {
+      final summary = computeDashboardSummary([
+        _rec(module: kModuleFamily, score: 10, endedAt: '2026-06-16T10:00:00'),
+      ], now: now);
+
+      final byDim = {for (final s in summary.skills) s.dimension: s};
+      expect(byDim[SkillDimension.memory]!.percent, 100);
+      expect(byDim[SkillDimension.communication]!.percent, 100);
+      // เกมครอบครัวไม่เข้าด้านการสังเกต/การใช้ชีวิตประจำวัน
+      expect(byDim[SkillDimension.observation]!.percent, isNull);
+      expect(byDim[SkillDimension.dailyLife]!.percent, isNull);
+    });
+
     test('a dimension with no sessions reports null percent', () {
       final summary = computeDashboardSummary([
         _rec(module: kModuleMemory, score: 8, endedAt: '2026-06-16T10:00:00'),

@@ -1016,6 +1016,7 @@ IconData _gameIcon(String module) => switch (module) {
   kModuleDailyLife => Icons.shopping_basket_rounded,
   kModuleMemory => Icons.grid_view_rounded,
   kModuleVocab => Icons.quiz_rounded,
+  kModuleFamily => Icons.diversity_3_rounded,
   _ => Icons.videogame_asset_rounded,
 };
 
@@ -1024,6 +1025,7 @@ String _gameLabel(RecentGame game, Map<String, String> titles) {
     kModuleDailyLife => titles[game.scenarioId] ?? 'ชีวิตประจำวัน',
     kModuleMemory => 'จับคู่ภาพ${_categorySuffix(game.scenarioId, 'memory_')}',
     kModuleVocab => 'ตอบคำถาม${_categorySuffix(game.scenarioId, 'quiz_')}',
+    kModuleFamily => 'ครอบครัว',
     _ => game.scenarioId,
   };
 }
