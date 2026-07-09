@@ -63,7 +63,7 @@
 ## Priority Queue (Next Up)
 1. Polish — ลูกศรใบ้ Module A (15 วิ), จับคู่ภาพ 8→10 คู่
 2. เฟส 3.1 — มาสคอต + ระบบดาวสะสม (⏸ พักไว้ก่อน รอ design)
-3. เฟส 2.1 — คลังคำศัพท์คัสตอม (local DB + image_picker, ต้อง design)
+3. ✅ เฟส 2.1 — เกม "หมวดครอบครัว" (quiz คัสตอมผู้ปกครองสร้างเอง + โหมดลูกเต๋าสุ่ม, Hive offline) เสร็จ 2026-07-09 · + animation polish + กราฟฟิกเกมจับคู่ใหม่
 4. งาน asset/build: เจนเสียง 225 คลิป, หมวดน้ำการ์ตูน, build APK ทดสอบ Android จริง
 
 ## How to Use
