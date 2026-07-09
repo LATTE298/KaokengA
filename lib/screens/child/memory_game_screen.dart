@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,8 +165,9 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
             detail: 'เปิดการ์ดทั้งหมด ${_controller.totalFlips} ครั้ง',
             onClose: () {
               Navigator.of(context).pop(); // ปิด dialog
-              if (context.mounted && context.canPop())
+              if (context.mounted && context.canPop()) {
                 context.pop(); // กลับหน้าหลัก
+              }
             },
           ),
     );
@@ -241,49 +243,128 @@ class _MemoryTileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFaceUp = tile.faceUp || tile.matched;
-    // เปลี่ยนจาก GestureDetector ตรงๆ มาใช้ PressableChildCard (spec 1.3) เพื่อให้การ์ด
-    // ทุกใบในกระดานมี press feedback (ขยาย+หรี่แสงเล็กน้อยตอนกดค้าง) และ haptic ที่สม่ำเสมอ
-    // กับการ์ดอื่นๆทั้งแอป โดยไม่ต้องเขียน animation feedback ซ้ำเอง — ปิด min-tap-target
-    // เพราะตัวการ์ดเองคำนวณขนาดให้เต็มช่อง grid อยู่แล้วเสมอ ใหญ่กว่า 64dp อยู่แล้วทุกกรณี
+    // PressableChildCard ให้ press feedback + haptic สม่ำเสมอกับการ์ดอื่นทั้งแอป (spec 1.3)
+    // ปิด min-tap-target เพราะการ์ดคำนวณขนาดเต็มช่อง grid อยู่แล้ว (ใหญ่กว่า 64dp)
     return PressableChildCard(
       onTap: onTap,
       enforceMinTapTarget: false,
       scale: 1.03,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        decoration: BoxDecoration(
-          color:
-              tile.matched
-                  ? kYellowLight
-                  : (tile.faceUp ? kBlueLight : kBluePrimary),
-          borderRadius: kRadiusMd,
-          boxShadow: const [kShadowSm],
+      // พลิกการ์ดแบบ 3D (หมุนรอบแกน Y จริง): ครึ่งแรกยังเห็นด้านหลัง พอเลยครึ่งทาง
+      // ค่อยสลับเป็นด้านหน้าแล้วกลับด้านไม่ให้ภาพมิเรอร์ — ให้ความรู้สึกพลิกการ์ดจริง
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: isFaceUp ? 1.0 : 0.0),
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeInOut,
+        builder: (context, t, _) {
+          final showFront = t >= 0.5;
+          final face =
+              showFront
+                  ? Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateY(math.pi),
+                    child: _FrontFace(tile: tile),
+                  )
+                  : const _BackFace();
+          return Transform(
+            alignment: Alignment.center,
+            transform:
+                Matrix4.identity()
+                  ..setEntry(3, 2, 0.0012) // perspective เล็กน้อยให้ดูมีมิติ
+                  ..rotateY(t * math.pi),
+            child: face,
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ด้านหลังการ์ด (คว่ำ) — ไล่เฉดฟ้า + ดาวใหญ่กลาง + ประกายมุม ดูมีมิติน่ากดพลิก
+class _BackFace extends StatelessWidget {
+  const _BackFace();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [kBluePrimary, kBlueDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        // หน้าการ์ดเปิด = รูปจริงจากคลังคำศัพท์ (แทนอิโมจิเดิม — รูปทีมมาแล้ว)
-        child:
-            isFaceUp
-                ? Padding(
-                  padding: const EdgeInsets.all(kSpace2),
-                  child: Image.asset(
-                    tile.pair.image,
-                    fit: BoxFit.contain,
-                    errorBuilder:
-                        (_, __, ___) => const Center(
-                          child: Icon(
-                            Icons.image_rounded,
-                            size: 40,
-                            color: kTextSecondary,
-                          ),
-                        ),
-                  ),
-                )
-                : Center(
-                  child: Icon(
-                    Icons.star_rounded,
-                    size: 40,
-                    color: kYellowPrimary.withValues(alpha: 0.8),
-                  ),
+        borderRadius: kRadiusLg,
+        boxShadow: const [kShadowMd],
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.25),
+          width: 2,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 8,
+            right: 10,
+            child: Icon(
+              Icons.auto_awesome,
+              size: 13,
+              color: Colors.white.withValues(alpha: 0.4),
+            ),
+          ),
+          Positioned(
+            bottom: 10,
+            left: 9,
+            child: Icon(
+              Icons.auto_awesome,
+              size: 9,
+              color: Colors.white.withValues(alpha: 0.28),
+            ),
+          ),
+          Center(
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
+              child: FittedBox(
+                child: Icon(Icons.star_rounded, color: kYellowPrimary),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ด้านหน้าการ์ด (หงาย) — พื้นขาว (เขียวอ่อนตอนจับคู่ได้) + กรอบเน้น + รูปใหญ่เกือบเต็มการ์ด
+class _FrontFace extends StatelessWidget {
+  const _FrontFace({required this.tile});
+  final MemoryTileState tile;
+
+  @override
+  Widget build(BuildContext context) {
+    final matched = tile.matched;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: matched ? kSuccessLight : Colors.white,
+        borderRadius: kRadiusLg,
+        boxShadow: const [kShadowMd],
+        border: Border.all(
+          color: matched ? kSuccess : kBlueLight,
+          width: matched ? 3 : 2,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(kSpace1),
+        child: Image.asset(
+          tile.pair.image,
+          fit: BoxFit.contain,
+          errorBuilder:
+              (_, __, ___) => const Center(
+                child: Icon(
+                  Icons.image_rounded,
+                  size: 40,
+                  color: kTextSecondary,
                 ),
+              ),
+        ),
       ),
     );
   }
