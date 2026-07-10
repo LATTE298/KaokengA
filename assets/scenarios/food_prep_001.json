@@ -1,43 +1,41 @@
 {
   "scenario_id": "food_prep_001",
-  "version": 2,
+  "version": 4,
   "category": "daily_life",
   "module": "A",
-  "title_th": "ช่วยจัดผลไม้ใส่จาน",
-  "background_image": "assets/images/bg_kitchen.jpg",
-  "tts_instruction": "น้องช่วยวางกล้วยลงบนจานให้หน่อยนะครับ",
+  "title_th": "ช่วยจัดผลไม้ใส่ถ้วย",
+  "background_image": "assets/images/bg_fruit_bowl.jpg",
+  "tts_instruction": "น้องช่วยหยิบผลไม้ที่บอก ใส่ถ้วยให้หน่อยนะครับ",
   "tts_celebration": "เก่งมากครับ! จัดผลไม้ได้สวยเลย!",
-  "tts_hint": "ลองหยิบกล้วยใส่จานนะครับ",
+  "tts_hint": "ลองหยิบผลไม้ที่บอก วางลงในถ้วยนะครับ",
+  "pick_count": 2,
+  "zones": [
+    { "id": "bowl", "x": 620, "y": 160, "width": 720, "height": 750 }
+  ],
   "interactables": [
-    {
-      "id": "banana",
-      "image": "assets/images/fruit_banana.png",
-      "is_target": true,
-      "start_pos": { "x": 280, "y": 540 }
-    },
-    {
-      "id": "orange",
-      "image": "assets/images/fruit_orange.png",
-      "is_target": false,
-      "start_pos": { "x": 640, "y": 540 }
-    },
     {
       "id": "apple",
       "image": "assets/images/fruit_apple.png",
-      "is_target": false,
-      "start_pos": { "x": 280, "y": 800 }
+      "zone_id": "bowl",
+      "start_pos": { "x": 400, "y": 940 }
     },
     {
       "id": "grapes",
       "image": "assets/images/fruit_grapes.png",
-      "is_target": false,
-      "start_pos": { "x": 640, "y": 800 }
+      "zone_id": "bowl",
+      "start_pos": { "x": 820, "y": 940 }
+    },
+    {
+      "id": "orange",
+      "image": "assets/images/fruit_orange.png",
+      "zone_id": "bowl",
+      "start_pos": { "x": 1240, "y": 940 }
+    },
+    {
+      "id": "banana",
+      "image": "assets/images/fruit_banana.png",
+      "zone_id": "bowl",
+      "start_pos": { "x": 1660, "y": 940 }
     }
-  ],
-  "target_zone": {
-    "x": 1400,
-    "y": 700,
-    "width": 320,
-    "height": 240
-  }
+  ]
 }

@@ -33,35 +33,60 @@ void main() {
       }
     });
 
-    test(
-      'each scenario has one target and declared placeholder-safe images',
-      () {
-        final index = _readJson('assets/scenarios/index.json');
-        final scenarios = index['scenarios'] as List<dynamic>;
+    test('each scenario is well-formed and uses placeholder-safe images', () {
+      final index = _readJson('assets/scenarios/index.json');
+      final scenarios = index['scenarios'] as List<dynamic>;
 
-        for (final rawScenario in scenarios) {
-          final scenario = rawScenario as Map<String, dynamic>;
-          final config = _readJson(scenario['config_url'] as String);
-          final interactables = config['interactables'] as List<dynamic>;
+      for (final rawScenario in scenarios) {
+        final scenario = rawScenario as Map<String, dynamic>;
+        final config = _readJson(scenario['config_url'] as String);
+        final scenarioId = config['scenario_id'] as String;
+        final interactables = config['interactables'] as List<dynamic>;
+        final zones = (config['zones'] as List<dynamic>?) ?? const [];
+
+        if (zones.isEmpty) {
+          // โหมดโจทย์ชิ้นเดียว: ต้องมี target 1 ชิ้น + target_zone
           final targets = interactables.where(
             (rawItem) => (rawItem as Map<String, dynamic>)['is_target'] == true,
           );
-
-          expect(targets.length, 1, reason: config['scenario_id'] as String);
-          _expectImageAvailableOrPlaceholder(
-            config['background_image'] as String,
-            placeholderPaths,
-          );
+          expect(targets.length, 1, reason: scenarioId);
+          expect(config['target_zone'], isNotNull, reason: scenarioId);
+        } else {
+          // โหมด sort-all: ทุกชิ้นต้องผูก zone_id ที่ประกาศไว้จริง
+          final zoneIds = {
+            for (final z in zones) (z as Map<String, dynamic>)['id'],
+          };
           for (final rawItem in interactables) {
             final item = rawItem as Map<String, dynamic>;
-            _expectImageAvailableOrPlaceholder(
-              item['image'] as String,
-              placeholderPaths,
+            expect(
+              zoneIds.contains(item['zone_id']),
+              isTrue,
+              reason: '$scenarioId: ${item['id']} มี zone_id ไม่ตรงกับ zones',
+            );
+          }
+          // pick_count (โจทย์สุ่มบางชิ้น) ต้องอยู่ในช่วงที่เล่นได้จริง
+          final pickCount = config['pick_count'] as int?;
+          if (pickCount != null) {
+            expect(
+              pickCount >= 2 && pickCount < interactables.length,
+              isTrue,
+              reason: '$scenarioId: pick_count=$pickCount ไม่สมเหตุสมผล',
             );
           }
         }
-      },
-    );
+        _expectImageAvailableOrPlaceholder(
+          config['background_image'] as String,
+          placeholderPaths,
+        );
+        for (final rawItem in interactables) {
+          final item = rawItem as Map<String, dynamic>;
+          _expectImageAvailableOrPlaceholder(
+            item['image'] as String,
+            placeholderPaths,
+          );
+        }
+      }
+    });
 
     test('vocabulary has 90 items and declared placeholder-safe images', () {
       final vocabulary = _readJson('assets/vocabulary/vocabulary.json');

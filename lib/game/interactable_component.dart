@@ -2,10 +2,12 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
-import 'package:flutter/material.dart' show Curves;
+import 'package:flutter/material.dart'
+    show Canvas, Curves, Paint, PaintingStyle, RRect, Radius, Rect;
 
 import '../models/scenario_config.dart';
 import '../services/haptic_service.dart';
+import '../theme/colors.dart';
 import 'drop_zone_component.dart';
 import 'game_asset_paths.dart';
 import 'placeholder_renderer.dart';
@@ -21,10 +23,12 @@ class InteractableComponent extends PositionComponent
     required this.placeholderImagePaths,
     this.onPathSample,
     this.onMistake,
+    double displaySize = 120,
+    this.showCard = false,
   }) : _startPosition = position.clone(),
        super(
          position: position,
-         size: Vector2.all(120),
+         size: Vector2.all(displaySize),
          anchor: Anchor.center,
          priority: 2,
        );
@@ -35,11 +39,18 @@ class InteractableComponent extends PositionComponent
   final void Function(Vector2 point)? onPathSample;
   final void Function()? onMistake; // เพิ่ม
 
+  /// วาดการ์ดขาวรองหลังรูป (โหมด sort-all — ให้ไอเทมเด่นบนพื้นหลังฉากจริง
+  /// แบบถาดไอเทมใน mockup) การ์ดหายเมื่อวางลงโซนสำเร็จ
+  final bool showCard;
+
   final Vector2 _startPosition;
   bool _isBeingDragged = false;
   bool _settledInZone = false;
 
   bool get isTarget => config.isTarget;
+
+  /// วางลงโซนสำเร็จแล้ว (ลากไม่ได้อีก) — เกมโหมด sort-all ใช้นับความคืบหน้า
+  bool get settled => _settledInZone;
 
   @override
   Future<void> onLoad() async {
@@ -48,7 +59,20 @@ class InteractableComponent extends PositionComponent
       await add(PlaceholderComponent(size: size, label: label));
     } else {
       final image = await findGame()!.images.load(flameImageKey(config.image));
-      await add(SpriteComponent(sprite: Sprite(image), size: size));
+      // fit แบบ contain รักษาสัดส่วนรูปจริง (รูปทีมไม่จัตุรัส — stretch แล้วเบี้ยว)
+      final aspect = image.width / image.height;
+      final inset = showCard ? size * 0.82 : size.clone();
+      final spriteSize =
+          aspect >= 1
+              ? Vector2(inset.x, inset.x / aspect)
+              : Vector2(inset.y * aspect, inset.y);
+      await add(
+        SpriteComponent(
+          sprite: Sprite(image),
+          size: spriteSize,
+          position: (size - spriteSize) / 2,
+        ),
+      );
     }
 
     // 80% hitbox (spec 04 §Hitbox).
@@ -58,6 +82,25 @@ class InteractableComponent extends PositionComponent
         position: size * 0.1,
         collisionType: CollisionType.active,
       ),
+    );
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    if (!showCard || _settledInZone) return;
+    // การ์ดรองหลังรูป (วาดก่อน children = อยู่ใต้รูปเสมอ)
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      const Radius.circular(20),
+    );
+    canvas.drawRRect(rect, Paint()..color = kWarmWhite.withValues(alpha: 0.95));
+    canvas.drawRRect(
+      rect,
+      Paint()
+        ..color = kYellowPrimary
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3,
     );
   }
 
@@ -111,12 +154,20 @@ class InteractableComponent extends PositionComponent
     _settledInZone = true;
     _isBeingDragged = false;
     priority = 5;
+    // ย่อเล็กน้อยให้ดู "วางลงไปแล้ว" ในถัง/ถ้วย (ภาพโซนอยู่ในพื้นหลัง)
     if (reduceMotion) {
       position = zoneCenter.clone();
+      scale = Vector2.all(0.85);
     } else {
       add(
         MoveEffect.to(
           zoneCenter,
+          EffectController(duration: 0.2, curve: Curves.easeOut),
+        ),
+      );
+      add(
+        ScaleEffect.to(
+          Vector2.all(0.85),
           EffectController(duration: 0.2, curve: Curves.easeOut),
         ),
       );

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../game/daily_life_game.dart';
 import '../../features/sessions/session_recorder.dart';
+import '../../l10n/tts_strings_th.dart';
 import '../../models/app_types.dart';
 import '../../models/loaded_scenario_config.dart';
 import '../../providers/content_providers.dart';
@@ -44,10 +45,15 @@ class ScenarioGameScreen extends ConsumerWidget {
               ),
             ),
         data: (LoadedScenarioConfig loadedScenario) {
-          // สุ่ม target ใหม่ทุกครั้งที่โหลดด่าน
+          // สุ่ม target ใหม่ทุกครั้งที่โหลดด่าน (เฉพาะโหมดโจทย์ชิ้นเดียว —
+          // ฉาก sort-all ไม่มี target เดี่ยว เด็กต้องเก็บครบทุกชิ้น)
           final randomized = _randomizeTarget(loadedScenario);
           final config = randomized.config;
-          final targetItem = config.interactables.firstWhere((i) => i.isTarget);
+          final sortAll = config.zones.isNotEmpty;
+          final targetItem =
+              sortAll
+                  ? null
+                  : config.interactables.firstWhere((i) => i.isTarget);
 
           final session = ref.watch(
             activeSessionProvider(
@@ -85,7 +91,9 @@ class ScenarioGameScreen extends ConsumerWidget {
             children: [
               Positioned.fill(child: GameWidget(game: game)),
 
-              // หัวข้อโจทย์บอกว่าต้องหยิบอะไร
+              // หัวข้อโจทย์ — โหมดเดิมบอกชิ้นที่ต้องหยิบ, โจทย์สุ่มโชว์รูป+ชื่อ
+              // 2 ชิ้นที่ต้องเก็บ (เด็กยังไม่อ่านหนังสือดูรูปได้), sort-all
+              // ธรรมดาบอกภารกิจรวม
               Positioned(
                 top: 0,
                 left: 0,
@@ -93,8 +101,20 @@ class ScenarioGameScreen extends ConsumerWidget {
                 child: SafeArea(
                   bottom: false,
                   child: _ObjectiveBar(
-                    targetId: targetItem.id,
-                    scenarioTitle: config.titleTh,
+                    label:
+                        targetItem == null
+                            ? config.titleTh
+                            : 'หยิบ: ${scenarioItemNameTh(targetItem.id)}',
+                    wanted: [
+                      for (final id in game.wantedIds ?? const <String>[])
+                        (
+                          image:
+                              config.interactables
+                                  .firstWhere((i) => i.id == id)
+                                  .image,
+                          name: scenarioItemNameTh(id),
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -110,9 +130,10 @@ class ScenarioGameScreen extends ConsumerWidget {
 
 // สุ่ม target ใหม่จาก interactables ทั้งหมดทุกรอบ
 // ไม่แก้ JSON — เปลี่ยน is_target ใน memory แทน
+// ฉาก sort-all (มี zones) ไม่สุ่ม: ทุกชิ้นคือโจทย์ ใช้ประโยค TTS จาก JSON ตรงๆ
 LoadedScenarioConfig _randomizeTarget(LoadedScenarioConfig original) {
   final items = original.config.interactables;
-  if (items.length <= 1) return original;
+  if (items.length <= 1 || original.config.zones.isNotEmpty) return original;
 
   final randomIndex = Random().nextInt(items.length);
   final newInteractables =
@@ -133,47 +154,30 @@ LoadedScenarioConfig _randomizeTarget(LoadedScenarioConfig original) {
   );
 }
 
-// สร้างประโยค TTS instruction จาก id ของ target
+// สร้างประโยค TTS instruction จาก id ของ target (ชื่อจาก kScenarioItemNamesTh
+// ใน l10n — เพิ่มไอเทมใหม่ต้องลงทะเบียนชื่อที่นั่น + คลิป sc_ask_*/sc_hint_*)
 String _buildInstruction(String targetId) {
-  final name = _thaiNameFor(targetId);
+  final name = scenarioItemNameTh(targetId);
   return 'น้องช่วยหยิบ$nameใส่ตะกร้าให้หน่อยนะครับ';
 }
 
 String _buildHint(String targetId) {
-  final name = _thaiNameFor(targetId);
+  final name = scenarioItemNameTh(targetId);
   return 'ลองหยิบ$nameนะครับ';
 }
 
-// Map id → ชื่อภาษาไทยสำหรับ TTS และหัวข้อโจทย์
-// ⚠️ เพิ่ม/แก้ id ในไฟล์ฉากเมื่อไหร่ ต้องอัปเดตที่นี่ + เพิ่มคลิป sc_ask_*/sc_hint_*
-// ใน tts_manifest.json ให้ตรงประโยคที่ประกอบจากชื่อนี้ (ดู docs/TTS_CLIPS.md)
-String _thaiNameFor(String id) {
-  const map = {
-    'milk_carton_blue': 'นมกล่องสีน้ำเงิน',
-    'bread_loaf': 'ขนมปัง',
-    'potato_chips': 'ขนมกรุบกรอบ',
-    'plastic_bottle': 'ขวดพลาสติก',
-    'food_waste': 'เศษอาหาร',
-    'paper_ball': 'กระดาษ',
-    'banana': 'กล้วย',
-    'orange': 'ส้ม',
-    'apple': 'แอปเปิ้ล',
-    'grapes': 'องุ่น',
-  };
-  return map[id] ?? id;
-}
-
-// แถบหัวข้อโจทย์ด้านบน — บอกว่าต้องหยิบอะไร
+// แถบหัวข้อโจทย์ด้านบน — โหมดเดิม "หยิบ: X", โจทย์สุ่ม = รูป+ชื่อของที่ต้องเก็บ,
+// sort-all ธรรมดา = ชื่อภารกิจ (ชื่อไอเทมมาจาก kScenarioItemNamesTh ใน l10n)
 class _ObjectiveBar extends StatelessWidget {
-  const _ObjectiveBar({required this.targetId, required this.scenarioTitle});
+  const _ObjectiveBar({required this.label, this.wanted = const []});
 
-  final String targetId;
-  final String scenarioTitle;
+  final String label;
+
+  /// โจทย์สุ่ม: รูป+ชื่อของชิ้นที่ต้องเก็บ — ว่าง = โชว์ [label] ธรรมดา
+  final List<({String image, String name})> wanted;
 
   @override
   Widget build(BuildContext context) {
-    final targetName = _thaiNameFor(targetId);
-
     return Container(
       // ซ้ายต้องพ้นปุ่มย้อนกลับที่ลอยมุมบนซ้าย (8 + 64 = 72) ไม่งั้นปุ่มทับไอคอนแถบโจทย์
       margin: const EdgeInsets.fromLTRB(
@@ -200,15 +204,66 @@ class _ObjectiveBar extends StatelessWidget {
             color: kTextPrimary,
           ),
           const SizedBox(width: kSpace2),
-          Text(
-            'หยิบ: $targetName',
-            style: kTextMd.copyWith(
-              fontWeight: FontWeight.w700,
-              color: kTextPrimary,
+          if (wanted.isEmpty)
+            Text(
+              label,
+              style: kTextMd.copyWith(
+                fontWeight: FontWeight.w700,
+                color: kTextPrimary,
+              ),
+            )
+          else ...[
+            Text(
+              'หยิบ: ',
+              style: kTextMd.copyWith(
+                fontWeight: FontWeight.w700,
+                color: kTextPrimary,
+              ),
             ),
-          ),
+            for (var i = 0; i < wanted.length; i++) ...[
+              if (i > 0)
+                Text(' กับ ', style: kTextMd.copyWith(color: kTextPrimary)),
+              _WantedChip(image: wanted[i].image, name: wanted[i].name),
+            ],
+          ],
         ],
       ),
+    );
+  }
+}
+
+// ชิปรูป+ชื่อของชิ้นในโจทย์สุ่ม — รูปช่วยเด็กที่ยังอ่านหนังสือไม่คล่อง
+class _WantedChip extends StatelessWidget {
+  const _WantedChip({required this.image, required this.name});
+
+  final String image;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(color: kWarmWhite, borderRadius: kRadiusSm),
+          child: Image.asset(
+            image,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+        ),
+        const SizedBox(width: kSpace1),
+        Text(
+          name,
+          style: kTextMd.copyWith(
+            fontWeight: FontWeight.w700,
+            color: kTextPrimary,
+          ),
+        ),
+      ],
     );
   }
 }

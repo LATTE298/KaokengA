@@ -1,4 +1,5 @@
 import 'dart:async' as async;
+import 'dart:math';
 
 import 'package:flame/game.dart';
 
@@ -11,6 +12,7 @@ import 'background_component.dart';
 import 'drop_zone_component.dart';
 import 'hint_arrow_component.dart';
 import 'interactable_component.dart';
+import 'item_tray_component.dart';
 import 'success_overlay.dart';
 
 // Root game class for Module A scenarios (spec 04 §DailyLifeGame).
@@ -21,8 +23,11 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     required this.reduceMotion,
     required this.onComplete,
     this.enablePromptTimers = true,
+    Random? random,
   }) : config = loadedScenario.config,
-       _placeholderImagePaths = loadedScenario.placeholderImagePaths;
+       _placeholderImagePaths = loadedScenario.placeholderImagePaths {
+    wantedIds = _pickWanted(random ?? Random());
+  }
 
   final ScenarioConfig config;
   final TtsSpeaker tts;
@@ -46,9 +51,52 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
   Vector2? _targetTopPos;
 
   final List<GamePosition> _dragPath = [];
+  final List<InteractableComponent> _items = [];
 
   // นับครั้งที่วางผิด (spec 1.2 — เกณฑ์คะแนน Module A).
   int mistakeCount = 0;
+
+  /// โหมด "คัดแยกครบทุกชิ้น": ทุก interactable ต้องลงโซนของตัวเอง (zone_id)
+  /// ถึงจะจบเกม — ฉากที่ประกาศ zones ใน JSON (แยกขยะ 4 ถัง / ผลไม้ลงถ้วย)
+  bool get isSortAll => config.zones.isNotEmpty;
+
+  /// โจทย์สุ่มบางชิ้น (pick_count ใน JSON เช่น ผลไม้สุ่ม 2 จาก 4) —
+  /// null = ต้องเก็บทุกชิ้น. เรียงตามลำดับไอเทมใน JSON เพื่อให้ประโยค TTS
+  /// ตรง key คลิปใน manifest เสมอ
+  late final List<String>? wantedIds;
+
+  int _sortedCount = 0;
+
+  int get _requiredCount => wantedIds?.length ?? config.interactables.length;
+
+  List<String>? _pickWanted(Random random) {
+    final pickCount = config.pickCount;
+    if (!isSortAll ||
+        pickCount == null ||
+        pickCount >= config.interactables.length) {
+      return null;
+    }
+    final ids = config.interactables.map((i) => i.id).toList()..shuffle(random);
+    final chosen = ids.take(pickCount).toSet();
+    // คงลำดับตาม JSON ให้ประโยคโจทย์/คลิปเสียงมีรูปแบบเดียวเสมอ
+    return [
+      for (final item in config.interactables)
+        if (chosen.contains(item.id)) item.id,
+    ];
+  }
+
+  /// ประโยคสั่งของรอบนี้ — โหมดสุ่มผลไม้ประกอบจากชื่อ 2 ชิ้นที่สุ่มได้
+  /// นอกนั้นใช้ประโยคของฉากจาก JSON ตรงๆ
+  String get instructionText {
+    final wanted = wantedIds;
+    if (wanted != null && wanted.length == 2) {
+      return ttsFruitPickAsk(
+        scenarioItemNameTh(wanted[0]),
+        scenarioItemNameTh(wanted[1]),
+      );
+    }
+    return config.ttsInstruction;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -59,46 +107,109 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
       ),
     );
 
-    final zone = DropZoneComponent(
-      position: _toCanvas(Vector2(config.targetZone.x, config.targetZone.y)),
-      size: _toCanvasSize(
-        Vector2(config.targetZone.width, config.targetZone.height),
-      ),
-      onTargetDropped: _handleSuccess,
-    );
-    await add(zone);
+    if (isSortAll) {
+      // โซนตามภาพพื้นหลัง (ถัง/ถ้วยวาดอยู่ในภาพแล้ว) — ไม่วาดกรอบทับ
+      final wanted = wantedIds?.toSet();
+      for (final zone in config.zones) {
+        await add(
+          DropZoneComponent(
+            position: _toCanvas(Vector2(zone.x, zone.y)),
+            size: _toCanvasSize(Vector2(zone.width, zone.height)),
+            zoneId: zone.id,
+            visible: false,
+            wantedIds: wanted,
+            onItemAccepted: _handleItemSorted,
+          ),
+        );
+      }
+    } else {
+      final target = config.targetZone!;
+      final zone = DropZoneComponent(
+        position: _toCanvas(Vector2(target.x, target.y)),
+        size: _toCanvasSize(Vector2(target.width, target.height)),
+        onItemAccepted: _handleSuccess,
+      );
+      await add(zone);
+    }
+
+    // โหมด sort-all: ไอเทมใหญ่ตามจอ + การ์ดขาวรองหลัง + ถาดใต้แถวไอเทม
+    // (โหมดเดิมคงขนาด 120 ตาม spec 04 ไม่แตะ)
+    final itemSize = isSortAll ? (size.y * 0.20).clamp(100.0, 170.0) : 120.0;
+    if (isSortAll) {
+      await add(_buildTray(itemSize));
+    }
 
     for (final item in config.interactables) {
       final pos = _toCanvas(Vector2(item.startPos.x, item.startPos.y));
       if (item.isTarget) {
-        // เหนือ interactable (สูง 120, anchor กลาง) ขึ้นไปอีกเล็กน้อย
-        _targetTopPos = Vector2(pos.x, pos.y - 72);
+        // เหนือ interactable (anchor กลาง) ขึ้นไปอีกเล็กน้อย
+        _targetTopPos = Vector2(pos.x, pos.y - itemSize * 0.6 - 12);
       }
-      await add(
-        InteractableComponent(
-          config: item,
-          position: pos,
-          reduceMotion: reduceMotion,
-          placeholderImagePaths: _placeholderImagePaths,
-          onPathSample: (p) {
-            _dragPath.add(GamePosition(x: p.x, y: p.y));
-            _resetIdleTimer();
-          },
-          onMistake: () {
-            // เรียกเมื่อวางผิดตำแหน่ง (ไม่ใช่ target zone) แล้วเด้งกลับ
-            mistakeCount++;
-          },
-        ),
+      final component = InteractableComponent(
+        config: item,
+        position: pos,
+        reduceMotion: reduceMotion,
+        placeholderImagePaths: _placeholderImagePaths,
+        displaySize: itemSize,
+        showCard: isSortAll,
+        onPathSample: (p) {
+          _dragPath.add(GamePosition(x: p.x, y: p.y));
+          _resetIdleTimer();
+        },
+        onMistake: () {
+          // เรียกเมื่อวางผิดตำแหน่ง (ผิดถัง/นอกโจทย์/นอกโซน) แล้วเด้งกลับ
+          mistakeCount++;
+          // โหมด sort-all บอกนุ่มๆ ให้ลองใหม่ (โหมดเดิมเงียบตามพฤติกรรมเดิม)
+          if (isSortAll && !_completed) tts.speak(kTtsQuizRetry);
+        },
       );
+      _items.add(component);
+      await add(component);
     }
 
     if (enablePromptTimers) {
       Future<void>.delayed(const Duration(seconds: 1), () {
         if (_completed) return;
-        tts.speak(config.ttsInstruction);
+        tts.speak(instructionText);
       });
       _startIdleTimer();
     }
+  }
+
+  /// ถาดรองแถวไอเทมด้านล่าง — ครอบตำแหน่งเริ่มของทุกชิ้น + ระยะหายใจ
+  ItemTrayComponent _buildTray(double itemSize) {
+    final xs = [
+      for (final item in config.interactables)
+        _toCanvas(Vector2(item.startPos.x, item.startPos.y)).x,
+    ];
+    final ys = [
+      for (final item in config.interactables)
+        _toCanvas(Vector2(item.startPos.x, item.startPos.y)).y,
+    ];
+    xs.sort();
+    ys.sort();
+    final padX = itemSize * 0.85;
+    final padY = itemSize * 0.68;
+    final left = xs.first - padX;
+    final right = xs.last + padX;
+    return ItemTrayComponent(
+      position: Vector2(left, ys.first - padY),
+      size: Vector2(right - left, (ys.last - ys.first) + padY * 2),
+    );
+  }
+
+  /// โหมด sort-all: ชิ้นลงโซนถูกต้อง 1 ชิ้น — ชมสั้นๆ ระหว่างทาง แล้วปิดเกม
+  /// เมื่อครบตามโจทย์ (ชิ้นสุดท้ายไม่ชมซ้อน ปล่อยให้เสียงฉลองใหญ่พูดแทน)
+  void _handleItemSorted(InteractableComponent item) {
+    if (_completed) return;
+    _sortedCount++;
+    _resetIdleTimer();
+    if (_sortedCount >= _requiredCount) {
+      _handleSuccess(item);
+      return;
+    }
+    HapticService.memoryMatch();
+    tts.speak(kTtsQuizCorrect);
   }
 
   @override
@@ -135,15 +246,28 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
   void _onIdle() {
     if (_completed) return;
-    tts.speak(config.ttsHint);
+    // โหมดสุ่มโจทย์: ทวนประโยคโจทย์เดิม (ใบ้ที่ตรงที่สุด) — โหมดอื่นใช้ hint ฉาก
+    tts.speak(wantedIds != null ? instructionText : config.ttsHint);
     _showHintArrow();
     _idleTimer = async.Timer(const Duration(seconds: 15), _onIdle);
   }
 
   void _showHintArrow() {
-    if (_hintArrow != null || _targetTopPos == null || _completed) return;
+    if (_hintArrow != null || _completed) return;
+    // โหมด sort-all: ชี้ชิ้นแรกในโจทย์ที่ยังไม่ได้เก็บ (ตำแหน่งปัจจุบัน)
+    Vector2? arrowPos = _targetTopPos;
+    if (isSortAll) {
+      for (final item in _items) {
+        final inScope = wantedIds?.contains(item.config.id) ?? true;
+        if (!item.settled && inScope) {
+          arrowPos = Vector2(item.position.x, item.position.y - 72);
+          break;
+        }
+      }
+    }
+    if (arrowPos == null) return;
     final arrow = HintArrowComponent(
-      position: _targetTopPos!,
+      position: arrowPos,
       reduceMotion: reduceMotion,
     );
     _hintArrow = arrow;

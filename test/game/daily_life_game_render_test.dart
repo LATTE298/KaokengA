@@ -39,9 +39,13 @@ void main() {
           hasLength(1),
           reason: summary.scenarioId,
         );
+        // ฉากโหมดเดิมมีโซนเดียว (ตะกร้า) — ฉาก sort-all มีโซนตาม zones ใน JSON
+        // (เช่น แยกขยะ = ถัง 4 ใบ, ผลไม้ = ถ้วย 1 ใบ)
+        final expectedZones =
+            loaded.config.zones.isEmpty ? 1 : loaded.config.zones.length;
         expect(
           game.children.whereType<DropZoneComponent>(),
-          hasLength(1),
+          hasLength(expectedZones),
           reason: summary.scenarioId,
         );
         expect(

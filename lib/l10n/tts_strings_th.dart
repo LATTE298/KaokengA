@@ -65,6 +65,32 @@ String ttsQuizQuestion(String category) {
   };
 }
 
+// --- Module A: ชื่อไอเทมในฉาก + โจทย์สุ่มผลไม้ 2 ชนิด ----------------------
+// ชื่อไทยของ interactable ทุกฉาก — ใช้ทั้งประกอบประโยค TTS และหัวข้อโจทย์บนจอ
+// ⚠️ เพิ่ม id ใหม่ในไฟล์ฉากเมื่อไหร่ต้องเพิ่มที่นี่ + คลิปเสียงที่เกี่ยวใน manifest
+const Map<String, String> kScenarioItemNamesTh = {
+  'milk_carton_blue': 'นมกล่องสีน้ำเงิน',
+  'bread_loaf': 'ขนมปัง',
+  'potato_chips': 'ขนมกรุบกรอบ',
+  'plastic_bottle': 'ขวดพลาสติก',
+  'food_waste': 'เศษอาหาร',
+  'paper_ball': 'กระดาษ',
+  'battery': 'ถ่านไฟฉาย',
+  'banana': 'กล้วย',
+  'orange': 'ส้ม',
+  'apple': 'แอปเปิ้ล',
+  'grapes': 'องุ่น',
+};
+
+/// ชื่อไทยของไอเทมในฉาก Module A (fallback = id ถ้ายังไม่ลงทะเบียน)
+String scenarioItemNameTh(String id) => kScenarioItemNamesTh[id] ?? id;
+
+/// โจทย์เกมจัดผลไม้โหมดสุ่ม 2 ชนิด — ประโยคเดียวบอกครบทั้งคู่ (กติกา TTS:
+/// หนึ่งเหตุการณ์พูดครั้งเดียว). เป็น key คลิปใน manifest — เรียงชื่อตามลำดับ
+/// ไอเทมใน JSON ฉากเสมอ (6 คู่ = 6 คลิป sc_fruit_pick_*)
+String ttsFruitPickAsk(String nameA, String nameB) =>
+    'น้องช่วยหยิบ$nameAกับ$nameBใส่ถ้วยให้หน่อยนะครับ';
+
 // --- Time-Limiter / Break reminder (spec 1.4) -----------------------------
 // ข้อความ TTS เตือนพักสายตา — โทนนุ่มนวล เหมือนเพื่อนเตือน ไม่ใช่ครู/พ่อแม่สั่งห้าม
 const String kTtsBreakReminder = 'น้องเล่นมานานแล้วนะครับ มาพักสายตาก่อนนะ';

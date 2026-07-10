@@ -1,37 +1,43 @@
 {
   "scenario_id": "trash_sort_001",
-  "version": 2,
+  "version": 3,
   "category": "daily_life",
   "module": "A",
   "title_th": "ช่วยแยกขยะให้ถูกถัง",
-  "background_image": "assets/images/bg_home.jpg",
-  "tts_instruction": "น้องช่วยทิ้งขวดพลาสติกลงในถังรีไซเคิลให้หน่อยนะครับ",
+  "background_image": "assets/images/bg_trash_bins.jpg",
+  "tts_instruction": "น้องช่วยลากขยะแต่ละชิ้น ไปทิ้งถังให้ถูกต้องนะครับ",
   "tts_celebration": "เยี่ยมมากเลยครับ! ขอบคุณที่ช่วยดูแลโลก!",
-  "tts_hint": "ลองหยิบขวดพลาสติกใส่ถังสีเขียวนะครับ",
+  "tts_hint": "ดูรูปบนถังนะครับ ขยะเหมือนรูปไหน ทิ้งถังนั้นเลยครับ",
+  "zones": [
+    { "id": "organic", "x": 250, "y": 280, "width": 330, "height": 550 },
+    { "id": "recycle", "x": 635, "y": 280, "width": 305, "height": 550 },
+    { "id": "general", "x": 980, "y": 280, "width": 330, "height": 550 },
+    { "id": "hazard", "x": 1330, "y": 280, "width": 340, "height": 550 }
+  ],
   "interactables": [
+    {
+      "id": "paper_ball",
+      "image": "assets/images/trash_paper.png",
+      "zone_id": "general",
+      "start_pos": { "x": 400, "y": 940 }
+    },
+    {
+      "id": "battery",
+      "image": "assets/images/trash_battery.png",
+      "zone_id": "hazard",
+      "start_pos": { "x": 820, "y": 940 }
+    },
     {
       "id": "plastic_bottle",
       "image": "assets/images/trash_bottle.png",
-      "is_target": true,
-      "start_pos": { "x": 300, "y": 620 }
+      "zone_id": "recycle",
+      "start_pos": { "x": 1240, "y": 940 }
     },
     {
       "id": "food_waste",
       "image": "assets/images/trash_food.png",
-      "is_target": false,
-      "start_pos": { "x": 640, "y": 650 }
-    },
-    {
-      "id": "paper_ball",
-      "image": "assets/images/trash_paper.png",
-      "is_target": false,
-      "start_pos": { "x": 980, "y": 620 }
+      "zone_id": "organic",
+      "start_pos": { "x": 1660, "y": 940 }
     }
-  ],
-  "target_zone": {
-    "x": 1400,
-    "y": 700,
-    "width": 320,
-    "height": 240
-  }
+  ]
 }

@@ -31,12 +31,32 @@ Map<String, dynamic> _$$TargetZoneImplToJson(_$TargetZoneImpl instance) =>
       'height': instance.height,
     };
 
+_$DropZoneConfigImpl _$$DropZoneConfigImplFromJson(Map<String, dynamic> json) =>
+    _$DropZoneConfigImpl(
+      id: json['id'] as String,
+      x: (json['x'] as num).toDouble(),
+      y: (json['y'] as num).toDouble(),
+      width: (json['width'] as num).toDouble(),
+      height: (json['height'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$$DropZoneConfigImplToJson(
+  _$DropZoneConfigImpl instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'x': instance.x,
+  'y': instance.y,
+  'width': instance.width,
+  'height': instance.height,
+};
+
 _$InteractableConfigImpl _$$InteractableConfigImplFromJson(
   Map<String, dynamic> json,
 ) => _$InteractableConfigImpl(
   id: json['id'] as String,
   image: json['image'] as String,
-  isTarget: json['is_target'] as bool,
+  isTarget: json['is_target'] as bool? ?? false,
+  zoneId: json['zone_id'] as String?,
   startPos: GamePosition.fromJson(json['start_pos'] as Map<String, dynamic>),
 );
 
@@ -46,6 +66,7 @@ Map<String, dynamic> _$$InteractableConfigImplToJson(
   'id': instance.id,
   'image': instance.image,
   'is_target': instance.isTarget,
+  'zone_id': instance.zoneId,
   'start_pos': instance.startPos.toJson(),
 };
 
@@ -65,7 +86,16 @@ _$ScenarioConfigImpl _$$ScenarioConfigImplFromJson(
       (json['interactables'] as List<dynamic>)
           .map((e) => InteractableConfig.fromJson(e as Map<String, dynamic>))
           .toList(),
-  targetZone: TargetZone.fromJson(json['target_zone'] as Map<String, dynamic>),
+  targetZone:
+      json['target_zone'] == null
+          ? null
+          : TargetZone.fromJson(json['target_zone'] as Map<String, dynamic>),
+  zones:
+      (json['zones'] as List<dynamic>?)
+          ?.map((e) => DropZoneConfig.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <DropZoneConfig>[],
+  pickCount: (json['pick_count'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$$ScenarioConfigImplToJson(
@@ -81,7 +111,9 @@ Map<String, dynamic> _$$ScenarioConfigImplToJson(
   'tts_celebration': instance.ttsCelebration,
   'tts_hint': instance.ttsHint,
   'interactables': instance.interactables.map((e) => e.toJson()).toList(),
-  'target_zone': instance.targetZone.toJson(),
+  'target_zone': instance.targetZone?.toJson(),
+  'zones': instance.zones.map((e) => e.toJson()).toList(),
+  'pick_count': instance.pickCount,
 };
 
 _$ScenarioSummaryImpl _$$ScenarioSummaryImplFromJson(

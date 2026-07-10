@@ -17,17 +17,17 @@
       "module": "A",
       "config_url": "assets/scenarios/trash_sort_001.json",
       "thumbnail_url": "assets/images/thumb_trash.jpg",
-      "version": 1,
+      "version": 3,
       "published": true
     },
     {
       "scenario_id": "food_prep_001",
-      "title_th": "ช่วยจัดผลไม้ใส่จาน",
+      "title_th": "ช่วยจัดผลไม้ใส่ถ้วย",
       "category": "daily_life",
       "module": "A",
       "config_url": "assets/scenarios/food_prep_001.json",
       "thumbnail_url": "assets/images/thumb_fruit.jpg",
-      "version": 1,
+      "version": 4,
       "published": true
     }
   ]

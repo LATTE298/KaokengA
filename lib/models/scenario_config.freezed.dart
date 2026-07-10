@@ -408,6 +408,250 @@ abstract class _TargetZone implements TargetZone {
       throw _privateConstructorUsedError;
 }
 
+DropZoneConfig _$DropZoneConfigFromJson(Map<String, dynamic> json) {
+  return _DropZoneConfig.fromJson(json);
+}
+
+/// @nodoc
+mixin _$DropZoneConfig {
+  String get id => throw _privateConstructorUsedError;
+  double get x => throw _privateConstructorUsedError;
+  double get y => throw _privateConstructorUsedError;
+  double get width => throw _privateConstructorUsedError;
+  double get height => throw _privateConstructorUsedError;
+
+  /// Serializes this DropZoneConfig to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of DropZoneConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $DropZoneConfigCopyWith<DropZoneConfig> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $DropZoneConfigCopyWith<$Res> {
+  factory $DropZoneConfigCopyWith(
+    DropZoneConfig value,
+    $Res Function(DropZoneConfig) then,
+  ) = _$DropZoneConfigCopyWithImpl<$Res, DropZoneConfig>;
+  @useResult
+  $Res call({String id, double x, double y, double width, double height});
+}
+
+/// @nodoc
+class _$DropZoneConfigCopyWithImpl<$Res, $Val extends DropZoneConfig>
+    implements $DropZoneConfigCopyWith<$Res> {
+  _$DropZoneConfigCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of DropZoneConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? x = null,
+    Object? y = null,
+    Object? width = null,
+    Object? height = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            id:
+                null == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String,
+            x:
+                null == x
+                    ? _value.x
+                    : x // ignore: cast_nullable_to_non_nullable
+                        as double,
+            y:
+                null == y
+                    ? _value.y
+                    : y // ignore: cast_nullable_to_non_nullable
+                        as double,
+            width:
+                null == width
+                    ? _value.width
+                    : width // ignore: cast_nullable_to_non_nullable
+                        as double,
+            height:
+                null == height
+                    ? _value.height
+                    : height // ignore: cast_nullable_to_non_nullable
+                        as double,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$DropZoneConfigImplCopyWith<$Res>
+    implements $DropZoneConfigCopyWith<$Res> {
+  factory _$$DropZoneConfigImplCopyWith(
+    _$DropZoneConfigImpl value,
+    $Res Function(_$DropZoneConfigImpl) then,
+  ) = __$$DropZoneConfigImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String id, double x, double y, double width, double height});
+}
+
+/// @nodoc
+class __$$DropZoneConfigImplCopyWithImpl<$Res>
+    extends _$DropZoneConfigCopyWithImpl<$Res, _$DropZoneConfigImpl>
+    implements _$$DropZoneConfigImplCopyWith<$Res> {
+  __$$DropZoneConfigImplCopyWithImpl(
+    _$DropZoneConfigImpl _value,
+    $Res Function(_$DropZoneConfigImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of DropZoneConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? x = null,
+    Object? y = null,
+    Object? width = null,
+    Object? height = null,
+  }) {
+    return _then(
+      _$DropZoneConfigImpl(
+        id:
+            null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String,
+        x:
+            null == x
+                ? _value.x
+                : x // ignore: cast_nullable_to_non_nullable
+                    as double,
+        y:
+            null == y
+                ? _value.y
+                : y // ignore: cast_nullable_to_non_nullable
+                    as double,
+        width:
+            null == width
+                ? _value.width
+                : width // ignore: cast_nullable_to_non_nullable
+                    as double,
+        height:
+            null == height
+                ? _value.height
+                : height // ignore: cast_nullable_to_non_nullable
+                    as double,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$DropZoneConfigImpl implements _DropZoneConfig {
+  const _$DropZoneConfigImpl({
+    required this.id,
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+  });
+
+  factory _$DropZoneConfigImpl.fromJson(Map<String, dynamic> json) =>
+      _$$DropZoneConfigImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final double x;
+  @override
+  final double y;
+  @override
+  final double width;
+  @override
+  final double height;
+
+  @override
+  String toString() {
+    return 'DropZoneConfig(id: $id, x: $x, y: $y, width: $width, height: $height)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$DropZoneConfigImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.x, x) || other.x == x) &&
+            (identical(other.y, y) || other.y == y) &&
+            (identical(other.width, width) || other.width == width) &&
+            (identical(other.height, height) || other.height == height));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, x, y, width, height);
+
+  /// Create a copy of DropZoneConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DropZoneConfigImplCopyWith<_$DropZoneConfigImpl> get copyWith =>
+      __$$DropZoneConfigImplCopyWithImpl<_$DropZoneConfigImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$DropZoneConfigImplToJson(this);
+  }
+}
+
+abstract class _DropZoneConfig implements DropZoneConfig {
+  const factory _DropZoneConfig({
+    required final String id,
+    required final double x,
+    required final double y,
+    required final double width,
+    required final double height,
+  }) = _$DropZoneConfigImpl;
+
+  factory _DropZoneConfig.fromJson(Map<String, dynamic> json) =
+      _$DropZoneConfigImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  double get x;
+  @override
+  double get y;
+  @override
+  double get width;
+  @override
+  double get height;
+
+  /// Create a copy of DropZoneConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DropZoneConfigImplCopyWith<_$DropZoneConfigImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 InteractableConfig _$InteractableConfigFromJson(Map<String, dynamic> json) {
   return _InteractableConfig.fromJson(json);
 }
@@ -415,9 +659,12 @@ InteractableConfig _$InteractableConfigFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$InteractableConfig {
   String get id => throw _privateConstructorUsedError;
-  String get image => throw _privateConstructorUsedError;
+  String get image =>
+      throw _privateConstructorUsedError; // โหมดเดิม (โจทย์สุ่มชิ้นเดียว) ใช้ is_target — ฉาก sort-all ไม่ต้องใส่
   @JsonKey(name: 'is_target')
-  bool get isTarget => throw _privateConstructorUsedError;
+  bool get isTarget => throw _privateConstructorUsedError; // โหมด sort-all: id ของโซนที่รับชิ้นนี้ (เช่น ขวดพลาสติก → "recycle")
+  @JsonKey(name: 'zone_id')
+  String? get zoneId => throw _privateConstructorUsedError;
   @JsonKey(name: 'start_pos')
   GamePosition get startPos => throw _privateConstructorUsedError;
 
@@ -442,6 +689,7 @@ abstract class $InteractableConfigCopyWith<$Res> {
     String id,
     String image,
     @JsonKey(name: 'is_target') bool isTarget,
+    @JsonKey(name: 'zone_id') String? zoneId,
     @JsonKey(name: 'start_pos') GamePosition startPos,
   });
 
@@ -466,6 +714,7 @@ class _$InteractableConfigCopyWithImpl<$Res, $Val extends InteractableConfig>
     Object? id = null,
     Object? image = null,
     Object? isTarget = null,
+    Object? zoneId = freezed,
     Object? startPos = null,
   }) {
     return _then(
@@ -485,6 +734,11 @@ class _$InteractableConfigCopyWithImpl<$Res, $Val extends InteractableConfig>
                     ? _value.isTarget
                     : isTarget // ignore: cast_nullable_to_non_nullable
                         as bool,
+            zoneId:
+                freezed == zoneId
+                    ? _value.zoneId
+                    : zoneId // ignore: cast_nullable_to_non_nullable
+                        as String?,
             startPos:
                 null == startPos
                     ? _value.startPos
@@ -519,6 +773,7 @@ abstract class _$$InteractableConfigImplCopyWith<$Res>
     String id,
     String image,
     @JsonKey(name: 'is_target') bool isTarget,
+    @JsonKey(name: 'zone_id') String? zoneId,
     @JsonKey(name: 'start_pos') GamePosition startPos,
   });
 
@@ -543,6 +798,7 @@ class __$$InteractableConfigImplCopyWithImpl<$Res>
     Object? id = null,
     Object? image = null,
     Object? isTarget = null,
+    Object? zoneId = freezed,
     Object? startPos = null,
   }) {
     return _then(
@@ -562,6 +818,11 @@ class __$$InteractableConfigImplCopyWithImpl<$Res>
                 ? _value.isTarget
                 : isTarget // ignore: cast_nullable_to_non_nullable
                     as bool,
+        zoneId:
+            freezed == zoneId
+                ? _value.zoneId
+                : zoneId // ignore: cast_nullable_to_non_nullable
+                    as String?,
         startPos:
             null == startPos
                 ? _value.startPos
@@ -578,7 +839,8 @@ class _$InteractableConfigImpl implements _InteractableConfig {
   const _$InteractableConfigImpl({
     required this.id,
     required this.image,
-    @JsonKey(name: 'is_target') required this.isTarget,
+    @JsonKey(name: 'is_target') this.isTarget = false,
+    @JsonKey(name: 'zone_id') this.zoneId,
     @JsonKey(name: 'start_pos') required this.startPos,
   });
 
@@ -589,16 +851,21 @@ class _$InteractableConfigImpl implements _InteractableConfig {
   final String id;
   @override
   final String image;
+  // โหมดเดิม (โจทย์สุ่มชิ้นเดียว) ใช้ is_target — ฉาก sort-all ไม่ต้องใส่
   @override
   @JsonKey(name: 'is_target')
   final bool isTarget;
+  // โหมด sort-all: id ของโซนที่รับชิ้นนี้ (เช่น ขวดพลาสติก → "recycle")
+  @override
+  @JsonKey(name: 'zone_id')
+  final String? zoneId;
   @override
   @JsonKey(name: 'start_pos')
   final GamePosition startPos;
 
   @override
   String toString() {
-    return 'InteractableConfig(id: $id, image: $image, isTarget: $isTarget, startPos: $startPos)';
+    return 'InteractableConfig(id: $id, image: $image, isTarget: $isTarget, zoneId: $zoneId, startPos: $startPos)';
   }
 
   @override
@@ -610,13 +877,15 @@ class _$InteractableConfigImpl implements _InteractableConfig {
             (identical(other.image, image) || other.image == image) &&
             (identical(other.isTarget, isTarget) ||
                 other.isTarget == isTarget) &&
+            (identical(other.zoneId, zoneId) || other.zoneId == zoneId) &&
             (identical(other.startPos, startPos) ||
                 other.startPos == startPos));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, image, isTarget, startPos);
+  int get hashCode =>
+      Object.hash(runtimeType, id, image, isTarget, zoneId, startPos);
 
   /// Create a copy of InteractableConfig
   /// with the given fields replaced by the non-null parameter values.
@@ -639,7 +908,8 @@ abstract class _InteractableConfig implements InteractableConfig {
   const factory _InteractableConfig({
     required final String id,
     required final String image,
-    @JsonKey(name: 'is_target') required final bool isTarget,
+    @JsonKey(name: 'is_target') final bool isTarget,
+    @JsonKey(name: 'zone_id') final String? zoneId,
     @JsonKey(name: 'start_pos') required final GamePosition startPos,
   }) = _$InteractableConfigImpl;
 
@@ -649,10 +919,13 @@ abstract class _InteractableConfig implements InteractableConfig {
   @override
   String get id;
   @override
-  String get image;
+  String get image; // โหมดเดิม (โจทย์สุ่มชิ้นเดียว) ใช้ is_target — ฉาก sort-all ไม่ต้องใส่
   @override
   @JsonKey(name: 'is_target')
-  bool get isTarget;
+  bool get isTarget; // โหมด sort-all: id ของโซนที่รับชิ้นนี้ (เช่น ขวดพลาสติก → "recycle")
+  @override
+  @JsonKey(name: 'zone_id')
+  String? get zoneId;
   @override
   @JsonKey(name: 'start_pos')
   GamePosition get startPos;
@@ -687,9 +960,14 @@ mixin _$ScenarioConfig {
   @JsonKey(name: 'tts_hint')
   String get ttsHint => throw _privateConstructorUsedError;
   List<InteractableConfig> get interactables =>
-      throw _privateConstructorUsedError;
+      throw _privateConstructorUsedError; // โหมดเดิม: โซนเดียว (ตะกร้า) — ฉาก sort-all ไม่ใส่ฟิลด์นี้
   @JsonKey(name: 'target_zone')
-  TargetZone get targetZone => throw _privateConstructorUsedError;
+  TargetZone? get targetZone => throw _privateConstructorUsedError; // โหมด sort-all: มี zones = ต้องลากทุกชิ้นลงโซนของตัวเองจนครบถึงจะจบเกม
+  List<DropZoneConfig> get zones =>
+      throw _privateConstructorUsedError; // โหมดสุ่มโจทย์บางชิ้น (ใช้คู่กับ zones): สุ่มหยิบแค่ N ชิ้นจากทั้งหมดต่อรอบ
+  // เช่น จัดผลไม้สุ่ม 2 ชนิด — ชิ้นนอกโจทย์ลากลงโซนแล้วโดนปฏิเสธ (นับ mistake)
+  @JsonKey(name: 'pick_count')
+  int? get pickCount => throw _privateConstructorUsedError;
 
   /// Serializes this ScenarioConfig to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -719,10 +997,12 @@ abstract class $ScenarioConfigCopyWith<$Res> {
     @JsonKey(name: 'tts_celebration') String ttsCelebration,
     @JsonKey(name: 'tts_hint') String ttsHint,
     List<InteractableConfig> interactables,
-    @JsonKey(name: 'target_zone') TargetZone targetZone,
+    @JsonKey(name: 'target_zone') TargetZone? targetZone,
+    List<DropZoneConfig> zones,
+    @JsonKey(name: 'pick_count') int? pickCount,
   });
 
-  $TargetZoneCopyWith<$Res> get targetZone;
+  $TargetZoneCopyWith<$Res>? get targetZone;
 }
 
 /// @nodoc
@@ -750,7 +1030,9 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
     Object? ttsCelebration = null,
     Object? ttsHint = null,
     Object? interactables = null,
-    Object? targetZone = null,
+    Object? targetZone = freezed,
+    Object? zones = null,
+    Object? pickCount = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -805,10 +1087,20 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
                     : interactables // ignore: cast_nullable_to_non_nullable
                         as List<InteractableConfig>,
             targetZone:
-                null == targetZone
+                freezed == targetZone
                     ? _value.targetZone
                     : targetZone // ignore: cast_nullable_to_non_nullable
-                        as TargetZone,
+                        as TargetZone?,
+            zones:
+                null == zones
+                    ? _value.zones
+                    : zones // ignore: cast_nullable_to_non_nullable
+                        as List<DropZoneConfig>,
+            pickCount:
+                freezed == pickCount
+                    ? _value.pickCount
+                    : pickCount // ignore: cast_nullable_to_non_nullable
+                        as int?,
           )
           as $Val,
     );
@@ -818,8 +1110,12 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $TargetZoneCopyWith<$Res> get targetZone {
-    return $TargetZoneCopyWith<$Res>(_value.targetZone, (value) {
+  $TargetZoneCopyWith<$Res>? get targetZone {
+    if (_value.targetZone == null) {
+      return null;
+    }
+
+    return $TargetZoneCopyWith<$Res>(_value.targetZone!, (value) {
       return _then(_value.copyWith(targetZone: value) as $Val);
     });
   }
@@ -845,11 +1141,13 @@ abstract class _$$ScenarioConfigImplCopyWith<$Res>
     @JsonKey(name: 'tts_celebration') String ttsCelebration,
     @JsonKey(name: 'tts_hint') String ttsHint,
     List<InteractableConfig> interactables,
-    @JsonKey(name: 'target_zone') TargetZone targetZone,
+    @JsonKey(name: 'target_zone') TargetZone? targetZone,
+    List<DropZoneConfig> zones,
+    @JsonKey(name: 'pick_count') int? pickCount,
   });
 
   @override
-  $TargetZoneCopyWith<$Res> get targetZone;
+  $TargetZoneCopyWith<$Res>? get targetZone;
 }
 
 /// @nodoc
@@ -876,7 +1174,9 @@ class __$$ScenarioConfigImplCopyWithImpl<$Res>
     Object? ttsCelebration = null,
     Object? ttsHint = null,
     Object? interactables = null,
-    Object? targetZone = null,
+    Object? targetZone = freezed,
+    Object? zones = null,
+    Object? pickCount = freezed,
   }) {
     return _then(
       _$ScenarioConfigImpl(
@@ -931,10 +1231,20 @@ class __$$ScenarioConfigImplCopyWithImpl<$Res>
                 : interactables // ignore: cast_nullable_to_non_nullable
                     as List<InteractableConfig>,
         targetZone:
-            null == targetZone
+            freezed == targetZone
                 ? _value.targetZone
                 : targetZone // ignore: cast_nullable_to_non_nullable
-                    as TargetZone,
+                    as TargetZone?,
+        zones:
+            null == zones
+                ? _value._zones
+                : zones // ignore: cast_nullable_to_non_nullable
+                    as List<DropZoneConfig>,
+        pickCount:
+            freezed == pickCount
+                ? _value.pickCount
+                : pickCount // ignore: cast_nullable_to_non_nullable
+                    as int?,
       ),
     );
   }
@@ -954,8 +1264,11 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     @JsonKey(name: 'tts_celebration') required this.ttsCelebration,
     @JsonKey(name: 'tts_hint') required this.ttsHint,
     required final List<InteractableConfig> interactables,
-    @JsonKey(name: 'target_zone') required this.targetZone,
-  }) : _interactables = interactables;
+    @JsonKey(name: 'target_zone') this.targetZone,
+    final List<DropZoneConfig> zones = const <DropZoneConfig>[],
+    @JsonKey(name: 'pick_count') this.pickCount,
+  }) : _interactables = interactables,
+       _zones = zones;
 
   factory _$ScenarioConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$ScenarioConfigImplFromJson(json);
@@ -992,13 +1305,30 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     return EqualUnmodifiableListView(_interactables);
   }
 
+  // โหมดเดิม: โซนเดียว (ตะกร้า) — ฉาก sort-all ไม่ใส่ฟิลด์นี้
   @override
   @JsonKey(name: 'target_zone')
-  final TargetZone targetZone;
+  final TargetZone? targetZone;
+  // โหมด sort-all: มี zones = ต้องลากทุกชิ้นลงโซนของตัวเองจนครบถึงจะจบเกม
+  final List<DropZoneConfig> _zones;
+  // โหมด sort-all: มี zones = ต้องลากทุกชิ้นลงโซนของตัวเองจนครบถึงจะจบเกม
+  @override
+  @JsonKey()
+  List<DropZoneConfig> get zones {
+    if (_zones is EqualUnmodifiableListView) return _zones;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_zones);
+  }
+
+  // โหมดสุ่มโจทย์บางชิ้น (ใช้คู่กับ zones): สุ่มหยิบแค่ N ชิ้นจากทั้งหมดต่อรอบ
+  // เช่น จัดผลไม้สุ่ม 2 ชนิด — ชิ้นนอกโจทย์ลากลงโซนแล้วโดนปฏิเสธ (นับ mistake)
+  @override
+  @JsonKey(name: 'pick_count')
+  final int? pickCount;
 
   @override
   String toString() {
-    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone)';
+    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone, zones: $zones, pickCount: $pickCount)';
   }
 
   @override
@@ -1025,7 +1355,10 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
               _interactables,
             ) &&
             (identical(other.targetZone, targetZone) ||
-                other.targetZone == targetZone));
+                other.targetZone == targetZone) &&
+            const DeepCollectionEquality().equals(other._zones, _zones) &&
+            (identical(other.pickCount, pickCount) ||
+                other.pickCount == pickCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1043,6 +1376,8 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     ttsHint,
     const DeepCollectionEquality().hash(_interactables),
     targetZone,
+    const DeepCollectionEquality().hash(_zones),
+    pickCount,
   );
 
   /// Create a copy of ScenarioConfig
@@ -1074,7 +1409,9 @@ abstract class _ScenarioConfig implements ScenarioConfig {
     @JsonKey(name: 'tts_celebration') required final String ttsCelebration,
     @JsonKey(name: 'tts_hint') required final String ttsHint,
     required final List<InteractableConfig> interactables,
-    @JsonKey(name: 'target_zone') required final TargetZone targetZone,
+    @JsonKey(name: 'target_zone') final TargetZone? targetZone,
+    final List<DropZoneConfig> zones,
+    @JsonKey(name: 'pick_count') final int? pickCount,
   }) = _$ScenarioConfigImpl;
 
   factory _ScenarioConfig.fromJson(Map<String, dynamic> json) =
@@ -1105,10 +1442,16 @@ abstract class _ScenarioConfig implements ScenarioConfig {
   @JsonKey(name: 'tts_hint')
   String get ttsHint;
   @override
-  List<InteractableConfig> get interactables;
+  List<InteractableConfig> get interactables; // โหมดเดิม: โซนเดียว (ตะกร้า) — ฉาก sort-all ไม่ใส่ฟิลด์นี้
   @override
   @JsonKey(name: 'target_zone')
-  TargetZone get targetZone;
+  TargetZone? get targetZone; // โหมด sort-all: มี zones = ต้องลากทุกชิ้นลงโซนของตัวเองจนครบถึงจะจบเกม
+  @override
+  List<DropZoneConfig> get zones; // โหมดสุ่มโจทย์บางชิ้น (ใช้คู่กับ zones): สุ่มหยิบแค่ N ชิ้นจากทั้งหมดต่อรอบ
+  // เช่น จัดผลไม้สุ่ม 2 ชนิด — ชิ้นนอกโจทย์ลากลงโซนแล้วโดนปฏิเสธ (นับ mistake)
+  @override
+  @JsonKey(name: 'pick_count')
+  int? get pickCount;
 
   /// Create a copy of ScenarioConfig
   /// with the given fields replaced by the non-null parameter values.

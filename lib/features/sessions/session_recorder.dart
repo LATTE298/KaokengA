@@ -119,8 +119,14 @@ class SessionRecorder {
     if (uid == null) return Future<void>.value();
 
     final endedAt = _clock().toUtc();
+    // ฉาก sort-all ไม่มี target เดี่ยว (ทุกชิ้นคือโจทย์) — ใช้ชิ้นแรกแทนใน record
     final targetId =
-        event.config.interactables.firstWhere((i) => i.isTarget).id;
+        event.config.interactables
+            .firstWhere(
+              (i) => i.isTarget,
+              orElse: () => event.config.interactables.first,
+            )
+            .id;
     final startedAt = event.session.startedAt.toUtc();
     final durationMs = endedAt.difference(startedAt).inMilliseconds;
     final record = SessionRecord(

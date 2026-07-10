@@ -69,10 +69,13 @@ GoRouter buildAppRouter() {
       GoRoute(
         // Child deep-route format: /module-a/game/:scenarioId
         path: '$kRouteScenarioGame/:scenarioId',
-        pageBuilder: (_, state) => _fadePage(
-          state,
-          ScenarioGameScreen(scenarioId: state.pathParameters['scenarioId']!),
-        ),
+        pageBuilder:
+            (_, state) => _fadePage(
+              state,
+              ScenarioGameScreen(
+                scenarioId: state.pathParameters['scenarioId']!,
+              ),
+            ),
       ),
       GoRoute(
         path: kRouteModuleB,
@@ -81,10 +84,11 @@ GoRouter buildAppRouter() {
       GoRoute(
         // Child deep-route format: /module-b/game/:packId (แพ็ค = หมวดคำศัพท์)
         path: '$kRouteMemoryGame/:packId',
-        pageBuilder: (_, state) => _fadePage(
-          state,
-          MemoryGameScreen(packId: state.pathParameters['packId']!),
-        ),
+        pageBuilder:
+            (_, state) => _fadePage(
+              state,
+              MemoryGameScreen(packId: state.pathParameters['packId']!),
+            ),
       ),
       GoRoute(
         path: kRouteModuleC,
@@ -96,16 +100,17 @@ GoRouter buildAppRouter() {
       ),
       GoRoute(
         path: kRouteVocabQuiz,
-        pageBuilder: (_, state) =>
-            _fadePage(state, const VocabQuizSelectScreen()),
+        pageBuilder:
+            (_, state) => _fadePage(state, const VocabQuizSelectScreen()),
       ),
       GoRoute(
         // Child deep-route format: /module-c/quiz/:category (หมวดคำศัพท์)
         path: '$kRouteVocabQuiz/:category',
-        pageBuilder: (_, state) => _fadePage(
-          state,
-          VocabQuizScreen(category: state.pathParameters['category']!),
-        ),
+        pageBuilder:
+            (_, state) => _fadePage(
+              state,
+              VocabQuizScreen(category: state.pathParameters['category']!),
+            ),
       ),
       GoRoute(
         path: kRouteFamilyGame,
@@ -125,8 +130,8 @@ GoRouter buildAppRouter() {
       ),
       GoRoute(
         path: kRouteFamilyManager,
-        pageBuilder: (_, state) =>
-            _fadePage(state, const FamilyManagerScreen()),
+        pageBuilder:
+            (_, state) => _fadePage(state, const FamilyManagerScreen()),
       ),
     ],
   );
