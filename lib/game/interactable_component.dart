@@ -3,7 +3,17 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart'
-    show Canvas, Curves, Paint, PaintingStyle, RRect, Radius, Rect;
+    show
+        BlurStyle,
+        Canvas,
+        Color,
+        Curves,
+        MaskFilter,
+        Paint,
+        PaintingStyle,
+        RRect,
+        Radius,
+        Rect;
 
 import '../models/scenario_config.dart';
 import '../services/haptic_service.dart';
@@ -25,6 +35,7 @@ class InteractableComponent extends PositionComponent
     this.onMistake,
     double displaySize = 120,
     this.showCard = false,
+    this.entryDelay = 0,
   }) : _startPosition = position.clone(),
        super(
          position: position,
@@ -43,9 +54,16 @@ class InteractableComponent extends PositionComponent
   /// แบบถาดไอเทมใน mockup) การ์ดหายเมื่อวางลงโซนสำเร็จ
   final bool showCard;
 
+  /// หน่วงเวลาก่อนอนิเมชันเข้าฉาก (วินาที) — ไล่ทีละใบให้ดูนุ่ม (0 = ไม่หน่วง)
+  final double entryDelay;
+
   final Vector2 _startPosition;
   bool _isBeingDragged = false;
   bool _settledInZone = false;
+
+  // โซนที่ hitbox กำลังคาบเกี่ยวอยู่ตอนนี้ — ใช้ตัดสินตอน "ปล่อย" ว่าวางลงโซนไหน
+  // (ไอเทมบางชิ้นเริ่มเกมโดยคาบเกี่ยวโซนอยู่แล้วเพราะถาดอยู่ใกล้ ต้องรอผู้เล่นลาก)
+  final Set<DropZoneComponent> _overlappingZones = {};
 
   bool get isTarget => config.isTarget;
 
@@ -83,24 +101,49 @@ class InteractableComponent extends PositionComponent
         collisionType: CollisionType.active,
       ),
     );
+
+    // เข้าฉากนุ่ม ๆ: การ์ดค่อยๆ ขยายเข้ามา ไล่ทีละใบ (subtle ไม่กระตุ้นตา — spec 1.3)
+    if (showCard && !reduceMotion) {
+      scale = Vector2.all(0.82);
+      add(
+        ScaleEffect.to(
+          Vector2.all(1.0),
+          EffectController(
+            duration: 0.28,
+            startDelay: entryDelay,
+            curve: Curves.easeOut,
+          ),
+        ),
+      );
+    }
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
     if (!showCard || _settledInZone) return;
-    // การ์ดรองหลังรูป (วาดก่อน children = อยู่ใต้รูปเสมอ)
-    final rect = RRect.fromRectAndRadius(
+    // การ์ดรองหลังรูป (วาดก่อน children = อยู่ใต้รูปเสมอ): เงานุ่ม + ขอบบางอุ่น
+    final r = Radius.circular(size.x * 0.22);
+    final card = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(20),
+      r,
     );
-    canvas.drawRRect(rect, Paint()..color = kWarmWhite.withValues(alpha: 0.95));
     canvas.drawRRect(
-      rect,
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, size.y * 0.05, size.x, size.y),
+        r,
+      ),
       Paint()
-        ..color = kYellowPrimary
+        ..color = const Color(0x1F000000)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+    );
+    canvas.drawRRect(card, Paint()..color = kWarmWhite);
+    canvas.drawRRect(
+      card,
+      Paint()
+        ..color = kYellowPrimary.withValues(alpha: 0.5)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 3,
+        ..strokeWidth = size.x * 0.018,
     );
   }
 
@@ -110,6 +153,8 @@ class InteractableComponent extends PositionComponent
     super.onDragStart(event);
     _isBeingDragged = true;
     priority = 100;
+    // ยกเลิก entrance ที่อาจยังวิ่งอยู่ ก่อนตั้ง scale ตอนจับ
+    children.whereType<ScaleEffect>().forEach((e) => e.removeFromParent());
     scale = Vector2.all(1.05);
     HapticService.grab();
     onPathSample?.call(position.clone());
@@ -126,17 +171,24 @@ class InteractableComponent extends PositionComponent
   void onDragEnd(DragEndEvent event) {
     super.onDragEnd(event);
     if (_settledInZone) return;
-    _isBeingDragged = false;
     priority = 2;
     scale = Vector2.all(1.0);
 
-    // Let the collision callback fire first (it runs this frame). If the
-    // target lands in the zone, DropZone claims us. Otherwise return home
-    // after a one-frame grace.
+    // ปล่อยขณะคาบเกี่ยวโซนที่รับได้ → วางลงโซนนั้น. ครอบคลุมกรณีที่ collisionStart
+    // ไม่ยิงระหว่างลาก (ไอเทมคาบเกี่ยวโซนมาตั้งแต่ตอนโหลด แล้วผู้เล่นลากอยู่ในโซน)
+    for (final zone in _overlappingZones.toList()) {
+      zone.onInteractableEntered(this);
+      if (_settledInZone) {
+        _isBeingDragged = false;
+        return;
+      }
+    }
+    _isBeingDragged = false;
+
+    // วางไม่ถูก zone — เด้งกลับ (หน่วง 1 เฟรมเผื่อ collision callback ปิดท้าย)
     Future<void>.delayed(const Duration(milliseconds: 50), () {
       if (_settledInZone || _isBeingDragged) return;
-      // วางไม่ถูก zone — นับเป็นความผิดพลาด 1 ครั้ง
-      onMistake?.call();
+      onMistake?.call(); // นับเป็นความผิดพลาด 1 ครั้ง
       if (reduceMotion) {
         position = _startPosition.clone();
       } else {
@@ -181,7 +233,10 @@ class InteractableComponent extends PositionComponent
   ) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is DropZoneComponent) {
-      other.onInteractableEntered(this);
+      _overlappingZones.add(other);
+      // ยอมรับเฉพาะตอน "กำลังลากจริง" — กันการวางเองตอนโหลด ถ้าไอเทมเริ่มเกม
+      // โดยคาบเกี่ยวโซนพอดี (เช่นถ้วยผลไม้ที่โซนกินลงมาใกล้แถวไอเทม)
+      if (_isBeingDragged) other.onInteractableEntered(this);
     }
   }
 
@@ -189,6 +244,7 @@ class InteractableComponent extends PositionComponent
   void onCollisionEnd(PositionComponent other) {
     super.onCollisionEnd(other);
     if (other is DropZoneComponent) {
+      _overlappingZones.remove(other);
       other.onInteractableExited(this);
     }
   }

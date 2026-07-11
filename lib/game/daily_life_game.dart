@@ -10,6 +10,7 @@ import '../services/haptic_service.dart';
 import '../services/tts_service.dart';
 import 'background_component.dart';
 import 'drop_zone_component.dart';
+import 'game_asset_paths.dart';
 import 'hint_arrow_component.dart';
 import 'interactable_component.dart';
 import 'item_tray_component.dart';
@@ -42,6 +43,11 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
   final Set<String> _placeholderImagePaths;
 
   static final Vector2 _authoringSpace = Vector2(1920, 1080);
+
+  // cover-fit transform (ใช้เมื่อ config.coverFit) — คำนวณครั้งเดียวใน onLoad
+  double _bgScale = 1;
+  Vector2 _bgOffset = Vector2.zero();
+  Vector2 _imgSize = Vector2.zero();
 
   async.Timer? _idleTimer;
   bool _completed = false;
@@ -100,10 +106,19 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
   @override
   Future<void> onLoad() async {
+    // cover-fit: คำนวณ scale/offset จากขนาดรูปจริง เพื่อวางโซน/ไอเทมให้ล็อกกับภาพ
+    if (config.coverFit) {
+      final image = await images.load(flameImageKey(config.backgroundImage));
+      _imgSize = Vector2(image.width.toDouble(), image.height.toDouble());
+      _bgScale = max(size.x / _imgSize.x, size.y / _imgSize.y);
+      _bgOffset = (size - _imgSize * _bgScale) / 2;
+    }
+
     await add(
       BackgroundComponent(
         imagePath: config.backgroundImage,
         placeholderImagePaths: _placeholderImagePaths,
+        coverFit: config.coverFit,
       ),
     );
 
@@ -132,15 +147,44 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
       await add(zone);
     }
 
-    // โหมด sort-all: ไอเทมใหญ่ตามจอ + การ์ดขาวรองหลัง + ถาดใต้แถวไอเทม
-    // (โหมดเดิมคงขนาด 120 ตาม spec 04 ไม่แตะ)
-    final itemSize = isSortAll ? (size.y * 0.20).clamp(100.0, 170.0) : 120.0;
-    if (isSortAll) {
-      await add(_buildTray(itemSize));
+    // ขนาดไอเทม: coverFit อิง viewport ให้พอดีแถวล่างจอทุกอัตราส่วน (จอเตี้ยก็ไม่ล้น),
+    // sort-all เดิมอิงความสูงจอ, โหมดโจทย์ชิ้นเดียวคง 120 (spec 04)
+    final n = config.interactables.length;
+    final double itemSize;
+    if (config.coverFit) {
+      itemSize = min(size.x * 0.13, size.y * 0.19).clamp(56.0, 135.0);
+    } else if (isSortAll) {
+      itemSize = (size.y * 0.20).clamp(100.0, 170.0);
+    } else {
+      itemSize = 120.0;
     }
 
-    for (final item in config.interactables) {
-      final pos = _toCanvas(Vector2(item.startPos.x, item.startPos.y));
+    // coverFit: จัดไอเทมเป็นแถวชิดขอบล่าง "จอ" (viewport) — ไม่ผูกกับการครอปรูป จึง
+    // เห็นเต็มเสมอแม้จอเตี้ย/กว้างมาก. นอกนั้นวางตาม start_pos จาก JSON
+    final List<Vector2> itemPositions;
+    if (config.coverFit) {
+      final gap = itemSize * 0.35;
+      final totalW = n * itemSize + (n - 1) * gap;
+      final startX = (size.x - totalW) / 2;
+      final centerY = size.y * 0.96 - itemSize / 2;
+      itemPositions = [
+        for (var i = 0; i < n; i++)
+          Vector2(startX + itemSize / 2 + i * (itemSize + gap), centerY),
+      ];
+    } else {
+      itemPositions = [
+        for (final item in config.interactables)
+          _toCanvas(Vector2(item.startPos.x, item.startPos.y)),
+      ];
+    }
+
+    if (isSortAll) {
+      await add(_buildTray(itemSize, itemPositions));
+    }
+
+    for (var i = 0; i < n; i++) {
+      final item = config.interactables[i];
+      final pos = itemPositions[i];
       if (item.isTarget) {
         // เหนือ interactable (anchor กลาง) ขึ้นไปอีกเล็กน้อย
         _targetTopPos = Vector2(pos.x, pos.y - itemSize * 0.6 - 12);
@@ -152,6 +196,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
         placeholderImagePaths: _placeholderImagePaths,
         displaySize: itemSize,
         showCard: isSortAll,
+        entryDelay: isSortAll ? i * 0.07 : 0,
         onPathSample: (p) {
           _dragPath.add(GamePosition(x: p.x, y: p.y));
           _resetIdleTimer();
@@ -176,18 +221,10 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     }
   }
 
-  /// ถาดรองแถวไอเทมด้านล่าง — ครอบตำแหน่งเริ่มของทุกชิ้น + ระยะหายใจ
-  ItemTrayComponent _buildTray(double itemSize) {
-    final xs = [
-      for (final item in config.interactables)
-        _toCanvas(Vector2(item.startPos.x, item.startPos.y)).x,
-    ];
-    final ys = [
-      for (final item in config.interactables)
-        _toCanvas(Vector2(item.startPos.x, item.startPos.y)).y,
-    ];
-    xs.sort();
-    ys.sort();
+  /// ถาดรองแถวไอเทมด้านล่าง — ครอบตำแหน่งของทุกชิ้น + ระยะหายใจ
+  ItemTrayComponent _buildTray(double itemSize, List<Vector2> positions) {
+    final xs = [for (final p in positions) p.x]..sort();
+    final ys = [for (final p in positions) p.y]..sort();
     final padX = itemSize * 0.85;
     final padY = itemSize * 0.68;
     final left = xs.first - padX;
@@ -219,17 +256,32 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     super.onRemove();
   }
 
-  Vector2 _toCanvas(Vector2 authoringPoint) {
+  // แปลงพิกัดฉาก → พิกัดจอ. coverFit: อินพุตเป็น "สัดส่วน 0..1 ของรูป" แล้วแมพผ่าน
+  // transform เดียวกับพื้นหลัง (โซน/ไอเทมล็อกกับภาพ). ปกติ: authoring 1920x1080 ยืดเต็มจอ
+  Vector2 _toCanvas(Vector2 point) {
+    if (config.coverFit) {
+      return _bgOffset +
+          Vector2(
+            point.x * _imgSize.x * _bgScale,
+            point.y * _imgSize.y * _bgScale,
+          );
+    }
     return Vector2(
-      authoringPoint.x / _authoringSpace.x * size.x,
-      authoringPoint.y / _authoringSpace.y * size.y,
+      point.x / _authoringSpace.x * size.x,
+      point.y / _authoringSpace.y * size.y,
     );
   }
 
-  Vector2 _toCanvasSize(Vector2 authoringSize) {
+  Vector2 _toCanvasSize(Vector2 sizeInput) {
+    if (config.coverFit) {
+      return Vector2(
+        sizeInput.x * _imgSize.x * _bgScale,
+        sizeInput.y * _imgSize.y * _bgScale,
+      );
+    }
     return Vector2(
-      authoringSize.x / _authoringSpace.x * size.x,
-      authoringSize.y / _authoringSpace.y * size.y,
+      sizeInput.x / _authoringSpace.x * size.x,
+      sizeInput.y / _authoringSpace.y * size.y,
     );
   }
 

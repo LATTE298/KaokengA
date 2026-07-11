@@ -1,6 +1,6 @@
 {
   "scenario_id": "food_prep_001",
-  "version": 4,
+  "version": 6,
   "category": "daily_life",
   "module": "A",
   "title_th": "ช่วยจัดผลไม้ใส่ถ้วย",
@@ -9,33 +9,34 @@
   "tts_celebration": "เก่งมากครับ! จัดผลไม้ได้สวยเลย!",
   "tts_hint": "ลองหยิบผลไม้ที่บอก วางลงในถ้วยนะครับ",
   "pick_count": 2,
+  "cover_fit": true,
   "zones": [
-    { "id": "bowl", "x": 620, "y": 160, "width": 720, "height": 750 }
+    { "id": "bowl", "x": 0.34, "y": 0.36, "width": 0.32, "height": 0.26 }
   ],
   "interactables": [
     {
       "id": "apple",
       "image": "assets/images/fruit_apple.png",
       "zone_id": "bowl",
-      "start_pos": { "x": 400, "y": 940 }
+      "start_pos": { "x": 0.16, "y": 0.75 }
     },
     {
       "id": "grapes",
       "image": "assets/images/fruit_grapes.png",
       "zone_id": "bowl",
-      "start_pos": { "x": 820, "y": 940 }
+      "start_pos": { "x": 0.38, "y": 0.75 }
     },
     {
       "id": "orange",
       "image": "assets/images/fruit_orange.png",
       "zone_id": "bowl",
-      "start_pos": { "x": 1240, "y": 940 }
+      "start_pos": { "x": 0.60, "y": 0.75 }
     },
     {
       "id": "banana",
       "image": "assets/images/fruit_banana.png",
       "zone_id": "bowl",
-      "start_pos": { "x": 1660, "y": 940 }
+      "start_pos": { "x": 0.82, "y": 0.75 }
     }
   ]
 }

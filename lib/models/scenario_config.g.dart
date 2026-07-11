@@ -96,6 +96,7 @@ _$ScenarioConfigImpl _$$ScenarioConfigImplFromJson(
           .toList() ??
       const <DropZoneConfig>[],
   pickCount: (json['pick_count'] as num?)?.toInt(),
+  coverFit: json['cover_fit'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$$ScenarioConfigImplToJson(
@@ -114,6 +115,7 @@ Map<String, dynamic> _$$ScenarioConfigImplToJson(
   'target_zone': instance.targetZone?.toJson(),
   'zones': instance.zones.map((e) => e.toJson()).toList(),
   'pick_count': instance.pickCount,
+  'cover_fit': instance.coverFit,
 };
 
 _$ScenarioSummaryImpl _$$ScenarioSummaryImplFromJson(

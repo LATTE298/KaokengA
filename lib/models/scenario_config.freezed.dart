@@ -967,7 +967,11 @@ mixin _$ScenarioConfig {
       throw _privateConstructorUsedError; // โหมดสุ่มโจทย์บางชิ้น (ใช้คู่กับ zones): สุ่มหยิบแค่ N ชิ้นจากทั้งหมดต่อรอบ
   // เช่น จัดผลไม้สุ่ม 2 ชนิด — ชิ้นนอกโจทย์ลากลงโซนแล้วโดนปฏิเสธ (นับ mistake)
   @JsonKey(name: 'pick_count')
-  int? get pickCount => throw _privateConstructorUsedError;
+  int? get pickCount => throw _privateConstructorUsedError; // พื้นหลัง cover-fit (รักษาสัดส่วน ไม่ยืด) + พิกัด zones/start_pos เป็น
+  // "สัดส่วน 0..1 ของรูปพื้นหลัง" แทน authoring 1920x1080 → โซนล็อกกับภาพจริง
+  // ทุกอัตราส่วนจอ (แท็บเล็ต/iPad ไม่ยืด). ไม่ใส่/false = โหมดเดิม (ยืดเต็มจอ)
+  @JsonKey(name: 'cover_fit')
+  bool get coverFit => throw _privateConstructorUsedError;
 
   /// Serializes this ScenarioConfig to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1000,6 +1004,7 @@ abstract class $ScenarioConfigCopyWith<$Res> {
     @JsonKey(name: 'target_zone') TargetZone? targetZone,
     List<DropZoneConfig> zones,
     @JsonKey(name: 'pick_count') int? pickCount,
+    @JsonKey(name: 'cover_fit') bool coverFit,
   });
 
   $TargetZoneCopyWith<$Res>? get targetZone;
@@ -1033,6 +1038,7 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
     Object? targetZone = freezed,
     Object? zones = null,
     Object? pickCount = freezed,
+    Object? coverFit = null,
   }) {
     return _then(
       _value.copyWith(
@@ -1101,6 +1107,11 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
                     ? _value.pickCount
                     : pickCount // ignore: cast_nullable_to_non_nullable
                         as int?,
+            coverFit:
+                null == coverFit
+                    ? _value.coverFit
+                    : coverFit // ignore: cast_nullable_to_non_nullable
+                        as bool,
           )
           as $Val,
     );
@@ -1144,6 +1155,7 @@ abstract class _$$ScenarioConfigImplCopyWith<$Res>
     @JsonKey(name: 'target_zone') TargetZone? targetZone,
     List<DropZoneConfig> zones,
     @JsonKey(name: 'pick_count') int? pickCount,
+    @JsonKey(name: 'cover_fit') bool coverFit,
   });
 
   @override
@@ -1177,6 +1189,7 @@ class __$$ScenarioConfigImplCopyWithImpl<$Res>
     Object? targetZone = freezed,
     Object? zones = null,
     Object? pickCount = freezed,
+    Object? coverFit = null,
   }) {
     return _then(
       _$ScenarioConfigImpl(
@@ -1245,6 +1258,11 @@ class __$$ScenarioConfigImplCopyWithImpl<$Res>
                 ? _value.pickCount
                 : pickCount // ignore: cast_nullable_to_non_nullable
                     as int?,
+        coverFit:
+            null == coverFit
+                ? _value.coverFit
+                : coverFit // ignore: cast_nullable_to_non_nullable
+                    as bool,
       ),
     );
   }
@@ -1267,6 +1285,7 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     @JsonKey(name: 'target_zone') this.targetZone,
     final List<DropZoneConfig> zones = const <DropZoneConfig>[],
     @JsonKey(name: 'pick_count') this.pickCount,
+    @JsonKey(name: 'cover_fit') this.coverFit = false,
   }) : _interactables = interactables,
        _zones = zones;
 
@@ -1325,10 +1344,16 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
   @override
   @JsonKey(name: 'pick_count')
   final int? pickCount;
+  // พื้นหลัง cover-fit (รักษาสัดส่วน ไม่ยืด) + พิกัด zones/start_pos เป็น
+  // "สัดส่วน 0..1 ของรูปพื้นหลัง" แทน authoring 1920x1080 → โซนล็อกกับภาพจริง
+  // ทุกอัตราส่วนจอ (แท็บเล็ต/iPad ไม่ยืด). ไม่ใส่/false = โหมดเดิม (ยืดเต็มจอ)
+  @override
+  @JsonKey(name: 'cover_fit')
+  final bool coverFit;
 
   @override
   String toString() {
-    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone, zones: $zones, pickCount: $pickCount)';
+    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone, zones: $zones, pickCount: $pickCount, coverFit: $coverFit)';
   }
 
   @override
@@ -1358,7 +1383,9 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
                 other.targetZone == targetZone) &&
             const DeepCollectionEquality().equals(other._zones, _zones) &&
             (identical(other.pickCount, pickCount) ||
-                other.pickCount == pickCount));
+                other.pickCount == pickCount) &&
+            (identical(other.coverFit, coverFit) ||
+                other.coverFit == coverFit));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1378,6 +1405,7 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     targetZone,
     const DeepCollectionEquality().hash(_zones),
     pickCount,
+    coverFit,
   );
 
   /// Create a copy of ScenarioConfig
@@ -1412,6 +1440,7 @@ abstract class _ScenarioConfig implements ScenarioConfig {
     @JsonKey(name: 'target_zone') final TargetZone? targetZone,
     final List<DropZoneConfig> zones,
     @JsonKey(name: 'pick_count') final int? pickCount,
+    @JsonKey(name: 'cover_fit') final bool coverFit,
   }) = _$ScenarioConfigImpl;
 
   factory _ScenarioConfig.fromJson(Map<String, dynamic> json) =
@@ -1451,7 +1480,12 @@ abstract class _ScenarioConfig implements ScenarioConfig {
   // เช่น จัดผลไม้สุ่ม 2 ชนิด — ชิ้นนอกโจทย์ลากลงโซนแล้วโดนปฏิเสธ (นับ mistake)
   @override
   @JsonKey(name: 'pick_count')
-  int? get pickCount;
+  int? get pickCount; // พื้นหลัง cover-fit (รักษาสัดส่วน ไม่ยืด) + พิกัด zones/start_pos เป็น
+  // "สัดส่วน 0..1 ของรูปพื้นหลัง" แทน authoring 1920x1080 → โซนล็อกกับภาพจริง
+  // ทุกอัตราส่วนจอ (แท็บเล็ต/iPad ไม่ยืด). ไม่ใส่/false = โหมดเดิม (ยืดเต็มจอ)
+  @override
+  @JsonKey(name: 'cover_fit')
+  bool get coverFit;
 
   /// Create a copy of ScenarioConfig
   /// with the given fields replaced by the non-null parameter values.

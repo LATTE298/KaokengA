@@ -79,6 +79,10 @@ class ScenarioConfig with _$ScenarioConfig {
     // โหมดสุ่มโจทย์บางชิ้น (ใช้คู่กับ zones): สุ่มหยิบแค่ N ชิ้นจากทั้งหมดต่อรอบ
     // เช่น จัดผลไม้สุ่ม 2 ชนิด — ชิ้นนอกโจทย์ลากลงโซนแล้วโดนปฏิเสธ (นับ mistake)
     @JsonKey(name: 'pick_count') int? pickCount,
+    // พื้นหลัง cover-fit (รักษาสัดส่วน ไม่ยืด) + พิกัด zones/start_pos เป็น
+    // "สัดส่วน 0..1 ของรูปพื้นหลัง" แทน authoring 1920x1080 → โซนล็อกกับภาพจริง
+    // ทุกอัตราส่วนจอ (แท็บเล็ต/iPad ไม่ยืด). ไม่ใส่/false = โหมดเดิม (ยืดเต็มจอ)
+    @JsonKey(name: 'cover_fit') @Default(false) bool coverFit,
   }) = _ScenarioConfig;
 
   factory ScenarioConfig.fromJson(Map<String, dynamic> json) =>

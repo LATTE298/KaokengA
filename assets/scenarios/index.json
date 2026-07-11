@@ -27,7 +27,7 @@
       "module": "A",
       "config_url": "assets/scenarios/food_prep_001.json",
       "thumbnail_url": "assets/images/thumb_fruit.jpg",
-      "version": 4,
+      "version": 6,
       "published": true
     }
   ]

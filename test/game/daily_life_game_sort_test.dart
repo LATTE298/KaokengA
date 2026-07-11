@@ -144,6 +144,37 @@ void main() {
     game.onRemove();
   });
 
+  test(
+    'ฉากผลไม้: ไอเทมที่คาบเกี่ยวถ้วยตอนโหลด ต้องไม่ถูกวางเอง (บั๊ก)',
+    () async {
+      final loaded = await load('food_prep_001');
+      final game = DailyLifeGame(
+        loadedScenario: loaded,
+        tts: _FakeSpeaker(),
+        reduceMotion: true,
+        enablePromptTimers: false,
+        random: Random(7),
+        onComplete: (_, __, ___) {},
+      );
+      game.onGameResize(Vector2(800, 450));
+      await game.onLoad();
+
+      final bowl = zoneById(game, 'bowl');
+      final wantedItem = game.children
+          .whereType<InteractableComponent>()
+          .firstWhere((i) => game.wantedIds!.contains(i.config.id));
+
+      // จำลอง collision ตอนโหลด (ไอเทมยังไม่ถูกลาก) — เดิมวางเองทันที
+      wantedItem.onCollisionStart(const <Vector2>{}, bowl);
+      expect(wantedItem.settled, isFalse);
+
+      // เรียกวางตรงๆ (จำลองว่าถูกลากมาปล่อย) ยังต้องทำงานปกติ
+      bowl.onInteractableEntered(wantedItem);
+      expect(wantedItem.settled, isTrue);
+      game.onRemove();
+    },
+  );
+
   test('ฉากผลไม้: ประโยคโจทย์ทุกคู่ที่สุ่มได้ มีคลิปใน tts_manifest', () async {
     final loaded = await load('food_prep_001');
     final ids = loaded.config.interactables.map((i) => i.id).toList();

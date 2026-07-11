@@ -73,6 +73,34 @@ void main() {
               reason: '$scenarioId: pick_count=$pickCount ไม่สมเหตุสมผล',
             );
           }
+          // cover_fit: พิกัด zones/start_pos เป็นสัดส่วน 0..1 ของรูป — ต้องอยู่ในช่วง
+          if (config['cover_fit'] == true) {
+            for (final z in zones) {
+              final zone = z as Map<String, dynamic>;
+              for (final k in ['x', 'y', 'width', 'height']) {
+                final v = (zone[k] as num).toDouble();
+                expect(
+                  v >= 0 && v <= 1,
+                  isTrue,
+                  reason: '$scenarioId zone ${zone['id']}.$k=$v ต้องเป็น 0..1',
+                );
+              }
+            }
+            for (final rawItem in interactables) {
+              final pos =
+                  (rawItem as Map<String, dynamic>)['start_pos']
+                      as Map<String, dynamic>;
+              for (final k in ['x', 'y']) {
+                final v = (pos[k] as num).toDouble();
+                expect(
+                  v >= 0 && v <= 1,
+                  isTrue,
+                  reason:
+                      '$scenarioId ${rawItem['id']} start_pos.$k=$v ต้อง 0..1',
+                );
+              }
+            }
+          }
         }
         _expectImageAvailableOrPlaceholder(
           config['background_image'] as String,
