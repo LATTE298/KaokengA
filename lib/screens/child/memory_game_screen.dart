@@ -12,8 +12,10 @@ import '../../models/app_types.dart';
 import '../../models/memory_pack.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
+import '../../providers/sfx_provider.dart';
 import '../../providers/tts_provider.dart';
 import '../../services/haptic_service.dart';
+import '../../services/sfx_player.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
@@ -104,6 +106,7 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
     if (result.matched) {
       // Match (spec 03 Flow 2 §4 MATCH).
       HapticService.memoryMatch();
+      ref.read(sfxPlayerProvider).play(kSfxRight);
       if (result.completed) {
         _onComplete(); // พูด kTtsMemoryComplete ที่เดียวใน _onComplete
       } else {
@@ -120,6 +123,8 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
         ref.read(ttsServiceProvider).speak(pairName);
       }
       if (result.mismatched) {
+        // จงใจไม่มีเสียง "ผิด" ที่เกมจับคู่ — เกมนี้ผิดบ่อยโดยธรรมชาติ เสียงผิดจะ
+        // กดดันเด็ก (ผู้ใช้กำหนด) เปิดการ์ดค้าง 1.2 วิ แล้วพลิกกลับ (spec 03 Flow 2 §4)
         // No match — hold both face-up 1.2s, then flip back (spec 03 Flow 2 §4).
         Future<void>.delayed(const Duration(milliseconds: 1200), () {
           if (!mounted) return;

@@ -20,6 +20,7 @@ class DropZoneComponent extends PositionComponent with CollisionCallbacks {
     this.zoneId,
     this.visible = true,
     this.wantedIds,
+    this.swallowItems = false,
   }) : super(position: position, size: size, priority: 1);
 
   final void Function(InteractableComponent item) onItemAccepted;
@@ -33,6 +34,9 @@ class DropZoneComponent extends PositionComponent with CollisionCallbacks {
   /// โจทย์สุ่มบางชิ้น (pick_count): รับเฉพาะ id ในชุดนี้ — null = รับทุกชิ้น
   /// ของโซนตัวเอง. ชิ้นนอกโจทย์ลงโซนถูกก็โดนปฏิเสธ (เด้งกลับ นับ mistake)
   final Set<String>? wantedIds;
+
+  /// true = ชิ้นที่รับแล้ว "ถูกดูดหายเข้าโซน" (ทิ้งขยะลงถัง) แทนการวางค้างไว้
+  final bool swallowItems;
 
   bool _activated = false;
 
@@ -108,13 +112,19 @@ class DropZoneComponent extends PositionComponent with CollisionCallbacks {
     if (zoneId == null && _activated) return;
     if (!_accepts(obj)) return; // ชิ้นผิดโซน: ปล่อยให้เด้งกลับเอง (นับ mistake)
     _activated = true;
-    final fraction = _spreadFractions[_settledCount % _spreadFractions.length];
-    _settledCount++;
-    final center =
-        position +
-        size / 2 +
-        Vector2(size.x * fraction.dx, size.y * fraction.dy);
-    obj.settleInZone(center);
+    if (swallowItems) {
+      // ดูดเข้า "ปากถัง" (แถบบนของโซน) แล้วหายไป — เหมือนทิ้งขยะจริง
+      obj.consumeInZone(position + Vector2(size.x / 2, size.y * 0.15));
+    } else {
+      final fraction =
+          _spreadFractions[_settledCount % _spreadFractions.length];
+      _settledCount++;
+      final center =
+          position +
+          size / 2 +
+          Vector2(size.x * fraction.dx, size.y * fraction.dy);
+      obj.settleInZone(center);
+    }
     onItemAccepted(obj);
   }
 

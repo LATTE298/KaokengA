@@ -9,6 +9,7 @@ import 'package:daily_life/game/interactable_component.dart';
 import 'package:daily_life/l10n/tts_strings_th.dart';
 import 'package:daily_life/models/loaded_scenario_config.dart';
 import 'package:daily_life/services/content_repository.dart';
+import 'package:daily_life/services/sfx_player.dart';
 import 'package:daily_life/services/tts_service.dart';
 import 'package:flame/components.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -145,6 +146,65 @@ void main() {
   });
 
   test(
+    'ฉากแยกขยะ: ชิ้นถูกถัง ถูกดูดหายออกจากฉาก + เล่นเสียงเอฟเฟกต์',
+    () async {
+      final loaded = await load('trash_sort_001');
+      final sfx = _FakeSfx();
+      final game = DailyLifeGame(
+        loadedScenario: loaded,
+        tts: _FakeSpeaker(),
+        sfx: sfx,
+        reduceMotion: true,
+        enablePromptTimers: false,
+        onComplete: (_, __, ___) {},
+      );
+      game.onGameResize(Vector2(800, 450));
+      await game.onLoad();
+
+      final bottle = itemById(game, 'plastic_bottle');
+      zoneById(game, 'recycle').onInteractableEntered(bottle);
+      expect(bottle.settled, isTrue);
+      expect(sfx.played, [kSfxTrashDrop]); // เสียงทิ้งขยะดัง 1 ครั้ง
+
+      // reduceMotion: ชิ้นออกจากฉากทันที (โหมดปกติหดหายด้วยอนิเมชันก่อนออก)
+      game.update(0);
+      expect(
+        game.children.whereType<InteractableComponent>().length,
+        3, // เหลือ 3 จาก 4
+      );
+      game.onRemove();
+    },
+  );
+
+  test('ฉากผลไม้: ชิ้นที่วางแล้ว "คงอยู่ในถ้วย" ไม่ถูกดูดหาย', () async {
+    final loaded = await load('food_prep_001');
+    final sfx = _FakeSfx();
+    final game = DailyLifeGame(
+      loadedScenario: loaded,
+      tts: _FakeSpeaker(),
+      sfx: sfx,
+      reduceMotion: true,
+      enablePromptTimers: false,
+      random: Random(7),
+      onComplete: (_, __, ___) {},
+    );
+    game.onGameResize(Vector2(800, 450));
+    await game.onLoad();
+
+    final wantedItem = game.children
+        .whereType<InteractableComponent>()
+        .firstWhere((i) => game.wantedIds!.contains(i.config.id));
+    zoneById(game, 'bowl').onInteractableEntered(wantedItem);
+    expect(wantedItem.settled, isTrue);
+
+    game.update(0);
+    expect(game.children.whereType<InteractableComponent>().length, 4);
+    // ฉากผลไม้ (ไม่ดูดหาย) วางถูกเล่นเสียง "ถูก" ทั่วไป ไม่ใช่เสียงทิ้งขยะ
+    expect(sfx.played, [kSfxRight]);
+    game.onRemove();
+  });
+
+  test(
     'ฉากผลไม้: ไอเทมที่คาบเกี่ยวถ้วยตอนโหลด ต้องไม่ถูกวางเอง (บั๊ก)',
     () async {
       final loaded = await load('food_prep_001');
@@ -235,6 +295,18 @@ class _FakeSpeaker implements TtsSpeaker {
 
   @override
   Future<void> cancel() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
+
+class _FakeSfx implements SfxPlayer {
+  final List<String> played = [];
+
+  @override
+  Future<void> play(String assetPath) async {
+    played.add(assetPath);
+  }
 
   @override
   Future<void> dispose() async {}

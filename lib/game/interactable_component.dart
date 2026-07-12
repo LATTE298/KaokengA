@@ -226,6 +226,30 @@ class InteractableComponent extends PositionComponent
     }
   }
 
+  /// "ถูกดูดหายเข้าโซน" — พุ่งเข้าปากถังพร้อมหดเล็กจนหาย แล้วออกจากฉาก
+  /// (ฉาก swallow_items เช่น ทิ้งขยะ — เหมือนขยะตกลงถังจริง)
+  void consumeInZone(Vector2 zoneMouth) {
+    _settledInZone = true;
+    _isBeingDragged = false;
+    priority = 5;
+    if (reduceMotion) {
+      removeFromParent();
+      return;
+    }
+    add(
+      MoveEffect.to(
+        zoneMouth,
+        EffectController(duration: 0.28, curve: Curves.easeIn),
+      ),
+    );
+    add(
+      ScaleEffect.to(
+        Vector2.all(0.05),
+        EffectController(duration: 0.28, curve: Curves.easeIn),
+      )..onComplete = removeFromParent,
+    );
+  }
+
   @override
   void onCollisionStart(
     Set<Vector2> intersectionPoints,

@@ -83,6 +83,9 @@ class ScenarioConfig with _$ScenarioConfig {
     // "สัดส่วน 0..1 ของรูปพื้นหลัง" แทน authoring 1920x1080 → โซนล็อกกับภาพจริง
     // ทุกอัตราส่วนจอ (แท็บเล็ต/iPad ไม่ยืด). ไม่ใส่/false = โหมดเดิม (ยืดเต็มจอ)
     @JsonKey(name: 'cover_fit') @Default(false) bool coverFit,
+    // ชิ้นที่วางถูกโซนแล้ว "ถูกดูดหายเข้าโซน" (เช่น ทิ้งขยะลงถัง) + เสียงเอฟเฟกต์
+    // — ต่างจากค่าเริ่มต้นที่ชิ้นวางค้างในโซน (เช่น ผลไม้เรียงในถ้วย)
+    @JsonKey(name: 'swallow_items') @Default(false) bool swallowItems,
   }) = _ScenarioConfig;
 
   factory ScenarioConfig.fromJson(Map<String, dynamic> json) =>

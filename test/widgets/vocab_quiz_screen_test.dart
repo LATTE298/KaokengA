@@ -4,11 +4,13 @@ import 'package:daily_life/models/vocabulary_item.dart';
 import 'package:daily_life/providers/auth_provider.dart';
 import 'package:daily_life/providers/content_providers.dart';
 import 'package:daily_life/providers/session_provider.dart';
+import 'package:daily_life/providers/sfx_provider.dart';
 import 'package:daily_life/providers/tts_provider.dart';
 import 'package:daily_life/screens/child/module_c_screen.dart';
 import 'package:daily_life/screens/child/vocab_quiz_screen.dart';
 import 'package:daily_life/screens/child/vocab_quiz_select_screen.dart';
 import 'package:daily_life/services/session_repository.dart';
+import 'package:daily_life/services/sfx_player.dart';
 import 'package:daily_life/services/tts_service.dart';
 import 'package:daily_life/theme/spacing.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +69,8 @@ void main() {
     testWidgets('wrong answer stays on the question until answered right', (
       tester,
     ) async {
-      await _pumpQuiz(tester, _FakeSessionWriter(), _FakeSpeaker());
+      final sfx = _FakeSfx();
+      await _pumpQuiz(tester, _FakeSessionWriter(), _FakeSpeaker(), sfx: sfx);
 
       final answer = _currentAnswerItem(tester);
       final wrongId = _visibleChoiceIds(
@@ -78,9 +81,14 @@ void main() {
       await tester.pump(kTapCooldown);
 
       expect(_progressText(tester), 'ข้อ 1/5', reason: 'ตอบผิดต้องอยู่ข้อเดิม');
+      expect(sfx.played, [kSfxWrong], reason: 'ตอบผิดต้องมีเสียงเอฟเฟกต์');
 
       await _answerCurrentQuestionCorrectly(tester);
       expect(_progressText(tester), 'ข้อ 2/5');
+      expect(sfx.played, [
+        kSfxWrong,
+        kSfxRight,
+      ], reason: 'ตอบถูกเล่นเสียงถูก ต่อจากเสียงผิดเดิม');
     });
 
     testWidgets('completing the quiz records a session and shows the result', (
@@ -130,8 +138,9 @@ final _items = [
 Future<void> _pumpQuiz(
   WidgetTester tester,
   SessionWriter writer,
-  TtsSpeaker speaker,
-) async {
+  TtsSpeaker speaker, {
+  SfxPlayer? sfx,
+}) async {
   await tester.binding.setSurfaceSize(const Size(900, 600));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   await tester.pumpWidget(
@@ -139,6 +148,7 @@ Future<void> _pumpQuiz(
       overrides: [
         vocabularyProvider.overrideWith((ref) => Future.value(_items)),
         ttsServiceProvider.overrideWithValue(speaker),
+        sfxPlayerProvider.overrideWithValue(sfx ?? const NoOpSfxPlayer()),
         sessionRepositoryProvider.overrideWithValue(writer),
         uidProvider.overrideWithValue('uid-1'),
       ],
@@ -200,4 +210,16 @@ class _FakeSessionWriter implements SessionWriter {
   Future<void> writeSession(SessionRecord record) async {
     records.add(record);
   }
+}
+
+class _FakeSfx implements SfxPlayer {
+  final played = <String>[];
+
+  @override
+  Future<void> play(String assetPath) async {
+    played.add(assetPath);
+  }
+
+  @override
+  Future<void> dispose() async {}
 }

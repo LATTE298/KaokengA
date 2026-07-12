@@ -9,8 +9,10 @@ import '../../models/app_types.dart';
 import '../../models/vocabulary_item.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
+import '../../providers/sfx_provider.dart';
 import '../../providers/tts_provider.dart';
 import '../../services/haptic_service.dart';
+import '../../services/sfx_player.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
@@ -127,12 +129,14 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
     if (!result.correct) {
       // ตอบผิด: ล็อกปุ่มที่ผิด + เตือนนุ่มๆ แล้วให้ลองต่อจนถูก (ไม่มีการ "แพ้")
       HapticService.tapLight();
+      ref.read(sfxPlayerProvider).play(kSfxWrong);
       ref.read(ttsServiceProvider).speak(kTtsQuizRetry);
       setState(() {});
       return;
     }
 
     HapticService.memoryMatch();
+    ref.read(sfxPlayerProvider).play(kSfxRight);
     setState(() {
       _correctFlashId = itemId;
       _transitioning = true;

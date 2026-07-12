@@ -3,224 +3,785 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:video_player/video_player.dart';
 
+import '../../features/streak/streak_tracker.dart';
 import '../../l10n/tts_strings_th.dart';
+import '../../providers/streak_provider.dart';
 import '../../providers/tts_provider.dart';
 import '../../routes/app_routes.dart';
 import '../../services/haptic_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
-import '../../widgets/child/module_card.dart';
+import '../../theme/typography.dart';
+import '../../widgets/child/pressable_child_card.dart';
 import '../../widgets/fade_slide_in.dart';
 import '../../widgets/orientation_lock.dart';
+
+// หน้าเลือกเล่นฝั่งเด็ก (ธีมใหม่ตาม mockup 2026-07-11)
+// asset จริงแล้ว: พื้นหลังวิดีโอลูป `assets/video/kaokeng_bg.mp4` (+ ภาพนิ่งสำรอง
+// `home_bg.jpg`) + รูปปกโหมด `assets/images/mode_{daily,memory,vocab,family}.jpg`
+// รออยู่: รูป avatar `assets/images/home_avatar.png` (ตกไปไอคอนหน้ายิ้มระหว่างรอ)
+//
+// ⚠️ TODO(feature): ชื่อเด็ก/ดาว + เมนู รางวัล/ความคืบหน้า ยังเป็น placeholder
+// โครงสร้าง (ยังไม่มี provider/ฟีเจอร์จริง) — สตรีคต่อเนื่องเป็นข้อมูลจริงแล้ว
+// (streakProvider — Hive, อัปเดตทุกครั้งที่เข้าหน้านี้)
+const String _kChildName = 'น้องดาว';
+const int _kStarCount = 120;
+
+// asset พื้นหลัง: วิดีโอลูป (หลัก) + ภาพนิ่ง (ขึ้นทันที/สำรองถ้าวิดีโอโหลดไม่ทัน)
+const String _kHomeBgVideo = 'assets/video/kaokeng_bg.mp4';
+const String _kHomeBgAsset = 'assets/images/home_bg.jpg';
+const String _kAvatarAsset = 'assets/images/home_avatar.png';
+
+class _ModeData {
+  const _ModeData({
+    required this.label,
+    required this.description,
+    required this.coverAsset,
+    required this.fallbackIcon,
+    required this.background,
+    required this.accent,
+    required this.onAccent,
+    required this.route,
+    this.ttsKey,
+  });
+
+  final String label;
+  final String description;
+  final String coverAsset;
+  final IconData fallbackIcon;
+  final Color background;
+  final Color accent;
+  final Color onAccent;
+  final String route;
+  final String? ttsKey;
+}
 
 class ModeSelectScreen extends ConsumerWidget {
   const ModeSelectScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    void openParentArea() {
+      HapticService.parentGateComplete();
+      context.push(kRouteParentGate);
+    }
+
+    void comingSoon(String label) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: kBlueDark,
+            duration: const Duration(seconds: 2),
+            content: Text(
+              '$label กำลังจะมาเร็ว ๆ นี้นะ',
+              style: kTextSm.copyWith(color: kWarmWhite),
+            ),
+          ),
+        );
+    }
+
+    const modes = <_ModeData>[
+      _ModeData(
+        label: kLabelModuleA,
+        description: 'ลองทำกิจกรรม',
+        coverAsset: 'assets/images/mode_daily.jpg',
+        fallbackIcon: Icons.home_rounded,
+        background: kYellowLight,
+        accent: kYellowPrimary,
+        onAccent: kTextPrimary,
+        route: kRouteModuleA,
+        ttsKey: kTtsModuleADesc,
+      ),
+      _ModeData(
+        label: kLabelModuleB,
+        description: 'จับคู่รูปภาพ',
+        coverAsset: 'assets/images/mode_memory.jpg',
+        fallbackIcon: Icons.grid_view_rounded,
+        background: kBlueLight,
+        accent: kBluePrimary,
+        onAccent: kWarmWhite,
+        route: kRouteModuleB,
+        ttsKey: kTtsModuleBDesc,
+      ),
+      _ModeData(
+        label: kLabelModuleC,
+        description: 'เรียนคำศัพท์',
+        coverAsset: 'assets/images/mode_vocab.jpg',
+        fallbackIcon: Icons.record_voice_over_rounded,
+        background: kYellowLight,
+        accent: kYellowPrimary,
+        onAccent: kTextPrimary,
+        route: kRouteModuleC,
+        ttsKey: kTtsModuleCDesc,
+      ),
+      _ModeData(
+        label: 'ครอบครัว',
+        description: 'ทายว่าใครเป็นใคร',
+        coverAsset: 'assets/images/mode_family.jpg',
+        fallbackIcon: Icons.diversity_3_rounded,
+        background: kBlueLight,
+        accent: kBluePrimary,
+        onAccent: kWarmWhite,
+        route: kRouteFamilyGame,
+      ),
+    ];
+
     return OrientationLock(
       portrait: false,
       child: Scaffold(
         backgroundColor: kWarmWhite,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Positioned(
-                top: kSpace4,
-                right: kSpace4,
-                child: _LogoSmall(
-                  onLongPressComplete: () {
-                    HapticService.parentGateComplete();
-                    context.push(kRouteParentGate);
-                  },
+        body: Stack(
+          children: [
+            const Positioned.fill(child: _HomeBackground()),
+            SafeArea(
+              child: Padding(
+                // ขวา 8px — ปุ่มรางวัล/ตั้งค่าชิดขวามากขึ้นแต่ยังไม่ติดขอบจอ
+                padding: const EdgeInsets.fromLTRB(
+                  kSpace4,
+                  kSpace2,
+                  kSpace2,
+                  kSpace2,
                 ),
-              ),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: kSpace6,
-                    vertical: kSpace4,
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // แบ่งความกว้างที่มีจริงให้การ์ด 3 ใบเท่าๆกัน หลังหักช่องว่าง 2 ช่อง
-                      // (spec 1.3) — เดิมการ์ดใช้ minWidth 140 ตายตัว รวมกันเกินจอแคบแล้วล้น
-                      // ตอนนี้การ์ดจะพอดีจอเสมอ ไม่ว่าจะ iPhone 12 Pro (390) หรือจออื่น
-                      const gap = kInteractiveGapMin;
-                      final totalGap = gap * 3;
-                      // จำกัดความกว้างรวมไม่ให้เกิน 1160 บนแท็บเล็ตใหญ่ (4 การ์ดไม่กว้างเวอร์)
-                      final usableWidth = constraints.maxWidth.clamp(
-                        0.0,
-                        1160.0,
-                      );
-                      final cardWidth = (usableWidth - totalGap) / 4;
+                child: Column(
+                  children: [
+                    _TopBar(
+                      streakDays: ref.watch(streakProvider),
+                      onRewards: () => comingSoon('รางวัล'),
+                      onSettings: openParentArea,
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            const gap = kInteractiveGapMin;
+                            final usableWidth = constraints.maxWidth.clamp(
+                              0.0,
+                              1280.0,
+                            );
+                            final cardWidth = ((usableWidth - gap * 3) / 4)
+                                .clamp(120.0, 300.0);
+                            // ขนาด "ธรรมชาติ" ของการ์ด (ใหญ่ขึ้น) — FittedBox ข้างล่าง
+                            // ย่อทั้งบล็อกให้พอดีจอเสมอ (จอเตี้ย/เล็กแค่ไหนก็ไม่ overflow)
+                            final cardHeight = (cardWidth * 1.55).clamp(
+                              210.0,
+                              410.0,
+                            );
 
-                      return FadeSlideIn(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ModuleCard(
-                              label: kLabelModuleA,
-                              description: 'ลองทำกิจกรรม',
-                              icon: Icons.home_rounded,
-                              background: kYellowLight,
-                              cardWidth: cardWidth,
-                              onTap: () {
-                                ref
-                                    .read(ttsServiceProvider)
-                                    .speak(kTtsModuleADesc);
-                                context.push(kRouteModuleA);
-                              },
-                            ),
-                            const SizedBox(width: gap),
-                            ModuleCard(
-                              label: kLabelModuleB,
-                              description: 'จับคู่รูปภาพ',
-                              icon: Icons.grid_view_rounded,
-                              background: kBlueLight,
-                              cardWidth: cardWidth,
-                              onTap: () {
-                                ref
-                                    .read(ttsServiceProvider)
-                                    .speak(kTtsModuleBDesc);
-                                context.push(kRouteModuleB);
-                              },
-                            ),
-                            const SizedBox(width: gap),
-                            ModuleCard(
-                              label: kLabelModuleC,
-                              description: 'เรียนคำศัพท์',
-                              icon: Icons.record_voice_over_rounded,
-                              background: kYellowAccent,
-                              cardWidth: cardWidth,
-                              onTap: () {
-                                ref
-                                    .read(ttsServiceProvider)
-                                    .speak(kTtsModuleCDesc);
-                                context.push(kRouteModuleC);
-                              },
-                            ),
-                            const SizedBox(width: gap),
-                            ModuleCard(
-                              label: 'ครอบครัว',
-                              description: 'ทายว่าใครเป็นใคร',
-                              icon: Icons.diversity_3_rounded,
-                              background: kBlueLight,
-                              cardWidth: cardWidth,
-                              onTap: () => context.push(kRouteFamilyGame),
-                            ),
-                          ],
+                            return FadeSlideIn(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const _PlayTitle(),
+                                    const SizedBox(height: kSpace2),
+                                    SizedBox(
+                                      height: cardHeight,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          for (
+                                            var i = 0;
+                                            i < modes.length;
+                                            i++
+                                          ) ...[
+                                            if (i > 0)
+                                              const SizedBox(width: gap),
+                                            _ModeCard(
+                                              data: modes[i],
+                                              width: cardWidth,
+                                              phase: i * 0.2,
+                                              onTap: () {
+                                                final tts = modes[i].ttsKey;
+                                                if (tts != null) {
+                                                  ref
+                                                      .read(ttsServiceProvider)
+                                                      .speak(tts);
+                                                }
+                                                context.push(modes[i].route);
+                                              },
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                    // ช่องว่างเล็กๆ คั่นการ์ดเกมกับแถบเมนูล่าง (ผู้ใช้กำหนด)
+                    const SizedBox(height: kSpace3),
+                    _BottomNav(onParent: openParentArea, onStub: comingSoon),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// Logo with 3s long-press gate to parent mode (spec 03 Flow 4 step 1).
-class _LogoSmall extends StatefulWidget {
-  const _LogoSmall({required this.onLongPressComplete});
-  final VoidCallback onLongPressComplete;
+// พื้นหลัง — 3 ชั้นซ้อน (ล่าง→บน): gradient สำรอง → ภาพนิ่ง home_bg.jpg (ขึ้นทันที)
+// → วิดีโอลูป kaokeng_bg.mp4 (เฟดทับเมื่อ init เสร็จ). ถ้าวิดีโอโหลดไม่ทัน/พังหรือเปิด
+// reduce-motion ก็เห็นภาพนิ่งแทน ไม่มีทางว่างเปล่า
+class _HomeBackground extends StatefulWidget {
+  const _HomeBackground();
 
   @override
-  State<_LogoSmall> createState() => _LogoSmallState();
+  State<_HomeBackground> createState() => _HomeBackgroundState();
 }
 
-class _LogoSmallState extends State<_LogoSmall>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ringController;
+class _HomeBackgroundState extends State<_HomeBackground> {
+  VideoPlayerController? _controller;
+  bool _videoReady = false;
+  bool _initStarted = false;
 
   @override
-  void initState() {
-    super.initState();
-    _ringController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // เคารพ "ลดการเคลื่อนไหว" ของระบบ — ปิดวิดีโอ ใช้ภาพนิ่ง (spec accessibility)
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    if (!reduceMotion && !_initStarted) {
+      _initStarted = true;
+      _initVideo();
+    }
   }
 
-  @override
-  void dispose() {
-    _ringController.dispose();
-    super.dispose();
-  }
-
-  void _onPressStart() {
-    _ringController.forward(from: 0).then((status) {
-      if (_ringController.isCompleted) {
-        widget.onLongPressComplete();
-      }
-    });
-  }
-
-  void _onPressEnd() {
-    if (!_ringController.isCompleted) {
-      _ringController.reverse();
+  Future<void> _initVideo() async {
+    final controller = VideoPlayerController.asset(_kHomeBgVideo);
+    _controller = controller;
+    try {
+      await controller.initialize();
+      await controller.setLooping(true);
+      await controller.setVolume(0); // พื้นหลังเงียบเสมอ
+      await controller.play();
+      if (mounted) setState(() => _videoReady = true);
+    } catch (_) {
+      // วิดีโอเล่นไม่ได้ (เช่น web codec) — ปล่อยให้ภาพนิ่งทำงานแทน ไม่พัง
+      await controller.dispose();
+      _controller = null;
     }
   }
 
   @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _onPressStart(),
-      onTapUp: (_) => _onPressEnd(),
-      onTapCancel: _onPressEnd,
-      behavior: HitTestBehavior.opaque,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          AnimatedBuilder(
-            animation: _ringController,
-            builder: (context, _) {
-              return SizedBox(
-                width: 58,
-                height: 58,
-                child: CircularProgressIndicator(
-                  value: _ringController.value,
-                  strokeWidth: 3,
-                  backgroundColor: Colors.transparent,
-                  valueColor: const AlwaysStoppedAnimation<Color>(kBluePrimary),
-                ),
-              );
-            },
+    final controller = _controller;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [kBlueLight, kWarmWhite, kSuccessLight],
+              stops: [0.0, 0.55, 1.0],
+            ),
           ),
-          AnimatedBuilder(
-            animation: _ringController,
-            builder: (context, child) {
-              final v = _ringController.value;
-              // สั่นไหวเบาๆ: หมุนกลับไปมา (sine) + ขยายเล็กน้อย ยิ่งกดค้างนานยิ่งชัด
-              // คูณด้วย v ให้เริ่มจากนิ่งแล้วค่อยสั่นแรงขึ้น (นุ่ม ไม่กระตุกตอนเริ่มกด)
-              final wiggle = math.sin(v * math.pi * 8) * 0.05 * v;
-              return Transform.rotate(
-                angle: wiggle,
-                child: Transform.scale(scale: 1.0 + v * 0.12, child: child),
-              );
-            },
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: kYellowPrimary,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.wb_sunny_rounded,
-                size: 28,
-                color: kTextPrimary,
+        ),
+        Image.asset(
+          _kHomeBgAsset,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        ),
+        if (_videoReady && controller != null)
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: kDurationNormal,
+            builder: (_, value, child) => Opacity(opacity: value, child: child),
+            child: FittedBox(
+              fit: BoxFit.cover,
+              clipBehavior: Clip.hardEdge,
+              child: SizedBox(
+                width: controller.value.size.width,
+                height: controller.value.size.height,
+                child: VideoPlayer(controller),
               ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+// หัวข้อ "เลือกเล่น" + ประกายตกแต่งสองข้าง
+class _PlayTitle extends StatelessWidget {
+  const _PlayTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.auto_awesome_rounded, color: kYellowPrimary, size: 15),
+        const SizedBox(width: kSpace2),
+        Text('เลือกเล่น', style: kTextLg.copyWith(fontWeight: FontWeight.w800)),
+        const SizedBox(width: kSpace2),
+        const Icon(Icons.auto_awesome_rounded, color: kBluePrimary, size: 15),
+      ],
+    );
+  }
+}
+
+// -------------------- แถบบน: โปรไฟล์ + สตรีค + ปุ่มรางวัล/ตั้งค่า --------------------
+
+class _TopBar extends StatelessWidget {
+  const _TopBar({
+    required this.streakDays,
+    required this.onRewards,
+    required this.onSettings,
+  });
+
+  final int streakDays;
+  final VoidCallback onRewards;
+  final VoidCallback onSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    // ทุกชิ้นห่อ FittedBox(scaleDown) — จอแคบแค่ไหนก็ย่อแทนการล้น (no overflow)
+    // ชิดขอบบนทั้งแถว: ปุ่มรางวัล/ตั้งค่าเกาะมุมขวาบนเหมือนชิปโปรไฟล์ฝั่งซ้าย
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Flexible(
+          flex: 3,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: const _ProfileChip(),
+          ),
+        ),
+        const SizedBox(width: kSpace3),
+        Expanded(
+          flex: 4,
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: _StreakChip(days: streakDays),
+            ),
+          ),
+        ),
+        const SizedBox(width: kSpace3),
+        _RoundActionButton(
+          icon: Icons.emoji_events_rounded,
+          color: kYellowPrimary,
+          onTap: onRewards,
+        ),
+        const SizedBox(width: kSpace3),
+        _RoundActionButton(
+          icon: Icons.settings_rounded,
+          color: kBluePrimary,
+          onTap: onSettings,
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfileChip extends StatelessWidget {
+  const _ProfileChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(kSpace1, kSpace1, kSpace4, kSpace1),
+      decoration: BoxDecoration(
+        color: kWarmWhite,
+        borderRadius: kRadiusFull,
+        boxShadow: const [kShadowSm],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(
+              color: kYellowLight,
+              shape: BoxShape.circle,
+            ),
+            child: Image.asset(
+              _kAvatarAsset,
+              fit: BoxFit.cover,
+              errorBuilder:
+                  (_, __, ___) => const Icon(
+                    Icons.face_rounded,
+                    color: kYellowDark,
+                    size: 24,
+                  ),
+            ),
+          ),
+          const SizedBox(width: kSpace2),
+          Text(
+            'สวัสดี $_kChildName',
+            style: kTextSm.copyWith(
+              fontWeight: FontWeight.w700,
+              color: kTextPrimary,
+            ),
+          ),
+          const SizedBox(width: kSpace2),
+          const Icon(Icons.star_rounded, color: kYellowPrimary, size: 16),
+          const SizedBox(width: 2),
+          Text(
+            '$_kStarCount',
+            style: kTextXs.copyWith(
+              fontWeight: FontWeight.w700,
+              color: kTextPrimary,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _StreakChip extends StatelessWidget {
+  const _StreakChip({required this.days});
+
+  /// จำนวนวันเข้าเล่นต่อเนื่องจริง (จาก streakProvider)
+  final int days;
+
+  @override
+  Widget build(BuildContext context) {
+    // เกิน 7 วันโชว์เต็มแถบ 7/7 (รอบเป้าหมายตาม mockup)
+    final shown = days.clamp(0, kStreakGoalDays);
+    final progress = (shown / kStreakGoalDays).clamp(0.0, 1.0);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: kSpace3,
+        vertical: kSpace1,
+      ),
+      decoration: BoxDecoration(
+        color: kWarmWhite,
+        borderRadius: kRadiusFull,
+        boxShadow: const [kShadowSm],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.local_fire_department_rounded,
+            color: kError,
+            size: 18,
+          ),
+          const SizedBox(width: kSpace1),
+          Text(
+            'ต่อเนื่อง $days วัน',
+            style: kTextXs.copyWith(
+              fontWeight: FontWeight.w700,
+              color: kTextPrimary,
+            ),
+            maxLines: 1,
+          ),
+          const SizedBox(width: kSpace2),
+          // แถบความคืบหน้าสตรีค
+          Container(
+            width: 68,
+            height: 9,
+            decoration: BoxDecoration(
+              color: kWarmSurface,
+              borderRadius: kRadiusFull,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  color: kSuccess,
+                  borderRadius: BorderRadius.all(Radius.circular(999)),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: kSpace2),
+          Text(
+            '$shown/$kStreakGoalDays',
+            style: kTextXs.copyWith(
+              fontWeight: FontWeight.w700,
+              color: kTextSecondary,
+            ),
+          ),
+          const SizedBox(width: kSpace1),
+          const Icon(Icons.card_giftcard_rounded, color: kError, size: 16),
+        ],
+      ),
+    );
+  }
+}
+
+// ปุ่มกลมไอคอนล้วน (ไม่มีป้ายข้อความ — ผู้ใช้กำหนด ลดความรก)
+class _RoundActionButton extends StatelessWidget {
+  const _RoundActionButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableChildCard(
+      onTap: onTap,
+      enforceMinTapTarget: false,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: kWarmWhite,
+          shape: BoxShape.circle,
+          boxShadow: const [kShadowSm],
+        ),
+        child: Icon(icon, color: color, size: 22),
+      ),
+    );
+  }
+}
+
+// -------------------- การ์ดโหมดเกม --------------------
+
+class _ModeCard extends StatelessWidget {
+  const _ModeCard({
+    required this.data,
+    required this.width,
+    required this.onTap,
+    this.phase = 0,
+  });
+
+  final _ModeData data;
+  final double width;
+  final VoidCallback onTap;
+
+  /// จังหวะเริ่มของอนิเมชันลอย (0..1) — ไล่ให้การ์ดแต่ละใบไม่ขยับพร้อมกัน
+  final double phase;
+
+  @override
+  Widget build(BuildContext context) {
+    final card = PressableChildCard(
+      onTap: onTap,
+      playClickSound: true,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.all(kSpace3),
+        decoration: BoxDecoration(
+          color: data.background,
+          borderRadius: kRadiusLg,
+          boxShadow: const [kShadowMd],
+        ),
+        child: Column(
+          children: [
+            // ช่องรูปปก (slot) — ตกไปไอคอนบนพื้นขาวระหว่างรอไฟล์จริง
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: kWarmWhite,
+                  borderRadius: kRadiusMd,
+                ),
+                child: Image.asset(
+                  data.coverAsset,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (_, __, ___) => Center(
+                        child: Icon(
+                          data.fallbackIcon,
+                          size: 48,
+                          color: data.accent,
+                        ),
+                      ),
+                ),
+              ),
+            ),
+            const SizedBox(height: kSpace3),
+            Text(
+              data.label,
+              style: kChildLabel.copyWith(fontWeight: FontWeight.w800),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: kSpace1),
+            Text(
+              data.description,
+              style: kTextSm,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: kSpace3),
+            // ปุ่มลูกศร (เป็นเพียง affordance — ทั้งการ์ดกดได้)
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: data.accent,
+                shape: BoxShape.circle,
+                boxShadow: const [kShadowSm],
+              ),
+              child: Icon(
+                Icons.arrow_forward_rounded,
+                color: data.onAccent,
+                size: 24,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    return _FloatingCard(phase: phase, child: card);
+  }
+}
+
+// ห่อการ์ดให้ "ลอยขึ้นลง + เอียงเบาๆ" วนไปเรื่อยๆ (subtle ไม่กระตุ้นตา — spec 1.3)
+// [phase] 0..1 ไล่จังหวะให้แต่ละใบไม่ขยับพร้อมกัน. ปิดเมื่อระบบเปิด reduce-motion
+class _FloatingCard extends StatefulWidget {
+  const _FloatingCard({required this.child, required this.phase});
+
+  final Widget child;
+  final double phase;
+
+  @override
+  State<_FloatingCard> createState() => _FloatingCardState();
+}
+
+class _FloatingCardState extends State<_FloatingCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3200),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.of(context).disableAnimations) return widget.child;
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        final t = (_controller.value + widget.phase) * 2 * math.pi;
+        return Transform.translate(
+          offset: Offset(0, math.sin(t) * 6),
+          child: Transform.rotate(angle: math.sin(t) * 0.012, child: child),
+        );
+      },
+    );
+  }
+}
+
+// -------------------- แถบเมนูล่าง --------------------
+
+class _BottomNav extends StatelessWidget {
+  const _BottomNav({required this.onParent, required this.onStub});
+
+  final VoidCallback onParent;
+  final void Function(String label) onStub;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: kSpace2, vertical: 4),
+      decoration: BoxDecoration(
+        color: kWarmWhite,
+        borderRadius: kRadiusFull,
+        boxShadow: const [kShadowMd],
+      ),
+      // 3 เมนูพอ (ผู้ใช้กำหนด) — ห่อ FittedBox กันล้นบนจอแคบมาก
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _NavItem(
+              icon: Icons.home_rounded,
+              color: kBluePrimary,
+              active: true,
+              onTap: () {}, // อยู่หน้านี้อยู่แล้ว
+            ),
+            _NavItem(
+              icon: Icons.bar_chart_rounded,
+              color: kSuccess,
+              onTap: () => onStub('ความคืบหน้า'),
+            ),
+            _NavItem(
+              icon: Icons.groups_rounded,
+              color: kBlueDark,
+              onTap: onParent,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// เมนูล่างแบบไอคอนล้วน (ไม่มีป้ายข้อความ — ผู้ใช้กำหนด) + จุดบอก active ใต้ไอคอน
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+    this.active = false,
+  });
+
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableChildCard(
+      onTap: onTap,
+      enforceMinTapTarget: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: kSpace3, vertical: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 2),
+            // จุดบอกสถานะ active ใต้เมนูที่เลือกอยู่
+            Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                color: active ? color : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

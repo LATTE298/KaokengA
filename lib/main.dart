@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'firebase_options.dart';
+import 'providers/streak_provider.dart';
 import 'routes/app_router.dart';
 import 'services/auth_service.dart';
 import 'services/family_card_repository.dart';
@@ -22,6 +23,8 @@ Future<void> main() async {
   // Hive local storage (เฟส 2.1 — คลังการ์ดหมวดครอบครัวของผู้ปกครอง เก็บ offline)
   await Hive.initFlutter();
   await Hive.openBox<dynamic>(FamilyCardRepository.boxName);
+  // ค่าตั้งต้นเล็กๆ ฝั่งเด็ก เช่น สตรีคเข้าเล่นต่อเนื่อง (หน้าเลือกเล่น)
+  await Hive.openBox<dynamic>(kAppPrefsBoxName);
 
   // Lock orientation to landscape — primary platform is 10" tablet (spec 01).
   // Skip on web (not applicable).

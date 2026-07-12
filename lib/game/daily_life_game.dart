@@ -7,6 +7,7 @@ import '../l10n/tts_strings_th.dart';
 import '../models/loaded_scenario_config.dart';
 import '../models/scenario_config.dart';
 import '../services/haptic_service.dart';
+import '../services/sfx_player.dart';
 import '../services/tts_service.dart';
 import 'background_component.dart';
 import 'drop_zone_component.dart';
@@ -24,6 +25,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     required this.reduceMotion,
     required this.onComplete,
     this.enablePromptTimers = true,
+    this.sfx = const NoOpSfxPlayer(),
     Random? random,
   }) : config = loadedScenario.config,
        _placeholderImagePaths = loadedScenario.placeholderImagePaths {
@@ -32,6 +34,9 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
   final ScenarioConfig config;
   final TtsSpeaker tts;
+
+  /// เสียงเอฟเฟกต์ (เช่น ทิ้งขยะลงถัง) — default เงียบสำหรับเทสต์
+  final SfxPlayer sfx;
   final bool reduceMotion;
   final async.FutureOr<void> Function(
     List<GamePosition> dragPath,
@@ -133,6 +138,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
             zoneId: zone.id,
             visible: false,
             wantedIds: wanted,
+            swallowItems: config.swallowItems,
             onItemAccepted: _handleItemSorted,
           ),
         );
@@ -204,8 +210,10 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
         onMistake: () {
           // เรียกเมื่อวางผิดตำแหน่ง (ผิดถัง/นอกโจทย์/นอกโซน) แล้วเด้งกลับ
           mistakeCount++;
-          // โหมด sort-all บอกนุ่มๆ ให้ลองใหม่ (โหมดเดิมเงียบตามพฤติกรรมเดิม)
-          if (isSortAll && !_completed) tts.speak(kTtsQuizRetry);
+          if (_completed) return;
+          sfx.play(kSfxWrong); // เสียงผิดนุ่มๆ ทุกโหมด (รวมฉากเซเว่น)
+          // โหมด sort-all บอกนุ่มๆ ให้ลองใหม่ด้วยเสียงพูด (โหมดเดิมเงียบตามเดิม)
+          if (isSortAll) tts.speak(kTtsQuizRetry);
         },
       );
       _items.add(component);
@@ -241,6 +249,9 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     if (_completed) return;
     _sortedCount++;
     _resetIdleTimer();
+    // เสียง "วางถูก" ทุกชิ้น (คนละช่องกับเสียงพูด ไม่ตัดกัน): ฉากทิ้งขยะใช้เสียง
+    // ดูดลงถังตามธีม ฉากอื่นใช้เสียงถูกทั่วไป
+    sfx.play(config.swallowItems ? kSfxTrashDrop : kSfxRight);
     if (_sortedCount >= _requiredCount) {
       _handleSuccess(item);
       return;

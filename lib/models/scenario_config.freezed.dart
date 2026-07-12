@@ -971,7 +971,10 @@ mixin _$ScenarioConfig {
   // "สัดส่วน 0..1 ของรูปพื้นหลัง" แทน authoring 1920x1080 → โซนล็อกกับภาพจริง
   // ทุกอัตราส่วนจอ (แท็บเล็ต/iPad ไม่ยืด). ไม่ใส่/false = โหมดเดิม (ยืดเต็มจอ)
   @JsonKey(name: 'cover_fit')
-  bool get coverFit => throw _privateConstructorUsedError;
+  bool get coverFit => throw _privateConstructorUsedError; // ชิ้นที่วางถูกโซนแล้ว "ถูกดูดหายเข้าโซน" (เช่น ทิ้งขยะลงถัง) + เสียงเอฟเฟกต์
+  // — ต่างจากค่าเริ่มต้นที่ชิ้นวางค้างในโซน (เช่น ผลไม้เรียงในถ้วย)
+  @JsonKey(name: 'swallow_items')
+  bool get swallowItems => throw _privateConstructorUsedError;
 
   /// Serializes this ScenarioConfig to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1005,6 +1008,7 @@ abstract class $ScenarioConfigCopyWith<$Res> {
     List<DropZoneConfig> zones,
     @JsonKey(name: 'pick_count') int? pickCount,
     @JsonKey(name: 'cover_fit') bool coverFit,
+    @JsonKey(name: 'swallow_items') bool swallowItems,
   });
 
   $TargetZoneCopyWith<$Res>? get targetZone;
@@ -1039,6 +1043,7 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
     Object? zones = null,
     Object? pickCount = freezed,
     Object? coverFit = null,
+    Object? swallowItems = null,
   }) {
     return _then(
       _value.copyWith(
@@ -1112,6 +1117,11 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
                     ? _value.coverFit
                     : coverFit // ignore: cast_nullable_to_non_nullable
                         as bool,
+            swallowItems:
+                null == swallowItems
+                    ? _value.swallowItems
+                    : swallowItems // ignore: cast_nullable_to_non_nullable
+                        as bool,
           )
           as $Val,
     );
@@ -1156,6 +1166,7 @@ abstract class _$$ScenarioConfigImplCopyWith<$Res>
     List<DropZoneConfig> zones,
     @JsonKey(name: 'pick_count') int? pickCount,
     @JsonKey(name: 'cover_fit') bool coverFit,
+    @JsonKey(name: 'swallow_items') bool swallowItems,
   });
 
   @override
@@ -1190,6 +1201,7 @@ class __$$ScenarioConfigImplCopyWithImpl<$Res>
     Object? zones = null,
     Object? pickCount = freezed,
     Object? coverFit = null,
+    Object? swallowItems = null,
   }) {
     return _then(
       _$ScenarioConfigImpl(
@@ -1263,6 +1275,11 @@ class __$$ScenarioConfigImplCopyWithImpl<$Res>
                 ? _value.coverFit
                 : coverFit // ignore: cast_nullable_to_non_nullable
                     as bool,
+        swallowItems:
+            null == swallowItems
+                ? _value.swallowItems
+                : swallowItems // ignore: cast_nullable_to_non_nullable
+                    as bool,
       ),
     );
   }
@@ -1286,6 +1303,7 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     final List<DropZoneConfig> zones = const <DropZoneConfig>[],
     @JsonKey(name: 'pick_count') this.pickCount,
     @JsonKey(name: 'cover_fit') this.coverFit = false,
+    @JsonKey(name: 'swallow_items') this.swallowItems = false,
   }) : _interactables = interactables,
        _zones = zones;
 
@@ -1350,10 +1368,15 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
   @override
   @JsonKey(name: 'cover_fit')
   final bool coverFit;
+  // ชิ้นที่วางถูกโซนแล้ว "ถูกดูดหายเข้าโซน" (เช่น ทิ้งขยะลงถัง) + เสียงเอฟเฟกต์
+  // — ต่างจากค่าเริ่มต้นที่ชิ้นวางค้างในโซน (เช่น ผลไม้เรียงในถ้วย)
+  @override
+  @JsonKey(name: 'swallow_items')
+  final bool swallowItems;
 
   @override
   String toString() {
-    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone, zones: $zones, pickCount: $pickCount, coverFit: $coverFit)';
+    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone, zones: $zones, pickCount: $pickCount, coverFit: $coverFit, swallowItems: $swallowItems)';
   }
 
   @override
@@ -1385,7 +1408,9 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
             (identical(other.pickCount, pickCount) ||
                 other.pickCount == pickCount) &&
             (identical(other.coverFit, coverFit) ||
-                other.coverFit == coverFit));
+                other.coverFit == coverFit) &&
+            (identical(other.swallowItems, swallowItems) ||
+                other.swallowItems == swallowItems));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1406,6 +1431,7 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     const DeepCollectionEquality().hash(_zones),
     pickCount,
     coverFit,
+    swallowItems,
   );
 
   /// Create a copy of ScenarioConfig
@@ -1441,6 +1467,7 @@ abstract class _ScenarioConfig implements ScenarioConfig {
     final List<DropZoneConfig> zones,
     @JsonKey(name: 'pick_count') final int? pickCount,
     @JsonKey(name: 'cover_fit') final bool coverFit,
+    @JsonKey(name: 'swallow_items') final bool swallowItems,
   }) = _$ScenarioConfigImpl;
 
   factory _ScenarioConfig.fromJson(Map<String, dynamic> json) =
@@ -1485,7 +1512,11 @@ abstract class _ScenarioConfig implements ScenarioConfig {
   // ทุกอัตราส่วนจอ (แท็บเล็ต/iPad ไม่ยืด). ไม่ใส่/false = โหมดเดิม (ยืดเต็มจอ)
   @override
   @JsonKey(name: 'cover_fit')
-  bool get coverFit;
+  bool get coverFit; // ชิ้นที่วางถูกโซนแล้ว "ถูกดูดหายเข้าโซน" (เช่น ทิ้งขยะลงถัง) + เสียงเอฟเฟกต์
+  // — ต่างจากค่าเริ่มต้นที่ชิ้นวางค้างในโซน (เช่น ผลไม้เรียงในถ้วย)
+  @override
+  @JsonKey(name: 'swallow_items')
+  bool get swallowItems;
 
   /// Create a copy of ScenarioConfig
   /// with the given fields replaced by the non-null parameter values.

@@ -12,6 +12,7 @@ import '../../models/app_types.dart';
 import '../../models/loaded_scenario_config.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
+import '../../providers/sfx_provider.dart';
 import '../../providers/tts_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
@@ -67,6 +68,7 @@ class ScenarioGameScreen extends ConsumerWidget {
           final game = DailyLifeGame(
             loadedScenario: randomized,
             tts: tts,
+            sfx: ref.watch(sfxPlayerProvider),
             reduceMotion: reduceMotion,
             onComplete: (dragPath, score, stars) async {
               ref

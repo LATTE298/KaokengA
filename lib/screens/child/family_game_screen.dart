@@ -9,8 +9,10 @@ import '../../models/app_types.dart';
 import '../../models/family_card.dart';
 import '../../providers/family_provider.dart';
 import '../../providers/session_provider.dart';
+import '../../providers/sfx_provider.dart';
 import '../../providers/tts_provider.dart';
 import '../../services/haptic_service.dart';
+import '../../services/sfx_player.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
@@ -132,12 +134,14 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
 
     if (!result.correct) {
       HapticService.tapLight();
+      ref.read(sfxPlayerProvider).play(kSfxWrong);
       ref.read(ttsServiceProvider).speak(kTtsQuizRetry);
       setState(() {});
       return;
     }
 
     HapticService.memoryMatch();
+    ref.read(sfxPlayerProvider).play(kSfxRight);
     setState(() {
       _correctFlash = choice;
       _transitioning = true;

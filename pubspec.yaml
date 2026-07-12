@@ -59,6 +59,7 @@ dependencies:
   hive_flutter: ^1.1.0
   image_picker: ^1.1.2
   image: ^4.3.0
+  video_player: ^2.12.0
 
 dev_dependencies:
   flutter_test:
@@ -80,3 +81,5 @@ flutter:
     - assets/images/vocab/
     - assets/vocabulary/
     - assets/tts/
+    - assets/sfx/
+    - assets/video/

@@ -1,6 +1,6 @@
 {
   "scenario_id": "trash_sort_001",
-  "version": 3,
+  "version": 5,
   "category": "daily_life",
   "module": "A",
   "title_th": "ช่วยแยกขยะให้ถูกถัง",
@@ -8,36 +8,38 @@
   "tts_instruction": "น้องช่วยลากขยะแต่ละชิ้น ไปทิ้งถังให้ถูกต้องนะครับ",
   "tts_celebration": "เยี่ยมมากเลยครับ! ขอบคุณที่ช่วยดูแลโลก!",
   "tts_hint": "ดูรูปบนถังนะครับ ขยะเหมือนรูปไหน ทิ้งถังนั้นเลยครับ",
+  "cover_fit": true,
+  "swallow_items": true,
   "zones": [
-    { "id": "organic", "x": 250, "y": 280, "width": 330, "height": 550 },
-    { "id": "recycle", "x": 635, "y": 280, "width": 305, "height": 550 },
-    { "id": "general", "x": 980, "y": 280, "width": 330, "height": 550 },
-    { "id": "hazard", "x": 1330, "y": 280, "width": 340, "height": 550 }
+    { "id": "organic", "x": 0.183, "y": 0.37, "width": 0.15, "height": 0.28 },
+    { "id": "recycle", "x": 0.346, "y": 0.37, "width": 0.15, "height": 0.28 },
+    { "id": "general", "x": 0.504, "y": 0.37, "width": 0.15, "height": 0.28 },
+    { "id": "hazard", "x": 0.665, "y": 0.37, "width": 0.15, "height": 0.28 }
   ],
   "interactables": [
     {
       "id": "paper_ball",
       "image": "assets/images/trash_paper.png",
       "zone_id": "general",
-      "start_pos": { "x": 400, "y": 940 }
+      "start_pos": { "x": 0.16, "y": 0.8 }
     },
     {
       "id": "battery",
       "image": "assets/images/trash_battery.png",
       "zone_id": "hazard",
-      "start_pos": { "x": 820, "y": 940 }
+      "start_pos": { "x": 0.38, "y": 0.8 }
     },
     {
       "id": "plastic_bottle",
       "image": "assets/images/trash_bottle.png",
       "zone_id": "recycle",
-      "start_pos": { "x": 1240, "y": 940 }
+      "start_pos": { "x": 0.6, "y": 0.8 }
     },
     {
       "id": "food_waste",
       "image": "assets/images/trash_food.png",
       "zone_id": "organic",
-      "start_pos": { "x": 1660, "y": 940 }
+      "start_pos": { "x": 0.82, "y": 0.8 }
     }
   ]
 }
