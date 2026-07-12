@@ -15,6 +15,7 @@ import 'routes/app_router.dart';
 import 'services/auth_service.dart';
 import 'services/family_card_repository.dart';
 import 'theme/app_theme.dart';
+import 'widgets/bgm_gate.dart';
 import 'widgets/usage_timer_gate.dart';
 
 Future<void> main() async {
@@ -90,8 +91,9 @@ class DailyLifeApp extends StatelessWidget {
       // ใต้ MaterialApp — มี Theme/Localizations/Overlay ให้ showDialog ใช้ได้ และ state ของ
       // gate ไม่ถูกทำลายเมื่อเปลี่ยนเส้นทาง (route)
       builder:
-          (context, child) =>
-              UsageTimerGate(child: child ?? const SizedBox.shrink()),
+          (context, child) => BgmGate(
+            child: UsageTimerGate(child: child ?? const SizedBox.shrink()),
+          ),
     );
   }
 }

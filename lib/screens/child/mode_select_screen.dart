@@ -7,8 +7,10 @@ import 'package:video_player/video_player.dart';
 
 import '../../features/streak/streak_tracker.dart';
 import '../../l10n/tts_strings_th.dart';
+import '../../providers/bgm_provider.dart';
 import '../../providers/streak_provider.dart';
 import '../../providers/tts_provider.dart';
+import '../../services/bgm_service.dart';
 import '../../routes/app_routes.dart';
 import '../../services/haptic_service.dart';
 import '../../theme/colors.dart';
@@ -151,7 +153,14 @@ class ModeSelectScreen extends ConsumerWidget {
                     _TopBar(
                       streakDays: ref.watch(streakProvider),
                       onRewards: () => comingSoon('รางวัล'),
-                      onSettings: openParentArea,
+                      onSettings:
+                          () => showDialog<void>(
+                            context: context,
+                            builder:
+                                (_) => _BgmSettingsDialog(
+                                  bgm: ref.read(bgmServiceProvider),
+                                ),
+                          ),
                     ),
                     Expanded(
                       child: Center(
@@ -695,6 +704,100 @@ class _FloatingCardState extends State<_FloatingCard>
           child: Transform.rotate(angle: math.sin(t) * 0.012, child: child),
         );
       },
+    );
+  }
+}
+
+// แผงตั้งค่าเพลงประกอบ (เปิดจากปุ่ม ⚙️) — เปิด/ปิด + ปรับความดัง (จำค่าลง Hive)
+class _BgmSettingsDialog extends StatefulWidget {
+  const _BgmSettingsDialog({required this.bgm});
+
+  final BgmService bgm;
+
+  @override
+  State<_BgmSettingsDialog> createState() => _BgmSettingsDialogState();
+}
+
+class _BgmSettingsDialogState extends State<_BgmSettingsDialog> {
+  late bool _enabled = widget.bgm.enabled;
+  late double _volume = widget.bgm.volume;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: kWarmWhite,
+      shape: RoundedRectangleBorder(borderRadius: kRadiusLg),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440),
+        child: Padding(
+          padding: const EdgeInsets.all(kSpace6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.music_note_rounded,
+                    color: kBluePrimary,
+                    size: 26,
+                  ),
+                  const SizedBox(width: kSpace2),
+                  Text(
+                    'ตั้งค่าเพลงประกอบ',
+                    style: kTextLg.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+              const SizedBox(height: kSpace5),
+              Row(
+                children: [
+                  Expanded(child: Text('เปิดเพลงประกอบ', style: kTextMd)),
+                  Switch(
+                    value: _enabled,
+                    activeThumbColor: kBluePrimary,
+                    onChanged: (v) {
+                      setState(() => _enabled = v);
+                      widget.bgm.setEnabled(v);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: kSpace2),
+              Opacity(
+                opacity: _enabled ? 1 : 0.4,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.volume_down_rounded,
+                      color: kTextSecondary,
+                    ),
+                    Expanded(
+                      child: Slider(
+                        value: _volume,
+                        activeColor: kBluePrimary,
+                        onChanged:
+                            _enabled
+                                ? (v) {
+                                  setState(() => _volume = v);
+                                  widget.bgm.setVolume(v);
+                                }
+                                : null,
+                      ),
+                    ),
+                    const Icon(Icons.volume_up_rounded, color: kTextSecondary),
+                  ],
+                ),
+              ),
+              const SizedBox(height: kSpace4),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('เสร็จ'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

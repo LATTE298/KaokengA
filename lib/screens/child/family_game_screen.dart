@@ -11,6 +11,7 @@ import '../../providers/family_provider.dart';
 import '../../providers/session_provider.dart';
 import '../../providers/sfx_provider.dart';
 import '../../providers/tts_provider.dart';
+import '../../routes/app_routes.dart';
 import '../../services/haptic_service.dart';
 import '../../services/sfx_player.dart';
 import '../../theme/colors.dart';
@@ -76,6 +77,13 @@ class _EmptyState extends StatelessWidget {
               'ให้คุณพ่อคุณแม่เพิ่มรูปคนในครอบครัวก่อนนะครับ',
               style: kTextMd.copyWith(color: kTextSecondary),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: kSpace6),
+            // ปุ่มลัดไปหน้าจัดการคลังครอบครัว (เพิ่มรูปสมาชิก) — สะดวกตอนยังไม่มีรูป
+            FilledButton.icon(
+              onPressed: () => context.push(kRouteFamilyManager),
+              icon: const Icon(Icons.add_a_photo_rounded),
+              label: const Text('เพิ่มคนในครอบครัว'),
             ),
           ],
         ),
