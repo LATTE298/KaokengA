@@ -21,3 +21,8 @@ const String kRouteActivityLog = '/parent/log';
 const String kRouteProgress = '/parent/progress';
 const String kRouteScenarios = '/parent/scenarios';
 const String kRouteFamilyManager = '/parent/family';
+
+// index แท็บ "ความก้าวหน้า" ใน DashboardScreen (0=บันทึกการเล่น, 1=ความก้าวหน้า,
+// 2=ตั้งค่าสถานการณ์) — ใช้ล็อกแท็บเมื่อเปิด dashboard แบบ `?view=progress`
+// (เมนู "ความคืบหน้า" ฝั่งเด็ก เปิดดูได้แค่หน้านี้ สลับแท็บอื่นไม่ได้)
+const int kDashboardProgressTab = 1;

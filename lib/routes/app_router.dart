@@ -126,7 +126,13 @@ GoRouter buildAppRouter() {
       ),
       GoRoute(
         path: kRouteDashboard,
-        pageBuilder: (_, state) => _fadePage(state, const DashboardScreen()),
+        pageBuilder:
+            (_, state) => _fadePage(
+              state,
+              DashboardScreen(
+                progressOnly: state.uri.queryParameters['view'] == 'progress',
+              ),
+            ),
       ),
       GoRoute(
         path: kRouteFamilyManager,

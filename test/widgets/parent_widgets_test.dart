@@ -113,11 +113,32 @@ void main() {
     expect(find.byKey(const Key('parent-delete-confirm')), findsOneWidget);
     expect(find.textContaining('ไม่สามารถกู้คืน'), findsOneWidget);
   });
+
+  testWidgets(
+    'DashboardScreen progressOnly ล็อกเฉพาะความก้าวหน้า — ซ่อนแท็บ/บัญชี',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(_dashboardWrap(progressOnly: true));
+      await tester.pump();
+
+      // เข้าจากหน้าเลือกเล่นฝั่งเด็ก: ต้องเข้าส่วนผู้ปกครองอื่นไม่ได้เลย
+      expect(find.byTooltip('ออกจากระบบ'), findsNothing);
+      expect(find.byTooltip('ตั้งชื่อเด็ก'), findsNothing);
+      expect(find.byTooltip('คลังครอบครัว'), findsNothing);
+      expect(find.byType(NavigationBar), findsNothing); // ไม่มีแถบสลับแท็บล่าง
+      // แต่ยังเห็นหน้าความก้าวหน้า (title แท็บ)
+      expect(find.text('ความก้าวหน้า'), findsWidgets);
+    },
+  );
 }
 
-Widget _dashboardWrap({_FakeScenarioSettingsStore? settings}) {
+Widget _dashboardWrap({
+  _FakeScenarioSettingsStore? settings,
+  bool progressOnly = false,
+}) {
   return _wrap(
-    const DashboardScreen(),
+    DashboardScreen(progressOnly: progressOnly),
     overrides: [
       parentAuthenticatedProvider.overrideWithValue(true),
       uidProvider.overrideWithValue('uid-1'),

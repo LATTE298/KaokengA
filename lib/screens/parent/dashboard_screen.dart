@@ -6,6 +6,7 @@ import '../../models/app_types.dart';
 import '../../models/scenario_config.dart';
 import '../../models/session_record.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/child_profile_provider.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/parent_dashboard_providers.dart';
 import '../../services/auth_service.dart' show parentAuthErrorMessage;
@@ -18,20 +19,24 @@ import '../../widgets/orientation_lock.dart';
 import 'progress_dashboard.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({super.key, this.progressOnly = false});
+
+  /// เปิดแบบ "ดูความก้าวหน้าอย่างเดียว" (เข้าจากหน้าเลือกเล่นฝั่งเด็ก) — ล็อกที่แท็บ
+  /// ความก้าวหน้า ซ่อนการสลับแท็บ + ปุ่มบัญชี/ตั้งค่า กันเด็กเข้าส่วนผู้ปกครองส่วนอื่น
+  final bool progressOnly;
 
   @override
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  int _tab = 0;
-
   static const _tabs = [
     _TabSpec('Log', 'บันทึกการเล่น', Icons.list_alt_rounded),
     _TabSpec('Progress', 'ความก้าวหน้า', Icons.bar_chart_rounded),
     _TabSpec('Scenarios', 'ตั้งค่าสถานการณ์', Icons.tune_rounded),
   ];
+
+  late int _tab = widget.progressOnly ? kDashboardProgressTab : 0;
 
   @override
   Widget build(BuildContext context) {
@@ -66,26 +71,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           onPressed: () => context.go(kRouteModeSelect),
         ),
         title: Text(_tabs[_tab].titleTh),
-        actions: [
-          if (isLandscape)
-            for (var i = 0; i < _tabs.length; i++)
-              IconButton(
-                tooltip: _tabs[i].titleTh,
-                isSelected: i == _tab,
-                icon: Icon(_tabs[i].icon),
-                onPressed: () => setState(() => _tab = i),
-              ),
-          IconButton(
-            tooltip: 'คลังครอบครัว',
-            icon: const Icon(Icons.diversity_3_rounded),
-            onPressed: () => context.push(kRouteFamilyManager),
-          ),
-          IconButton(
-            tooltip: 'ออกจากระบบ',
-            icon: const Icon(Icons.account_circle_rounded),
-            onPressed: _showLogoutSheet,
-          ),
-        ],
+        actions:
+            widget.progressOnly
+                ? null
+                : [
+                  if (isLandscape)
+                    for (var i = 0; i < _tabs.length; i++)
+                      IconButton(
+                        tooltip: _tabs[i].titleTh,
+                        isSelected: i == _tab,
+                        icon: Icon(_tabs[i].icon),
+                        onPressed: () => setState(() => _tab = i),
+                      ),
+                  IconButton(
+                    tooltip: 'ตั้งชื่อเด็ก',
+                    icon: const Icon(Icons.badge_rounded),
+                    onPressed: _showChildNameDialog,
+                  ),
+                  IconButton(
+                    tooltip: 'คลังครอบครัว',
+                    icon: const Icon(Icons.diversity_3_rounded),
+                    onPressed: () => context.push(kRouteFamilyManager),
+                  ),
+                  IconButton(
+                    tooltip: 'ออกจากระบบ',
+                    icon: const Icon(Icons.account_circle_rounded),
+                    onPressed: _showLogoutSheet,
+                  ),
+                ],
       ),
       body: switch (_tab) {
         0 => const _ActivityLogTab(),
@@ -93,7 +106,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         _ => const _ScenarioSettingsTab(),
       },
       bottomNavigationBar:
-          isLandscape
+          (isLandscape || widget.progressOnly)
               ? null
               : NavigationBar(
                 selectedIndex: _tab,
@@ -104,6 +117,42 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ],
               ),
     );
+  }
+
+  // ผู้ปกครองตั้งชื่อเด็ก — โชว์เป็นคำทักทายบนหน้าเลือกเล่น (เก็บ Hive, ออฟไลน์ได้)
+  Future<void> _showChildNameDialog() async {
+    final controller = TextEditingController(text: ref.read(childNameProvider));
+    final name = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('ชื่อเด็ก'),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              maxLength: 20,
+              textInputAction: TextInputAction.done,
+              decoration: const InputDecoration(
+                labelText: 'ชื่อที่จะทักทายบนหน้าเลือกเล่น',
+                hintText: 'เช่น น้องดาว',
+              ),
+              onSubmitted: (value) => Navigator.of(context).pop(value),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('ยกเลิก'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(controller.text),
+                child: const Text('บันทึก'),
+              ),
+            ],
+          ),
+    );
+    controller.dispose();
+    if (name == null || !mounted) return;
+    ref.read(childNameProvider.notifier).setName(name);
   }
 
   Future<void> _showLogoutSheet() async {

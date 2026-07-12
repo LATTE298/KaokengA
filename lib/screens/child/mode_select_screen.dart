@@ -8,6 +8,7 @@ import 'package:video_player/video_player.dart';
 import '../../features/streak/streak_tracker.dart';
 import '../../l10n/tts_strings_th.dart';
 import '../../providers/bgm_provider.dart';
+import '../../providers/child_profile_provider.dart';
 import '../../providers/streak_provider.dart';
 import '../../providers/tts_provider.dart';
 import '../../services/bgm_service.dart';
@@ -25,11 +26,10 @@ import '../../widgets/orientation_lock.dart';
 // `home_bg.jpg`) + รูปปกโหมด `assets/images/mode_{daily,memory,vocab,family}.jpg`
 // รออยู่: รูป avatar `assets/images/home_avatar.png` (ตกไปไอคอนหน้ายิ้มระหว่างรอ)
 //
-// ⚠️ TODO(feature): ชื่อเด็ก/ดาว + เมนู รางวัล/ความคืบหน้า ยังเป็น placeholder
-// โครงสร้าง (ยังไม่มี provider/ฟีเจอร์จริง) — สตรีคต่อเนื่องเป็นข้อมูลจริงแล้ว
-// (streakProvider — Hive, อัปเดตทุกครั้งที่เข้าหน้านี้)
-const String _kChildName = 'น้องดาว';
-const int _kStarCount = 120;
+// ข้อมูลจริงทั้งหมดแล้ว: สตรีค = streakProvider, ชื่อเด็ก = childNameProvider
+// (ผู้ปกครองตั้งจาก dashboard), ดาวสะสม = totalStarsProvider (บวกทุกครั้งจบเกม) —
+// ทั้งหมดเก็บ Hive `app_prefs`. เมนู "ความคืบหน้า" เปิด dashboard ผู้ปกครอง (แท็บ
+// ความก้าวหน้า); เมนู "รางวัล" ยัง coming-soon (ผูกเฟส 3.1 มาสคอตที่พักไว้รอ design)
 
 // asset พื้นหลัง: วิดีโอลูป (หลัก) + ภาพนิ่ง (ขึ้นทันที/สำรองถ้าวิดีโอโหลดไม่ทัน)
 const String _kHomeBgVideo = 'assets/video/kaokeng_bg.mp4';
@@ -68,6 +68,13 @@ class ModeSelectScreen extends ConsumerWidget {
     void openParentArea() {
       HapticService.parentGateComplete();
       context.push(kRouteParentGate);
+    }
+
+    // เมนู "ความคืบหน้า" → dashboard แบบ "ดูอย่างเดียว" (view=progress): ล็อกที่แท็บ
+    // ความก้าวหน้า สลับแท็บ/เข้าบัญชี-ตั้งค่าไม่ได้ (กันเด็กเข้าส่วนผู้ปกครองอื่น)
+    // หน้า dashboard กันตัวเองด้วยการล็อกอินอยู่แล้ว (ยังไม่ล็อกอิน = โชว์ปุ่มเข้าระบบ)
+    void openProgress() {
+      context.push('$kRouteDashboard?view=progress');
     }
 
     void comingSoon(String label) {
@@ -232,7 +239,10 @@ class ModeSelectScreen extends ConsumerWidget {
                     ),
                     // ช่องว่างเล็กๆ คั่นการ์ดเกมกับแถบเมนูล่าง (ผู้ใช้กำหนด)
                     const SizedBox(height: kSpace3),
-                    _BottomNav(onParent: openParentArea, onStub: comingSoon),
+                    _BottomNav(
+                      onParent: openParentArea,
+                      onProgress: openProgress,
+                    ),
                   ],
                 ),
               ),
@@ -407,11 +417,13 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _ProfileChip extends StatelessWidget {
+class _ProfileChip extends ConsumerWidget {
   const _ProfileChip();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final childName = ref.watch(childNameProvider);
+    final stars = ref.watch(totalStarsProvider);
     return Container(
       padding: const EdgeInsets.fromLTRB(kSpace1, kSpace1, kSpace4, kSpace1),
       decoration: BoxDecoration(
@@ -443,7 +455,7 @@ class _ProfileChip extends StatelessWidget {
           ),
           const SizedBox(width: kSpace2),
           Text(
-            'สวัสดี $_kChildName',
+            'สวัสดี $childName',
             style: kTextSm.copyWith(
               fontWeight: FontWeight.w700,
               color: kTextPrimary,
@@ -453,7 +465,7 @@ class _ProfileChip extends StatelessWidget {
           const Icon(Icons.star_rounded, color: kYellowPrimary, size: 16),
           const SizedBox(width: 2),
           Text(
-            '$_kStarCount',
+            '$stars',
             style: kTextXs.copyWith(
               fontWeight: FontWeight.w700,
               color: kTextPrimary,
@@ -805,10 +817,10 @@ class _BgmSettingsDialogState extends State<_BgmSettingsDialog> {
 // -------------------- แถบเมนูล่าง --------------------
 
 class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.onParent, required this.onStub});
+  const _BottomNav({required this.onParent, required this.onProgress});
 
   final VoidCallback onParent;
-  final void Function(String label) onStub;
+  final VoidCallback onProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -834,7 +846,7 @@ class _BottomNav extends StatelessWidget {
             _NavItem(
               icon: Icons.bar_chart_rounded,
               color: kSuccess,
-              onTap: () => onStub('ความคืบหน้า'),
+              onTap: onProgress,
             ),
             _NavItem(
               icon: Icons.groups_rounded,
