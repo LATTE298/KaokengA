@@ -1,0 +1,54 @@
+name: Build APK
+
+# รันเอง: แท็บ Actions → "Build APK" → Run workflow
+# หรือ push tag ขึ้นต้นด้วย v (เช่น v1.0.0) ก็ build ให้อัตโนมัติ
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write # ให้สร้าง Release แนบไฟล์ APK ได้
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+
+      - run: flutter --version
+      - run: flutter pub get
+      - run: flutter build apk --release
+
+      # ดาวน์โหลดได้จากหน้า run (ต้อง login GitHub, เป็น .zip)
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaokeng-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      # ลิงก์ดาวน์โหลดตรงสำหรับมือถือ (หน้า Releases)
+      - name: Publish to Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Kaokeng APK (build ${{ github.run_number }})
+          prerelease: true
+          body: |
+            APK ทดลองเล่น — เซ็นด้วย debug key (ติดตั้งแบบ sideload)
+            • ต้องเปิด "ติดตั้งจากแหล่งที่ไม่รู้จัก / Unknown sources" บนมือถือ
+            • Google Sign-In อาจไม่ทำงานบน build นี้ (SHA-1 ของ CI ไม่ตรงกับ Firebase) — ใช้ email/รหัสผ่านได้ปกติ
+          files: build/app/outputs/flutter-apk/app-release.apk
