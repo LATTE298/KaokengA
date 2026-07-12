@@ -17,6 +17,7 @@ import '../../providers/tts_provider.dart';
 import '../../services/haptic_service.dart';
 import '../../services/sfx_player.dart';
 import '../../theme/colors.dart';
+import '../../widgets/child/paper_background.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child_back_button.dart';
@@ -39,6 +40,7 @@ class MemoryGameScreen extends ConsumerWidget {
       body: SafeArea(
         child: Stack(
           children: [
+            const Positioned.fill(child: PaperBackground()),
             ChildAsyncView(
               value: asyncPack,
               error:

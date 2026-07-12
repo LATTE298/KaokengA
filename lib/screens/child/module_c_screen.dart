@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../routes/app_routes.dart';
 import '../../theme/colors.dart';
+import '../../widgets/child/paper_background.dart';
 import '../../theme/spacing.dart';
 import '../../widgets/child_back_button.dart';
 import '../../widgets/child/module_card.dart';
@@ -21,6 +22,7 @@ class ModuleCScreen extends ConsumerWidget {
       body: SafeArea(
         child: Stack(
           children: [
+            const Positioned.fill(child: PaperBackground()),
             Center(
               child: LayoutBuilder(
                 builder: (context, constraints) {

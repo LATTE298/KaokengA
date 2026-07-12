@@ -7,6 +7,7 @@ import '../../providers/parent_dashboard_providers.dart';
 import '../../providers/tts_provider.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/colors.dart';
+import '../../widgets/child/paper_background.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child_back_button.dart';
@@ -26,6 +27,7 @@ class ModuleAScreen extends ConsumerWidget {
       body: SafeArea(
         child: Stack(
           children: [
+            const Positioned.fill(child: PaperBackground()),
             Padding(
               // ลด padding แนวตั้งเมื่อเทียบกับเดิม (top kSpace12) เพราะจอเตี้ยต้องการพื้นที่
               // ทุก px — ยกหัวขึ้นด้วย kSpace8 พอให้ไม่ชนปุ่มย้อนกลับ

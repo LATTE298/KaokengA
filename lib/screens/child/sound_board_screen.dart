@@ -6,6 +6,7 @@ import '../../providers/content_providers.dart';
 import '../../providers/tts_provider.dart';
 import '../../services/haptic_service.dart';
 import '../../theme/colors.dart';
+import '../../widgets/child/paper_background.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child_back_button.dart';
@@ -40,6 +41,7 @@ class _SoundBoardScreenState extends ConsumerState<SoundBoardScreen> {
       body: SafeArea(
         child: Stack(
           children: [
+            const Positioned.fill(child: PaperBackground()),
             Padding(
               // ซ้ายต้องพ้นปุ่มย้อนกลับที่ลอยมุมบนซ้าย (8 + 64 = 72) — เดิม kSpace12 (48)
               // ทำให้ปุ่มทับมุมการ์ดคอลัมน์แรก แตะมุมนั้นแล้วโดนปุ่มแทนการ์ด

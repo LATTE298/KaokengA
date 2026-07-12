@@ -7,6 +7,7 @@ import '../../models/vocabulary_item.dart';
 import '../../providers/content_providers.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/colors.dart';
+import '../../widgets/child/paper_background.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../../widgets/child_back_button.dart';
@@ -27,6 +28,7 @@ class VocabQuizSelectScreen extends ConsumerWidget {
       body: SafeArea(
         child: Stack(
           children: [
+            const Positioned.fill(child: PaperBackground()),
             Padding(
               // ซ้ายพ้นปุ่มย้อนกลับที่ลอยมุมบนซ้าย (8 + 64 = 72)
               padding: const EdgeInsets.fromLTRB(
