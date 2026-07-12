@@ -155,7 +155,11 @@ Future<void> _pumpQuiz(
       child: const MaterialApp(home: VocabQuizScreen(category: 'animals')),
     ),
   );
-  // รอ vocabularyProvider (Future) แล้วให้บอร์ดขึ้น
+  // รอ vocabularyProvider (Future) แล้วเลือกโหมด "เลือกคำ" (เทสต์ชุดนี้ครอบเส้นทาง
+  // ช้อยส์เป็นคำ) จากนั้นบอร์ดจึงขึ้น
+  await tester.pump();
+  await tester.pump();
+  await tester.tap(find.byKey(const Key('quiz_mode_words')));
   await tester.pump();
   await tester.pump();
 }

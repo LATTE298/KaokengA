@@ -56,7 +56,7 @@ class VocabQuizScreen extends ConsumerWidget {
                 if (categoryItems.length < 3) {
                   return Center(child: Text('โหลดไม่สำเร็จ', style: kTextLg));
                 }
-                return _QuizBoard(category: category, items: categoryItems);
+                return _QuizFlow(category: category, items: categoryItems);
               },
             ),
             const Positioned(top: 8, left: 8, child: ChildBackButton()),
@@ -67,13 +67,159 @@ class VocabQuizScreen extends ConsumerWidget {
   }
 }
 
+// เลือกแบบก่อนเล่น (feedback ครู 2026-07-12): เลือกคำ (ช้อยส์เป็นคำ) หรือ
+// เลือกภาพ (คำถามเป็นเสียง/ตัวหนังสือ → จิ้มเลือกรูปที่ถูก)
+class _QuizFlow extends StatefulWidget {
+  const _QuizFlow({required this.category, required this.items});
+
+  final String category;
+  final List<VocabularyItem> items;
+
+  @override
+  State<_QuizFlow> createState() => _QuizFlowState();
+}
+
+class _QuizFlowState extends State<_QuizFlow> {
+  bool? _imageChoices;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_imageChoices == null) {
+      return _QuizModePicker(
+        onSelect:
+            (imageChoices) => setState(() => _imageChoices = imageChoices),
+      );
+    }
+    return _QuizBoard(
+      category: widget.category,
+      items: widget.items,
+      imageChoices: _imageChoices!,
+    );
+  }
+}
+
+class _QuizModePicker extends StatelessWidget {
+  const _QuizModePicker({required this.onSelect});
+
+  final void Function(bool imageChoices) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(kSpace6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'เลือกแบบ',
+              style: kTextXL.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: kSpace6),
+            Wrap(
+              spacing: kSpace4,
+              runSpacing: kSpace4,
+              alignment: WrapAlignment.center,
+              children: [
+                _QuizModeCard(
+                  key: const Key('quiz_mode_words'),
+                  icon: Icons.text_fields_rounded,
+                  label: 'เลือกคำ',
+                  hint: 'ดูรูป แล้วเลือกคำ',
+                  bg: kYellowLight,
+                  accent: kYellowPrimary,
+                  onTap: () => onSelect(false),
+                ),
+                _QuizModeCard(
+                  key: const Key('quiz_mode_images'),
+                  icon: Icons.image_rounded,
+                  label: 'เลือกภาพ',
+                  hint: 'ฟังคำ แล้วเลือกรูป',
+                  bg: kBlueLight,
+                  accent: kBluePrimary,
+                  onTap: () => onSelect(true),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuizModeCard extends StatelessWidget {
+  const _QuizModeCard({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.hint,
+    required this.bg,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String hint;
+  final Color bg;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableChildCard(
+      onTap: onTap,
+      playClickSound: true,
+      child: Container(
+        width: 180,
+        padding: const EdgeInsets.all(kSpace5),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: kRadiusLg,
+          boxShadow: const [kShadowMd],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+              child: Icon(icon, color: Colors.white, size: 32),
+            ),
+            const SizedBox(height: kSpace3),
+            Text(
+              label,
+              style: kChildLabel.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: kSpace1),
+            Text(
+              hint,
+              style: kTextSm.copyWith(color: kTextSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _QuizBoard extends ConsumerStatefulWidget {
-  const _QuizBoard({required this.category, required this.items});
+  const _QuizBoard({
+    required this.category,
+    required this.items,
+    required this.imageChoices,
+  });
 
   final String category;
 
   /// คำเฉพาะหมวดที่เลือกแล้ว (กรองมาจากหน้าจอชั้นนอก)
   final List<VocabularyItem> items;
+
+  /// true = ช้อยส์เป็นรูป (คำถามเป็นคำ/เสียง) · false = ช้อยส์เป็นคำ (โจทย์เป็นรูป)
+  final bool imageChoices;
 
   @override
   ConsumerState<_QuizBoard> createState() => _QuizBoardState();
@@ -113,15 +259,26 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(ttsServiceProvider).speak(kTtsQuizStart);
+      // โหมดเลือกภาพ: พูด "คำ" ที่ต้องหาตั้งแต่เริ่ม (เด็กฟังแล้วจิ้มรูป)
+      if (widget.imageChoices) {
+        _speakQuestion();
+      } else {
+        ref.read(ttsServiceProvider).speak(kTtsQuizStart);
+      }
     });
   }
 
-  // พูดประโยคคำถามตามหมวด — ห้ามพูดคำตอบเอง (เฉลยทันที)
+  // โหมดเลือกคำ: พูดประโยคคำถามตามหมวด · โหมดเลือกภาพ: พูดคำที่ต้องหา
+  // (ห้ามพูดคำตอบเองในโหมดเลือกคำ เพราะจะเฉลยทันที)
   void _speakQuestion() {
+    final answer = _controller.currentQuestion.answer;
     ref
         .read(ttsServiceProvider)
-        .speak(ttsQuizQuestion(_controller.currentQuestion.answer.category));
+        .speak(
+          widget.imageChoices
+              ? answer.ttsWord
+              : ttsQuizQuestion(answer.category),
+        );
   }
 
   Future<void> _onChoiceTap(String itemId) async {
@@ -253,10 +410,15 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
                                   ),
                                   boxShadow: const [kShadowMd],
                                 ),
-                                child: _PromptImage(
-                                  key: Key('quiz_image_${answer.itemId}'),
-                                  item: answer,
-                                ),
+                                child:
+                                    widget.imageChoices
+                                        ? _PromptWord(item: answer)
+                                        : _PromptImage(
+                                          key: Key(
+                                            'quiz_image_${answer.itemId}',
+                                          ),
+                                          item: answer,
+                                        ),
                               ),
                             ),
                           ),
@@ -264,7 +426,9 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
                           FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              'คำถาม: ${ttsQuizQuestion(answer.category)}?',
+                              widget.imageChoices
+                                  ? 'แตะรูปที่ใช่'
+                                  : 'คำถาม: ${ttsQuizQuestion(answer.category)}?',
                               key: const Key('quiz_question'),
                               style: kTextXL,
                             ),
@@ -283,26 +447,58 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
                             if (i > 0)
                               const SizedBox(height: kInteractiveGapMin),
                             Expanded(
-                              child: _ChoicePill(
-                                key: Key(
-                                  'choice_${question.choices[i].itemId}',
-                                ),
-                                prefix: _kChoicePrefixes[i],
-                                item: question.choices[i],
-                                background:
-                                    _kChoiceBackgrounds[i %
-                                        _kChoiceBackgrounds.length],
-                                locked: _controller.lockedChoiceIds.contains(
-                                  question.choices[i].itemId,
-                                ),
-                                correctFlash:
-                                    _correctFlashId ==
-                                    question.choices[i].itemId,
-                                onTap:
-                                    () => _onChoiceTap(
-                                      question.choices[i].itemId,
-                                    ),
-                              ),
+                              child:
+                                  widget.imageChoices
+                                      ? _ImageChoice(
+                                        key: Key(
+                                          'choice_${question.choices[i].itemId}',
+                                        ),
+                                        item: question.choices[i],
+                                        locked: _controller.lockedChoiceIds
+                                            .contains(
+                                              question.choices[i].itemId,
+                                            ),
+                                        correctFlash:
+                                            _correctFlashId ==
+                                            question.choices[i].itemId,
+                                        onTap:
+                                            () => _onChoiceTap(
+                                              question.choices[i].itemId,
+                                            ),
+                                        onListen:
+                                            () => ref
+                                                .read(ttsServiceProvider)
+                                                .speak(
+                                                  question.choices[i].ttsWord,
+                                                ),
+                                      )
+                                      : _ChoicePill(
+                                        key: Key(
+                                          'choice_${question.choices[i].itemId}',
+                                        ),
+                                        prefix: _kChoicePrefixes[i],
+                                        item: question.choices[i],
+                                        background:
+                                            _kChoiceBackgrounds[i %
+                                                _kChoiceBackgrounds.length],
+                                        locked: _controller.lockedChoiceIds
+                                            .contains(
+                                              question.choices[i].itemId,
+                                            ),
+                                        correctFlash:
+                                            _correctFlashId ==
+                                            question.choices[i].itemId,
+                                        onTap:
+                                            () => _onChoiceTap(
+                                              question.choices[i].itemId,
+                                            ),
+                                        onListen:
+                                            () => ref
+                                                .read(ttsServiceProvider)
+                                                .speak(
+                                                  question.choices[i].ttsWord,
+                                                ),
+                                      ),
                             ),
                           ],
                         ],
@@ -325,6 +521,120 @@ const _kChoicePrefixes = ['ก', 'ข', 'ค'];
 // สีพื้นปุ่มไล่ตามตำแหน่ง (ตกแต่งอย่างเดียว ไม่สื่อถูก/ผิด — สถานะถูก/ผิดใช้
 // ขอบเขียว/หรี่จางแทน) ให้เด็กแยกปุ่มแต่ละอันได้ง่ายแบบเดียวกับ mockup
 const _kChoiceBackgrounds = [kBlueLight, kYellowLight, kWarmSurface];
+
+// ปุ่มลำโพงเล็ก — กดฟังเสียงคำ (แยกจากการตอบ) ช่วยเด็กที่ยังอ่านไม่คล่อง
+class _ListenButton extends StatelessWidget {
+  const _ListenButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onTap,
+      icon: const Icon(Icons.volume_up_rounded),
+      color: kBlueDark,
+      tooltip: 'ฟังเสียง',
+    );
+  }
+}
+
+// โจทย์โหมดเลือกภาพ = "คำ" ตัวใหญ่ + ไอคอนลำโพง (แตะการ์ดโจทย์เพื่อฟังซ้ำ)
+class _PromptWord extends StatelessWidget {
+  const _PromptWord({required this.item});
+
+  final VocabularyItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.volume_up_rounded, color: kBluePrimary, size: 40),
+            const SizedBox(width: kSpace3),
+            Text(
+              item.ttsWord,
+              key: Key('quiz_word_${item.itemId}'),
+              style: kTextXL.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ช้อยส์โหมดเลือกภาพ = รูปใหญ่ + ปุ่มลำโพง, แตะรูป = ตอบ
+class _ImageChoice extends StatelessWidget {
+  const _ImageChoice({
+    super.key,
+    required this.item,
+    required this.locked,
+    required this.correctFlash,
+    required this.onTap,
+    required this.onListen,
+  });
+
+  final VocabularyItem item;
+  final bool locked;
+  final bool correctFlash;
+  final VoidCallback onTap;
+  final VoidCallback onListen;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableChildCard(
+      onTap: onTap,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 250),
+        opacity: locked ? 0.45 : 1.0,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpace3,
+            vertical: kSpace2,
+          ),
+          decoration: BoxDecoration(
+            color:
+                correctFlash
+                    ? kSuccessLight
+                    : locked
+                    ? kDisabledSurface
+                    : Colors.white,
+            borderRadius: kRadiusLg,
+            border: Border.all(
+              color: correctFlash ? kSuccess : kWarmBorder,
+              width: correctFlash ? 2.5 : 1.5,
+            ),
+            boxShadow: const [kShadowSm],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Image.asset(
+                  item.image,
+                  fit: BoxFit.contain,
+                  errorBuilder:
+                      (_, __, ___) => Icon(
+                        iconForVocabCategory(item.category),
+                        size: 44,
+                        color: kTextSecondary,
+                      ),
+                ),
+              ),
+              const SizedBox(width: kSpace2),
+              _ListenButton(onTap: onListen),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // รูปโจทย์: ใช้รูปจริงจาก assets ถ้ามี — ยังไม่มี (placeholder) ให้โชว์ไอคอนหมวด
 // ขนาดใหญ่ไปก่อน จะกลายเป็นภาพจริงเองเมื่อทีมวางไฟล์รูป
@@ -362,6 +672,7 @@ class _ChoicePill extends StatelessWidget {
     required this.locked,
     required this.correctFlash,
     required this.onTap,
+    required this.onListen,
   });
 
   final String prefix;
@@ -372,6 +683,9 @@ class _ChoicePill extends StatelessWidget {
   final bool locked;
   final bool correctFlash;
   final VoidCallback onTap;
+
+  /// กดฟังเสียงคำของช้อยส์นี้ (feedback ครู 2026-07-12) — ไม่ใช่การตอบ
+  final VoidCallback onListen;
 
   @override
   Widget build(BuildContext context) {
@@ -435,6 +749,8 @@ class _ChoicePill extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(width: kSpace2),
+                  _ListenButton(onTap: onListen),
                 ],
               );
             },

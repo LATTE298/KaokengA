@@ -47,7 +47,7 @@ class MemoryGameScreen extends ConsumerWidget {
               error:
                   (_, __) =>
                       Center(child: Text('โหลดไม่สำเร็จ', style: kTextLg)),
-              data: (pack) => _MemoryBoard(pack: pack),
+              data: (pack) => _MemoryGameFlow(pack: pack),
             ),
             const Positioned(top: 8, left: 8, child: ChildBackButton()),
           ],
@@ -57,9 +57,34 @@ class MemoryGameScreen extends ConsumerWidget {
   }
 }
 
-class _MemoryBoard extends ConsumerStatefulWidget {
-  const _MemoryBoard({required this.pack});
+// เลือกระดับความยากก่อนเริ่ม (feedback ครู 2026-07-12) — เริ่มน้อยแผ่นแล้วเพิ่มได้เรื่อยๆ
+class _MemoryGameFlow extends StatefulWidget {
+  const _MemoryGameFlow({required this.pack});
   final MemoryPack pack;
+
+  @override
+  State<_MemoryGameFlow> createState() => _MemoryGameFlowState();
+}
+
+class _MemoryGameFlowState extends State<_MemoryGameFlow> {
+  int? _pairCount;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_pairCount == null) {
+      return _DifficultyPicker(
+        maxPairs: widget.pack.pairs.length,
+        onSelect: (pairs) => setState(() => _pairCount = pairs),
+      );
+    }
+    return _MemoryBoard(pack: widget.pack, pairCount: _pairCount!);
+  }
+}
+
+class _MemoryBoard extends ConsumerStatefulWidget {
+  const _MemoryBoard({required this.pack, required this.pairCount});
+  final MemoryPack pack;
+  final int pairCount;
 
   @override
   ConsumerState<_MemoryBoard> createState() => _MemoryBoardState();
@@ -80,6 +105,7 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
     );
     _controller = MemoryGameController(
       pack: widget.pack,
+      pairCount: widget.pairCount,
       elapsedMs:
           () =>
               ref
@@ -171,7 +197,7 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
           (context) => GameResultDialog(
             stars: stars,
             score: score,
-            detail: 'เปิดการ์ดทั้งหมด ${_controller.totalFlips} ครั้ง',
+            detail: 'จับคู่ครบ ${_controller.pairCount} คู่ เก่งมาก!',
             onClose: () {
               Navigator.of(context).pop(); // ปิด dialog
               if (context.mounted && context.canPop()) {
@@ -190,8 +216,10 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
         const horizontalPadding = kSpace4;
         const topPadding = kSpace2;
         const bottomPadding = kSpace2;
-        const crossAxisCount = 4;
-        const rowCount = 4;
+        // กระดานยืดหยุ่นตามจำนวนคู่: คอลัมน์ = จำนวนคู่, 2 แถว (คู่ละ 2 ใบ)
+        // เช่น 2 คู่ = 2×2 (4 แผ่น), 3 คู่ = 3×2 (6 แผ่น), 4 คู่ = 4×2 (8 แผ่น)
+        final crossAxisCount = widget.pairCount;
+        const rowCount = 2;
         const spacing = kSpace2;
 
         final availableWidth = constraints.maxWidth - (horizontalPadding * 2);
@@ -240,6 +268,112 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
           ),
         );
       },
+    );
+  }
+}
+
+// ---- เลือกระดับความยาก (จำนวนคู่) ----
+typedef _Level = ({String label, int pairs, Color bg, Color accent});
+
+class _DifficultyPicker extends StatelessWidget {
+  const _DifficultyPicker({required this.maxPairs, required this.onSelect});
+
+  final int maxPairs;
+  final void Function(int pairs) onSelect;
+
+  static const List<_Level> _levels = [
+    (label: 'ง่าย', pairs: 2, bg: kYellowLight, accent: kYellowPrimary),
+    (label: 'ปานกลาง', pairs: 3, bg: kBlueLight, accent: kBluePrimary),
+    (label: 'ยาก', pairs: 4, bg: kYellowLight, accent: kYellowDark),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final levels = _levels.where((l) => l.pairs <= maxPairs).toList();
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(kSpace6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'เลือกระดับ',
+              style: kTextXL.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: kSpace2),
+            Text(
+              'เริ่มจากน้อยแผ่นก่อน เก่งแล้วค่อยเพิ่ม',
+              style: kTextSm.copyWith(color: kTextSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: kSpace6),
+            Wrap(
+              spacing: kSpace4,
+              runSpacing: kSpace4,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final lvl in levels)
+                  _LevelCard(level: lvl, onTap: () => onSelect(lvl.pairs)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LevelCard extends StatelessWidget {
+  const _LevelCard({required this.level, required this.onTap});
+
+  final _Level level;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableChildCard(
+      onTap: onTap,
+      playClickSound: true,
+      child: Container(
+        width: 150,
+        padding: const EdgeInsets.symmetric(
+          vertical: kSpace5,
+          horizontal: kSpace4,
+        ),
+        decoration: BoxDecoration(
+          color: level.bg,
+          borderRadius: kRadiusLg,
+          boxShadow: const [kShadowMd],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: level.accent,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.grid_view_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+            const SizedBox(height: kSpace3),
+            Text(
+              level.label,
+              style: kChildLabel.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: kSpace1),
+            Text(
+              '${level.pairs * 2} แผ่น',
+              style: kTextSm.copyWith(color: kTextSecondary),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

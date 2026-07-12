@@ -3,6 +3,8 @@
 
 // Child routes
 const String kRouteSplash = '/';
+const String kRouteHome =
+    '/home'; // หน้าเริ่ม (แนวตั้ง) ปุ่ม Play ก่อนเข้าเลือกโหมด
 const String kRouteModeSelect = '/mode-select';
 const String kRouteModuleA = '/module-a';
 const String kRouteScenarioGame = '/module-a/game';

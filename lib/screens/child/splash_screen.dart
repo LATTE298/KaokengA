@@ -9,6 +9,7 @@ import '../../providers/tts_provider.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
+import '../../widgets/orientation_lock.dart';
 
 // Splash screen per spec 02 §SplashScreen + spec 03 Flow 1 steps 1-2.
 // 800ms logo animate-in, greeting TTS, navigate to ModeSelect at 1500ms.
@@ -43,7 +44,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     });
 
     _navTimer = Timer(const Duration(milliseconds: 1500), () {
-      if (mounted) context.go(kRouteModeSelect);
+      if (mounted) context.go(kRouteHome);
     });
   }
 
@@ -56,38 +57,52 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [kYellowLight, kWarmWhite],
+    return OrientationLock(
+      portrait: true,
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [kYellowLight, kWarmWhite],
+            ),
           ),
-        ),
-        child: Center(
-          child: ScaleTransition(
-            scale: _logoScale,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Placeholder logo — replace with actual brand mark asset.
-                Container(
-                  width: 160,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: kYellowPrimary,
-                    borderRadius: BorderRadius.circular(40),
+          child: Center(
+            child: ScaleTransition(
+              scale: _logoScale,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ปกแอปจริง — ถ้าโหลดไม่ได้ตกไปโลโก้กล่องเหลืองสำรอง
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 240,
+                      maxHeight: 240,
+                    ),
+                    child: Image.asset(
+                      'assets/images/home_cover.png',
+                      fit: BoxFit.contain,
+                      errorBuilder:
+                          (_, __, ___) => Container(
+                            width: 160,
+                            height: 160,
+                            decoration: BoxDecoration(
+                              color: kYellowPrimary,
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            child: const Icon(
+                              Icons.wb_sunny_rounded,
+                              size: 96,
+                              color: kTextPrimary,
+                            ),
+                          ),
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.wb_sunny_rounded,
-                    size: 96,
-                    color: kTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text('ชีวิตประจำวัน', style: kTextXL),
-              ],
+                  const SizedBox(height: 24),
+                  Text('ก้าวเก่ง', style: kTextXL),
+                ],
+              ),
             ),
           ),
         ),

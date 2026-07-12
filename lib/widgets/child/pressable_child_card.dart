@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../services/haptic_service.dart';
+import '../../services/sfx_player.dart';
 import '../../theme/spacing.dart';
 
 // การ์ด/ปุ่มที่กดได้สำหรับฝั่งเด็ก — เป็น building block กลางที่ ModuleCard, ScenarioCard,
@@ -75,7 +75,7 @@ class _PressableChildCardState extends State<PressableChildCard> {
     if (_coolingDown) return;
 
     if (widget.playClickSound) {
-      SystemSound.play(SystemSoundType.click);
+      playUiClick();
     }
     if (widget.hapticOnTap) {
       HapticService.tapLight();

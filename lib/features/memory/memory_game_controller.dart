@@ -143,26 +143,18 @@ class MemoryGameController {
     return doubled;
   }
 
-  /// คิดคะแนนจากจำนวนครั้งที่เปิดการ์ดทั้งหมด (spec 1.1).
-  /// ≤30 ครั้ง = 10 คะแนน, 31-40 = 8, 41-49 = 6, ≥50 = 4.
+  /// จำนวนครั้งที่จับผิดคู่ (พลิกแล้วไม่เข้าคู่)
+  int get mismatches => matchEvents.where((e) => !e.matched).length;
+
+  /// คะแนนเชิงบวก (feedback ครูโรงเรียนเด็กดาวน์ 2026-07-12): **เลิกหักคะแนนตามจำนวน
+  /// ครั้งที่เปิดซ้ำ** เพราะบั่นทอนกำลังใจ. จับคู่ครบ = สำเร็จเสมอ — จับผิดน้อย = เต็ม,
+  /// ผิดเยอะก็ยังได้คะแนนกำลังใจ (ขั้นต่ำ 6 "พอใช้" ไม่มี 4 อีกต่อไป)
   int get score {
-    if (totalFlips <= 30) return 10;
-    if (totalFlips <= 40) return 8;
-    if (totalFlips <= 49) return 6;
-    return 4;
+    if (mismatches == 0) return 10;
+    if (mismatches <= pairCount) return 8;
+    return 6;
   }
 
-  /// แปลงคะแนนเป็นจำนวนดาว (0-3 ดวง) สำหรับแสดงผลตอนจบเกม.
-  int get starRating {
-    switch (score) {
-      case 10:
-        return 3;
-      case 8:
-        return 2;
-      case 6:
-        return 1;
-      default:
-        return 0;
-    }
-  }
+  /// ดาว 0-3 ดวง — **ขั้นต่ำ 2 ดวงเสมอเมื่อเล่นจบ** (ไม่ให้ 0 ดาวมาลดกำลังใจเด็ก)
+  int get starRating => score >= 8 ? 3 : 2;
 }

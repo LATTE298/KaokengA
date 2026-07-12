@@ -14,6 +14,24 @@ const String kSfxRight = 'assets/sfx/right.mp3';
 /// **ยกเว้นเกมจับคู่ภาพ** ที่ผิดบ่อยโดยธรรมชาติ (กันเด็กกดดัน — ใส่แค่เสียงถูก)
 const String kSfxWrong = 'assets/sfx/wrong.mp3';
 
+/// path เสียงคลิกปุ่ม (asset จริงจากทีม) — เล่นผ่าน [playUiClick] ที่ PressableChildCard เรียก
+const String kSfxClick = 'assets/sfx/click.mp3';
+
+/// path เสียงตอนเปลี่ยนหน้า — เล่นผ่าน [playUiTransition] ที่ NavigatorObserver เรียก
+const String kSfxTransition = 'assets/sfx/transition.mp3';
+
+// --- Hook เสียง UI สำหรับจุดที่ไม่ได้อยู่ใต้ Riverpod (PressableChildCard, NavigatorObserver) ---
+// main ตั้ง player ให้ตอนเปิดแอปผ่าน [setUiSfxPlayer]; ยังไม่ตั้ง = เงียบ (เช่นใน widget test)
+SfxPlayer? _uiSfxPlayer;
+
+void setUiSfxPlayer(SfxPlayer player) => _uiSfxPlayer = player;
+
+/// เล่นเสียงคลิกปุ่ม (best-effort — เงียบถ้ายังไม่ได้ตั้ง player)
+void playUiClick() => _uiSfxPlayer?.play(kSfxClick);
+
+/// เล่นเสียงเปลี่ยนหน้า (best-effort)
+void playUiTransition() => _uiSfxPlayer?.play(kSfxTransition);
+
 /// ตัวเล่นเสียงเอฟเฟกต์ — กติกาเดียวกับเสียงระบบอื่น: **ห้าม throw ออกไปหาผู้เรียก**
 /// (เสียงเป็น best-effort เล่นไม่ได้ = เงียบ ไม่ทำเกมล้ม)
 abstract class SfxPlayer {

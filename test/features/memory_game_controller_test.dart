@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:daily_life/features/memory/memory_game_controller.dart';
 import 'package:daily_life/models/memory_pack.dart';
+import 'package:daily_life/models/session_record.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -129,6 +130,30 @@ void main() {
       final other = MemoryGameController(pack: bigPack, random: Random(2));
       final otherIds = other.tiles.map((t) => t.pair.id).toSet();
       expect(otherIds, isNot(equals(pairIds)));
+    });
+  });
+
+  group('คะแนนเชิงบวก (feedback ครู 2026-07-12)', () {
+    test('จบไม่มีจับผิด = 10 คะแนน 3 ดาว', () {
+      final c = MemoryGameController(pack: _pack(), random: Random(1));
+      expect(c.mismatches, 0);
+      expect(c.score, 10);
+      expect(c.starRating, 3);
+    });
+
+    test('จับผิดเยอะยังได้อย่างน้อย 2 ดาว (ไม่ลงโทษการเปิดซ้ำ)', () {
+      final c = MemoryGameController(
+        pack: _pack(),
+        pairCount: 2,
+        random: Random(1),
+      );
+      c.matchEvents.addAll([
+        for (var i = 0; i < 9; i++)
+          MatchEvent(pairId: 'x', matched: false, atMs: 0),
+      ]);
+      expect(c.mismatches, 9);
+      expect(c.score, 6); // ผิด > จำนวนคู่ → 6 (ไม่ต่ำกว่านี้)
+      expect(c.starRating, 2); // ขั้นต่ำ 2 ดาวเสมอ
     });
   });
 }

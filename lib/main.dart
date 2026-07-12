@@ -10,10 +10,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'firebase_options.dart';
+import 'providers/sfx_provider.dart';
 import 'providers/streak_provider.dart';
 import 'routes/app_router.dart';
 import 'services/auth_service.dart';
 import 'services/family_card_repository.dart';
+import 'services/sfx_player.dart';
 import 'theme/app_theme.dart';
 import 'widgets/bgm_gate.dart';
 import 'widgets/usage_timer_gate.dart';
@@ -27,12 +29,12 @@ Future<void> main() async {
   // ค่าตั้งต้นเล็กๆ ฝั่งเด็ก เช่น สตรีคเข้าเล่นต่อเนื่อง (หน้าเลือกเล่น)
   await Hive.openBox<dynamic>(kAppPrefsBoxName);
 
-  // Lock orientation to landscape — primary platform is 10" tablet (spec 01).
-  // Skip on web (not applicable).
+  // เปิดแอปด้วยแนวตั้ง (หน้าแรก = splash ล็อกแนวตั้ง) กันแวบแนวนอนตอนบูต —
+  // แต่ละหน้าจากนั้นตั้งทิศเองผ่าน OrientationLock (เมนู/เกมเด็ก = แนวนอน). ข้ามบนเว็บ
   if (!kIsWeb) {
     await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
     ]);
   }
 
@@ -76,8 +78,23 @@ Future<void> _retryAnonymousSignIn(AuthService authService) async {
   }
 }
 
-class DailyLifeApp extends StatelessWidget {
+class DailyLifeApp extends ConsumerStatefulWidget {
   const DailyLifeApp({super.key});
+
+  @override
+  ConsumerState<DailyLifeApp> createState() => _DailyLifeAppState();
+}
+
+class _DailyLifeAppState extends ConsumerState<DailyLifeApp> {
+  // สร้าง router ครั้งเดียว (ไม่รีเซ็ตทุก build) — observers เล่นเสียงเปลี่ยนหน้า
+  final _router = buildAppRouter();
+
+  @override
+  void initState() {
+    super.initState();
+    // ต่อ player เสียง UI (คลิกปุ่ม/เปลี่ยนหน้า) เข้ากับ hook กลางใน sfx_player
+    setUiSfxPlayer(ref.read(sfxPlayerProvider));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +102,7 @@ class DailyLifeApp extends StatelessWidget {
       title: 'Daily Life',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      routerConfig: buildAppRouter(),
+      routerConfig: _router,
       // ครอบทุกหน้าด้วย UsageTimerGate (spec 1.4 — เตือนพักสายตาทุก 15 นาที)
       // ตั้งที่ระดับ MaterialApp.router(builder:) เพื่อให้ gate อยู่เหนือ Navigator แต่อยู่
       // ใต้ MaterialApp — มี Theme/Localizations/Overlay ให้ showDialog ใช้ได้ และ state ของ

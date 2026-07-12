@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../screens/child/family_game_screen.dart';
+import '../screens/child/home_screen.dart';
 import '../screens/child/memory_game_screen.dart';
 import '../screens/child/mode_select_screen.dart';
 import '../screens/child/module_a_screen.dart';
@@ -16,7 +17,24 @@ import '../screens/parent/auth_screen.dart';
 import '../screens/parent/dashboard_screen.dart';
 import '../screens/parent/family_manager_screen.dart';
 import '../screens/parent/parent_gate_screen.dart';
+import '../services/sfx_player.dart';
 import 'app_routes.dart';
+
+// เล่นเสียงเปลี่ยนหน้าเมื่อ push/pop "หน้าเพจ" — ข้าม dialog/bottom sheet (PopupRoute ไม่ใช่
+// PageRoute) และข้าม push แรกตอนเปิดแอป (previousRoute == null) กันเสียงรัวตอนบูต
+class _SfxRouteObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (previousRoute != null && route is PageRoute) playUiTransition();
+    super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is PageRoute) playUiTransition();
+    super.didPop(route, previousRoute);
+  }
+}
 
 // Global navigator key ของ root navigator — ผูกเข้า GoRouter ด้านล่าง
 // ใช้โดย UsageTimerGate เพื่อเปิด popup เตือนพัก (spec 1.4) จาก context ที่รับประกันว่า
@@ -52,11 +70,16 @@ CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
 GoRouter buildAppRouter() {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
+    observers: [_SfxRouteObserver()],
     initialLocation: kRouteSplash,
     routes: [
       GoRoute(
         path: kRouteSplash,
         pageBuilder: (_, state) => _fadePage(state, const SplashScreen()),
+      ),
+      GoRoute(
+        path: kRouteHome,
+        pageBuilder: (_, state) => _fadePage(state, const HomeScreen()),
       ),
       GoRoute(
         path: kRouteModeSelect,

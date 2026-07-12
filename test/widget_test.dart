@@ -13,6 +13,6 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: DailyLifeApp()));
 
     expect(find.byType(MaterialApp), findsOneWidget);
-    expect(find.text('ชีวิตประจำวัน'), findsOneWidget);
+    expect(find.text('ก้าวเก่ง'), findsOneWidget);
   });
 }
