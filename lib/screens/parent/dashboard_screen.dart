@@ -68,7 +68,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         leading: IconButton(
           tooltip: 'กลับหน้าเล่นเกม',
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(kRouteModeSelect),
+          onPressed: () => context.go(parentAreaOrigin),
         ),
         title: Text(_tabs[_tab].titleTh),
         actions:
@@ -177,7 +177,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           .logout();
                       if (!context.mounted) return;
                       Navigator.of(context).pop();
-                      context.go(kRouteModeSelect);
+                      context.go(parentAreaOrigin);
                     },
                     child: const Text('ออกจากระบบ'),
                   ),
@@ -233,7 +233,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     try {
       await ref.read(parentAuthControllerProvider.notifier).deleteAccount();
       if (!mounted) return;
-      context.go(kRouteModeSelect);
+      context.go(parentAreaOrigin);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(

@@ -42,6 +42,17 @@ class BgmService {
     if (enabled) _player.play();
   }
 
+  /// พักเพลงเมื่อแอปลงพื้นหลัง (พับจอ/สลับแอป) — ไม่แตะค่า enabled ที่ผู้ใช้ตั้งไว้
+  void pauseForBackground() {
+    _fadeTimer?.cancel();
+    _player.pause();
+  }
+
+  /// กลับมาเล่นเมื่อแอปกลับขึ้นหน้าจอ (ถ้าเปิดเพลงอยู่)
+  void resumeForeground() {
+    if (enabled) _player.play();
+  }
+
   /// เปิด/ปิดเพลง (จำค่า)
   Future<void> setEnabled(bool value) async {
     await _box?.put(_kEnabledKey, value);

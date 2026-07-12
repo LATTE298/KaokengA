@@ -18,6 +18,7 @@ import '../screens/parent/dashboard_screen.dart';
 import '../screens/parent/family_manager_screen.dart';
 import '../screens/parent/parent_gate_screen.dart';
 import '../services/sfx_player.dart';
+import '../widgets/orientation_lock.dart';
 import 'app_routes.dart';
 
 // เล่นเสียงเปลี่ยนหน้าเมื่อ push/pop "หน้าเพจ" — ข้าม dialog/bottom sheet (PopupRoute ไม่ใช่
@@ -70,7 +71,7 @@ CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
 GoRouter buildAppRouter() {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    observers: [_SfxRouteObserver()],
+    observers: [_SfxRouteObserver(), orientationRouteObserver],
     initialLocation: kRouteSplash,
     routes: [
       GoRoute(

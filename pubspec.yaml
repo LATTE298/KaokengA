@@ -71,6 +71,18 @@ dev_dependencies:
   freezed: ^2.5.7
   json_serializable: ^6.8.0
 
+  # สร้างไอคอนแอปจากรูปเดียว (Kaokeng_ปก) — รัน: dart run flutter_launcher_icons
+  flutter_launcher_icons: ^0.14.4
+
+# ไอคอนแอป: ใช้ปก Kaokeng (3000x3000 สี่เหลี่ยมจัตุรัส) + adaptive icon พื้นครีม
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/home_cover.png"
+  min_sdk_android: 23
+  adaptive_icon_background: "#FBF3E4"
+  adaptive_icon_foreground: "assets/images/home_cover.png"
+
 flutter:
   uses-material-design: true
   # Sarabun font (spec 10) is loaded via google_fonts package — no asset bundling needed.

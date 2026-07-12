@@ -136,13 +136,8 @@ class _ParentGateScreenState extends ConsumerState<ParentGateScreen> {
                   ),
                   const SizedBox(height: kSpace4),
                   TextButton(
-                    onPressed: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go(kRouteHome);
-                      }
-                    },
+                    // กลับไปหน้าที่กดเข้ามา (home หรือ mode-select)
+                    onPressed: () => context.go(parentAreaOrigin),
                     child: Text(
                       'กลับ',
                       style: kTextMd.copyWith(color: kTextSecondary),

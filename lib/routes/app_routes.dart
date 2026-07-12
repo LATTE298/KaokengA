@@ -24,6 +24,10 @@ const String kRouteProgress = '/parent/progress';
 const String kRouteScenarios = '/parent/scenarios';
 const String kRouteFamilyManager = '/parent/family';
 
+// จำหน้าที่กดเข้าโซนผู้ปกครอง (home หรือ mode-select) — ตั้งตอนกดเข้า, อ่านตอนกดกลับ
+// (gate/auth/dashboard) เพื่อกลับไปหน้าเดิมให้ถูก ไม่ใช่ hardcode mode-select เสมอ
+String parentAreaOrigin = kRouteModeSelect;
+
 // index แท็บ "ความก้าวหน้า" ใน DashboardScreen (0=บันทึกการเล่น, 1=ความก้าวหน้า,
 // 2=ตั้งค่าสถานการณ์) — ใช้ล็อกแท็บเมื่อเปิด dashboard แบบ `?view=progress`
 // (เมนู "ความคืบหน้า" ฝั่งเด็ก เปิดดูได้แค่หน้านี้ สลับแท็บอื่นไม่ได้)

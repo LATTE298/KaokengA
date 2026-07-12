@@ -31,6 +31,10 @@ import '../../widgets/orientation_lock.dart';
 // ทั้งหมดเก็บ Hive `app_prefs`. เมนู "ความคืบหน้า" เปิด dashboard ผู้ปกครอง (แท็บ
 // ความก้าวหน้า); เมนู "รางวัล" ยัง coming-soon (ผูกเฟส 3.1 มาสคอตที่พักไว้รอ design)
 
+// เปิดวิดีโอพื้นหลัง — เดิมแตก (เส้นเขียว) เพราะ Impeller; ปิด Impeller ใน AndroidManifest
+// แล้วใช้ Skia เรนเดอร์วิดีโอปกติ (2026-07-13). ถ้ายังแตกให้ตั้ง false = ใช้ภาพนิ่งแทน
+const bool _kEnableBgVideo = true;
+
 // asset พื้นหลัง: วิดีโอลูป (หลัก) + ภาพนิ่ง (ขึ้นทันที/สำรองถ้าวิดีโอโหลดไม่ทัน)
 const String _kHomeBgVideo = 'assets/video/kaokeng_bg.mp4';
 const String _kHomeBgAsset = 'assets/images/home_bg.jpg';
@@ -67,6 +71,7 @@ class ModeSelectScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     void openParentArea() {
       HapticService.parentGateComplete();
+      parentAreaOrigin = kRouteModeSelect; // กลับมาหน้านี้เมื่อกดกลับ
       context.push(kRouteParentGate);
     }
 
@@ -274,7 +279,7 @@ class _HomeBackgroundState extends State<_HomeBackground> {
     super.didChangeDependencies();
     // เคารพ "ลดการเคลื่อนไหว" ของระบบ — ปิดวิดีโอ ใช้ภาพนิ่ง (spec accessibility)
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    if (!reduceMotion && !_initStarted) {
+    if (_kEnableBgVideo && !reduceMotion && !_initStarted) {
       _initStarted = true;
       _initVideo();
     }

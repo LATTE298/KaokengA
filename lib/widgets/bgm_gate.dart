@@ -14,13 +14,33 @@ class BgmGate extends ConsumerStatefulWidget {
   ConsumerState<BgmGate> createState() => _BgmGateState();
 }
 
-class _BgmGateState extends ConsumerState<BgmGate> {
+class _BgmGateState extends ConsumerState<BgmGate> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ref.read(bgmServiceProvider).start();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // พับจอ/สลับแอป → พักเพลง; กลับมา → เล่นต่อ (ถ้าเปิดอยู่). แก้บั๊กเพลงเล่นตลอด
+  // แม้พับแอปลงไปแล้ว (พบบน Android 2026-07-13)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final bgm = ref.read(bgmServiceProvider);
+    if (state == AppLifecycleState.resumed) {
+      bgm.resumeForeground();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      bgm.pauseForBackground();
+    }
   }
 
   @override

@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="daily_life"
+        android:label="ก้าวเก่ง"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -32,6 +32,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- ปิด Impeller ใช้ Skia แทน — แก้วิดีโอพื้นหลัง (video_player) เรนเดอร์แตก
+             (เส้นเขียว) บน Android จริงกับ Flutter 3.44 + Impeller (พบ 2026-07-13) -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

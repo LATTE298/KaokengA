@@ -36,6 +36,8 @@ class HomeScreen extends StatelessWidget {
                         _ParentButton(
                           onTap: () {
                             HapticService.parentGateComplete();
+                            parentAreaOrigin =
+                                kRouteHome; // กลับมาหน้านี้เมื่อกดกลับ
                             context.push(kRouteParentGate);
                           },
                         ),
