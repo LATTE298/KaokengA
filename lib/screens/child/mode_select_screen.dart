@@ -269,10 +269,17 @@ class _HomeBackground extends StatefulWidget {
   State<_HomeBackground> createState() => _HomeBackgroundState();
 }
 
-class _HomeBackgroundState extends State<_HomeBackground> {
+class _HomeBackgroundState extends State<_HomeBackground>
+    with WidgetsBindingObserver {
   VideoPlayerController? _controller;
   bool _videoReady = false;
   bool _initStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void didChangeDependencies() {
@@ -285,8 +292,30 @@ class _HomeBackgroundState extends State<_HomeBackground> {
     }
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // กลับมาจาก background (พับจอ/สลับแอป) — surface ของ ExoPlayer มักถูกทำลาย → จอดำ
+    // จึงสร้าง controller ใหม่ให้ผูก surface ใหม่ (แก้บั๊กพื้นหลังดำหลังพับจอ 2026-07-13)
+    if (state == AppLifecycleState.resumed && _kEnableBgVideo && _initStarted) {
+      _reinitVideo();
+    }
+  }
+
+  Future<void> _reinitVideo() async {
+    final old = _controller;
+    _controller = null;
+    if (mounted) setState(() => _videoReady = false);
+    await old?.dispose();
+    await _initVideo();
+  }
+
   Future<void> _initVideo() async {
-    final controller = VideoPlayerController.asset(_kHomeBgVideo);
+    // mixWithOthers: วิดีโอไม่แย่ง audio focus → ไม่หยุดเมื่อเสียงคลิก/เพลงเล่น
+    // (แก้บั๊กพื้นหลัง pause ตอนแตะจอ 2026-07-13)
+    final controller = VideoPlayerController.asset(
+      _kHomeBgVideo,
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+    );
     _controller = controller;
     try {
       await controller.initialize();
@@ -303,6 +332,7 @@ class _HomeBackgroundState extends State<_HomeBackground> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
     super.dispose();
   }

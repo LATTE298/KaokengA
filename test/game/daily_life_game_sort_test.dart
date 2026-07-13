@@ -93,8 +93,8 @@ void main() {
     final (score, stars) = await completer.future.timeout(
       const Duration(seconds: 5),
     );
-    expect(score, 8); // ผิด 1 ครั้ง
-    expect(stars, 2);
+    expect(score, 10); // ผิด 1 ครั้ง — เกณฑ์ใหม่ผิด ≤3 ยังเต็ม 10 (3 ดาว)
+    expect(stars, 3);
     // 3 ชิ้นแรกชมระหว่างทาง — ชิ้นสุดท้ายปล่อยให้เสียงฉลองใหญ่พูดแทน
     expect(speaker.spoken.where((s) => s == kTtsQuizCorrect), hasLength(3));
     game.onRemove();

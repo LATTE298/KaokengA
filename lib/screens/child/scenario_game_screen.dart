@@ -18,6 +18,7 @@ import '../../providers/tts_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
+import '../../widgets/child/game_result_dialog.dart';
 import '../../widgets/child_back_button.dart';
 
 class ScenarioGameScreen extends ConsumerWidget {
@@ -280,77 +281,12 @@ Future<void> _showResultDialog(
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (_) => _DailyLifeResultDialog(score: score, stars: stars),
-  );
-}
-
-class _DailyLifeResultDialog extends StatelessWidget {
-  const _DailyLifeResultDialog({required this.score, required this.stars});
-
-  final int score;
-  final int stars;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.symmetric(
-        horizontal: kSpace6,
-        vertical: kSpace4,
-      ),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: kSpace8, vertical: kSpace5),
-          decoration: BoxDecoration(
-            color: kWarmWhite,
-            borderRadius: kRadiusLg,
-            boxShadow: const [kShadowLg],
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('เก่งมากเลย!', style: kTextXL),
-                SizedBox(height: kSpace4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(3, (i) {
-                    final filled = i < stars;
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: kSpace1),
-                      child: Icon(
-                        Icons.star_rounded,
-                        size: 48,
-                        color:
-                            filled
-                                ? kYellowPrimary
-                                : kYellowPrimary.withValues(alpha: 0.2),
-                      ),
-                    );
-                  }),
-                ),
-                SizedBox(height: kSpace4),
-                Text('คะแนน $score เต็ม 10', style: kTextLg),
-                SizedBox(height: kSpace5),
-                // เอา style: FilledButton.styleFrom(...) ที่เคยเซ็ตซ้ำเองตรงนี้ออก เพราะ
-                // app_theme.dart ตั้งค่ากลางให้ทุกปุ่มในแอปแล้ว เหมือนกับใน
-                // memory_game_screen.dart — ปุ่ม "ปิด" ของทั้งสองโมดูลจะหน้าตาเหมือนกัน
-                // เป๊ะโดยไม่ต้องก็อปสไตล์มาวางซ้ำ (spec 1.3)
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('ปิด'),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    builder:
+        (dialogContext) => GameResultDialog(
+          stars: stars,
+          score: score,
+          detail: 'ทำกิจกรรมสำเร็จแล้ว!',
+          onClose: () => Navigator.of(dialogContext).pop(),
         ),
-      ),
-    );
-  }
+  );
 }

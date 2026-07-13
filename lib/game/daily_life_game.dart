@@ -342,12 +342,12 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     _hintArrow = null;
   }
 
-  /// คิดคะแนนจากจำนวนครั้งที่วางผิด (spec 1.2).
-  /// ถูกทุกครั้ง=10, ผิด1=8, ผิด2=6, ผิด≥3=4.
+  /// คะแนนเชิงบวก (feedback ครู 2026-07-13): ผิดได้ถึง 6 ครั้งยังเต็ม 10 (3 ดาว)
+  /// จากนั้นค่อยลด — ผิด 7-8=8(2ดาว), 9-11=6(1ดาว), ≥12=4(0ดาว)
   int get score {
-    if (mistakeCount == 0) return 10;
-    if (mistakeCount == 1) return 8;
-    if (mistakeCount == 2) return 6;
+    if (mistakeCount <= 6) return 10;
+    if (mistakeCount <= 8) return 8;
+    if (mistakeCount <= 11) return 6;
     return 4;
   }
 

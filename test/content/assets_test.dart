@@ -116,12 +116,13 @@ void main() {
       }
     });
 
-    test('vocabulary has 90 items and declared placeholder-safe images', () {
+    test('vocabulary has 91 items and declared placeholder-safe images', () {
       final vocabulary = _readJson('assets/vocabulary/vocabulary.json');
       final items = vocabulary['items'] as List<dynamic>;
 
-      // คลังคำจริงของทีม: 6 หมวด × 15 คำ (จาก zip "NSC คำศัพท์ + ภาพ")
-      expect(items.length, 90);
+      // คลังคำจริงของทีม: เดิม 6 หมวด × 15 = 90; หมวดอาหารปรับ (ลบ สุกี้/ส้มตำ/ผัดไทย
+      // เพิ่ม ซูชิ/ไข่ต้ม/หมูปิ้ง/บะหมี่) → 16 คำ รวมทั้งหมด 91 (feedback ครู 2026-07-13)
+      expect(items.length, 91);
       for (final rawItem in items) {
         final item = rawItem as Map<String, dynamic>;
         _expectImageAvailableOrPlaceholder(
