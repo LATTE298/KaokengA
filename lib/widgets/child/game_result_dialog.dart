@@ -24,6 +24,7 @@ class GameResultDialog extends ConsumerStatefulWidget {
     required this.score,
     required this.detail,
     required this.onClose,
+    this.onPlayAgain,
   });
 
   final int stars;
@@ -32,6 +33,9 @@ class GameResultDialog extends ConsumerStatefulWidget {
   /// บรรทัดรายละเอียดใต้คะแนน เช่น "จับคู่ครบ 4 คู่" / "ตอบครบ 5 ข้อ"
   final String detail;
   final VoidCallback onClose;
+
+  /// ไม่ null = โชว์ปุ่ม "เล่นอีกครั้ง" คู่กับ "ปิด" (เล่นด่านเดิมใหม่)
+  final VoidCallback? onPlayAgain;
 
   @override
   ConsumerState<GameResultDialog> createState() => _GameResultDialogState();
@@ -168,13 +172,36 @@ class _GameResultDialogState extends ConsumerState<GameResultDialog>
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: kSpace5),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: widget.onClose,
-                    child: const Text('ปิด'),
+                if (widget.onPlayAgain == null)
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: widget.onClose,
+                      child: const Text('ปิด'),
+                    ),
+                  )
+                else
+                  // มีเล่นอีกครั้ง: "ปิด" (รอง) ซ้าย + "เล่นอีกครั้ง" (เด่น) ขวา
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: widget.onClose,
+                          child: const Text('ปิด'),
+                        ),
+                      ),
+                      const SizedBox(width: kSpace3),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: widget.onPlayAgain,
+                          child: const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('เล่นอีกครั้ง'),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
               ],
             ),
           ),

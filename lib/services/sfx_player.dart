@@ -18,6 +18,9 @@ const String kSfxWrong = 'assets/sfx/wrong.mp3';
 /// วางไฟล์จริงทับชื่อเดิมได้เลย (ยังไม่มีไฟล์ = เงียบ best-effort ไม่พัง)
 const String kSfxAchievement = 'assets/sfx/achievement.mp3';
 
+/// path เสียงฉลอง "จบด่าน" (Kaokeng_congrat) — เล่นตอน popup สรุปผลเด้งขึ้นทุกเกม
+const String kSfxCongrat = 'assets/sfx/congrat.mp3';
+
 /// path เสียงคลิกปุ่ม (asset จริงจากทีม) — เล่นผ่าน [playUiClick] ที่ PressableChildCard เรียก
 const String kSfxClick = 'assets/sfx/click.mp3';
 

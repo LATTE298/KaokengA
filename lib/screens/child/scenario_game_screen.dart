@@ -73,6 +73,7 @@ class ScenarioGameScreen extends ConsumerWidget {
             sfx: ref.watch(sfxPlayerProvider),
             reduceMotion: reduceMotion,
             onComplete: (dragPath, score, stars) async {
+              // เสียงฉลองจบด่าน (congrat) เล่นในเกม พร้อม confetti (daily_life_game)
               ref
                   .read(sessionRecorderProvider)
                   .recordDailyLifeCompleted(
@@ -85,10 +86,30 @@ class ScenarioGameScreen extends ConsumerWidget {
                     ),
                   );
               awardGameResult(ref, module: kModuleDailyLife, stars: stars);
-              if (context.mounted) {
-                await _showResultDialog(context, score, stars);
-              }
-              if (context.mounted && context.canPop()) context.pop();
+              if (!context.mounted) return;
+              await showDialog<void>(
+                context: context,
+                barrierDismissible: false,
+                builder:
+                    (dialogCtx) => GameResultDialog(
+                      stars: stars,
+                      score: score,
+                      detail: 'ทำกิจกรรมสำเร็จแล้ว!',
+                      onClose: () {
+                        final router = GoRouter.of(context);
+                        Navigator.of(dialogCtx).pop();
+                        if (router.canPop()) router.pop();
+                      },
+                      // เล่นอีกครั้ง = pop หน้าเกมเดิม แล้ว push เส้นทางเดิมใหม่ (สุ่ม target ใหม่)
+                      onPlayAgain: () {
+                        final router = GoRouter.of(context);
+                        final loc = GoRouterState.of(context).uri.toString();
+                        Navigator.of(dialogCtx).pop();
+                        router.pop();
+                        router.push(loc);
+                      },
+                    ),
+              );
             },
           );
 
@@ -273,20 +294,3 @@ class _WantedChip extends StatelessWidget {
   }
 }
 
-Future<void> _showResultDialog(
-  BuildContext context,
-  int score,
-  int stars,
-) async {
-  await showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder:
-        (dialogContext) => GameResultDialog(
-          stars: stars,
-          score: score,
-          detail: 'ทำกิจกรรมสำเร็จแล้ว!',
-          onClose: () => Navigator.of(dialogContext).pop(),
-        ),
-  );
-}

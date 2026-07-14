@@ -164,6 +164,8 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
   }
 
   Future<void> _onComplete() async {
+    // เสียงฉลองจบด่าน (Kaokeng_congrat) — เล่นทันทีที่จับคู่ครบ ก่อนหน่วง 1.2 วิ + popup
+    ref.read(sfxPlayerProvider).play(kSfxCongrat);
     ref.read(ttsServiceProvider).speak(kTtsMemoryComplete);
 
     ref
@@ -194,15 +196,23 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
       context: context,
       barrierDismissible: false,
       builder:
-          (context) => GameResultDialog(
+          (dialogCtx) => GameResultDialog(
             stars: stars,
             score: score,
             detail: 'จับคู่ครบ ${_controller.pairCount} คู่ เก่งมาก!',
             onClose: () {
-              Navigator.of(context).pop(); // ปิด dialog
-              if (context.mounted && context.canPop()) {
-                context.pop(); // กลับหน้าหลัก
-              }
+              final router = GoRouter.of(context);
+              Navigator.of(dialogCtx).pop(); // ปิด dialog
+              if (router.canPop()) router.pop(); // กลับหน้าหลัก
+            },
+            // เล่นอีกครั้ง = pop หน้าเกมเดิม แล้ว push เส้นทางเดิมใหม่ (เกมรอบใหม่/สุ่มใหม่).
+            // เก็บ router (object คงอยู่แม้ context หน้าเกมถูก pop) ก่อนปิด dialog
+            onPlayAgain: () {
+              final router = GoRouter.of(context);
+              final loc = GoRouterState.of(context).uri.toString();
+              Navigator.of(dialogCtx).pop();
+              router.pop();
+              router.push(loc);
             },
           ),
     );

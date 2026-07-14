@@ -377,6 +377,8 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
             kTtsCelebrations.length];
     await tts.speak(celebration);
 
+    // เสียงฉลองจบด่าน (Kaokeng_congrat) — เล่นพร้อมเอฟเฟกต์ confetti วงกลมฟ้า-เหลือง
+    sfx.play(kSfxCongrat);
     await add(SuccessOverlayComponent(gameSize: size));
 
     await Future<void>.delayed(const Duration(milliseconds: 2500));

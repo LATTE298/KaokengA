@@ -159,6 +159,8 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
     });
 
     if (result.completed) {
+      // เสียงฉลองจบด่าน (Kaokeng_congrat) — เล่นทันทีที่สำเร็จ ก่อนหน่วง 1.2 วิ + popup
+      ref.read(sfxPlayerProvider).play(kSfxCongrat);
       ref.read(ttsServiceProvider).speak(kTtsQuizComplete);
       await ref
           .read(sessionRecorderProvider)
@@ -194,13 +196,22 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
       context: context,
       barrierDismissible: false,
       builder:
-          (context) => GameResultDialog(
+          (dialogCtx) => GameResultDialog(
             stars: _controller.starRating,
             score: _controller.score,
             detail: 'ตอบครบ ${_controller.totalQuestions} ข้อ',
             onClose: () {
-              Navigator.of(context).pop();
-              if (context.mounted && context.canPop()) context.pop();
+              final router = GoRouter.of(context);
+              Navigator.of(dialogCtx).pop();
+              if (router.canPop()) router.pop();
+            },
+            // เล่นอีกครั้ง = pop หน้าเกมเดิม แล้ว push เส้นทางเดิมใหม่ (โจทย์สุ่มใหม่)
+            onPlayAgain: () {
+              final router = GoRouter.of(context);
+              final loc = GoRouterState.of(context).uri.toString();
+              Navigator.of(dialogCtx).pop();
+              router.pop();
+              router.push(loc);
             },
           ),
     );
