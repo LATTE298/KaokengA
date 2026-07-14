@@ -14,6 +14,10 @@ const String kSfxRight = 'assets/sfx/right.mp3';
 /// **ยกเว้นเกมจับคู่ภาพ** ที่ผิดบ่อยโดยธรรมชาติ (กันเด็กกดดัน — ใส่แค่เสียงถูก)
 const String kSfxWrong = 'assets/sfx/wrong.mp3';
 
+/// path เสียง "ปลดล็อก Achievement/สติกเกอร์" (Kaokeng Achievement) — เล่นตอน toast เด้ง
+/// วางไฟล์จริงทับชื่อเดิมได้เลย (ยังไม่มีไฟล์ = เงียบ best-effort ไม่พัง)
+const String kSfxAchievement = 'assets/sfx/achievement.mp3';
+
 /// path เสียงคลิกปุ่ม (asset จริงจากทีม) — เล่นผ่าน [playUiClick] ที่ PressableChildCard เรียก
 const String kSfxClick = 'assets/sfx/click.mp3';
 

@@ -121,4 +121,49 @@ void main() {
       expect(medalCurrentValue(_medal('streak_3'), s), 5);
     });
   });
+
+  group('newlyUnlocked (before → after)', () {
+    test('ไม่มีอะไรเปลี่ยน = ว่างเปล่า', () {
+      final s = _stats(totalStars: 5, gamesCompleted: 2);
+      final r = newlyUnlocked(before: s, after: s);
+      expect(r.stickers, isEmpty);
+      expect(r.medals, isEmpty);
+    });
+
+    test('ข้ามเส้นสติกเกอร์ = ได้เฉพาะใบใหม่ (ตามลำดับ)', () {
+      // 5 → 12 ดาว: ปลดสติกเกอร์ใบแรก 1 ใบ
+      final r = newlyUnlocked(
+        before: _stats(totalStars: 5),
+        after: _stats(totalStars: 12),
+      );
+      expect(r.stickers.map((s) => s.id), [kStickers.first.id]);
+
+      // 5 → 25 ดาว: ปลด 2 ใบแรก
+      final r2 = newlyUnlocked(
+        before: _stats(totalStars: 5),
+        after: _stats(totalStars: 25),
+      );
+      expect(r2.stickers.length, 2);
+    });
+
+    test('จบเกมได้ทั้งสติกเกอร์ + เหรียญใหม่พร้อมกัน', () {
+      final r = newlyUnlocked(
+        before: _stats(totalStars: 5, gamesCompleted: 0),
+        after: _stats(totalStars: 12, gamesCompleted: 1),
+      );
+      expect(r.stickers.map((s) => s.id), [kStickers.first.id]);
+      // เกมแรก + ดาวครบ 10 → 2 เหรียญใหม่
+      final ids = r.medals.map((m) => m.id).toSet();
+      expect(ids, containsAll(<String>['first_game', 'stars_10']));
+    });
+
+    test('เหรียญที่ปลดไปแล้วไม่ถูกรายงานซ้ำ', () {
+      final r = newlyUnlocked(
+        before: _stats(gamesCompleted: 1), // first_game ปลดแล้ว
+        after: _stats(gamesCompleted: 2), // games_10 ยังไม่ถึง
+      );
+      expect(r.medals, isEmpty);
+      expect(r.stickers, isEmpty);
+    });
+  });
 }

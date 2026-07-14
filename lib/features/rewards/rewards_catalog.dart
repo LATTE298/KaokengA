@@ -209,3 +209,28 @@ bool medalUnlocked(MedalDef m, RewardsStats s) =>
 /// จำนวนเหรียญที่ปลดล็อกแล้วทั้งหมด
 int medalsUnlockedCount(RewardsStats s) =>
     kMedals.where((m) => medalUnlocked(m, s)).length;
+
+/// สิ่งที่ "เพิ่งปลดล็อก" เมื่อสถิติเปลี่ยนจาก [before] → [after] (เช่นหลังจบเกม 1 รอบ) —
+/// ใช้ trigger การเด้ง toast แสดงความสำเร็จ. pure → test ได้. สติกเกอร์เรียงตามลำดับใบที่ปลด,
+/// เหรียญเรียงตามลำดับใน kMedals
+({List<StickerDef> stickers, List<MedalDef> medals}) newlyUnlocked({
+  required RewardsStats before,
+  required RewardsStats after,
+}) {
+  final beforeStickers = stickersUnlockedCount(before.totalStars);
+  final afterStickers = stickersUnlockedCount(after.totalStars);
+  final stickers = [
+    for (var i = beforeStickers; i < afterStickers; i++) kStickers[i],
+  ];
+
+  final beforeMedalIds = {
+    for (final m in kMedals)
+      if (medalUnlocked(m, before)) m.id,
+  };
+  final medals = [
+    for (final m in kMedals)
+      if (medalUnlocked(m, after) && !beforeMedalIds.contains(m.id)) m,
+  ];
+
+  return (stickers: stickers, medals: medals);
+}

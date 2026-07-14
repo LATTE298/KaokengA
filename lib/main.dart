@@ -17,6 +17,7 @@ import 'services/auth_service.dart';
 import 'services/family_card_repository.dart';
 import 'services/sfx_player.dart';
 import 'theme/app_theme.dart';
+import 'widgets/achievement_overlay.dart';
 import 'widgets/bgm_gate.dart';
 import 'widgets/usage_timer_gate.dart';
 
@@ -109,7 +110,9 @@ class _DailyLifeAppState extends ConsumerState<DailyLifeApp> {
       // gate ไม่ถูกทำลายเมื่อเปลี่ยนเส้นทาง (route)
       builder:
           (context, child) => BgmGate(
-            child: UsageTimerGate(child: child ?? const SizedBox.shrink()),
+            child: AchievementOverlay(
+              child: UsageTimerGate(child: child ?? const SizedBox.shrink()),
+            ),
           ),
     );
   }

@@ -7,7 +7,6 @@ import '../../features/sessions/session_recorder.dart';
 import '../../l10n/tts_strings_th.dart';
 import '../../models/app_types.dart';
 import '../../models/family_card.dart';
-import '../../providers/child_profile_provider.dart';
 import '../../providers/rewards_provider.dart';
 import '../../providers/family_provider.dart';
 import '../../providers/session_provider.dart';
@@ -189,8 +188,7 @@ class _FamilyBoardState extends ConsumerState<_FamilyBoard> {
   }
 
   void _showResultDialog() {
-    ref.read(totalStarsProvider.notifier).award(_controller.starRating);
-    ref.read(rewardsStatsProvider.notifier).recordCompletion(kModuleFamily);
+    awardGameResult(ref, module: kModuleFamily, stars: _controller.starRating);
     HapticService.success();
     showDialog<void>(
       context: context,

@@ -7,7 +7,6 @@ import '../../features/vocab_quiz/vocab_quiz_controller.dart';
 import '../../l10n/tts_strings_th.dart';
 import '../../models/app_types.dart';
 import '../../models/vocabulary_item.dart';
-import '../../providers/child_profile_provider.dart';
 import '../../providers/rewards_provider.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
@@ -335,8 +334,7 @@ class _QuizBoardState extends ConsumerState<_QuizBoard> {
   }
 
   void _showResultDialog() {
-    ref.read(totalStarsProvider.notifier).award(_controller.starRating);
-    ref.read(rewardsStatsProvider.notifier).recordCompletion(kModuleVocab);
+    awardGameResult(ref, module: kModuleVocab, stars: _controller.starRating);
     HapticService.success();
     showDialog<void>(
       context: context,
