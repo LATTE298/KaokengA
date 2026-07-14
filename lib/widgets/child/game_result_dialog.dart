@@ -1,15 +1,23 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/sfx_provider.dart';
+import '../../services/sfx_player.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 
+// จังหวะดาวเด้งเข้า (ค่า 0..1 ของ AnimationController) — ใช้ร่วมกันทั้งอนิเมชันภาพ
+// (_StarsRow) และการเล่นเสียง Right02 ตามดาว (_maybePlayStarSfx) ให้ภาพ+เสียงตรงจังหวะเสมอ
+const double _kStarPopBegin = 0.4; // ดาวใบแรกเริ่มหลังกล่องเด้งเสร็จ
+const double _kStarPopStagger = 0.18; // เว้นจังหวะระหว่างดาวแต่ละดวง
+
 // Popup สรุปผลตอนจบเกม (ดาว 0-3 ดวง + คะแนน + บรรทัดรายละเอียด + ปุ่มปิด) พร้อม
 // อนิเมชันเด้งเข้า + ดาวป๊อปทีละดวง (2026-07-13). ใช้ร่วมกันทุกเกม (จับคู่ภาพ/คำศัพท์/
 // ครอบครัว/ชีวิตประจำวัน) — สไตล์เดียวกันเพื่อให้เด็กจำรูปแบบได้ (สำคัญกับกลุ่มเป้าหมาย)
-class GameResultDialog extends StatefulWidget {
+class GameResultDialog extends ConsumerStatefulWidget {
   const GameResultDialog({
     super.key,
     required this.stars,
@@ -26,15 +34,29 @@ class GameResultDialog extends StatefulWidget {
   final VoidCallback onClose;
 
   @override
-  State<GameResultDialog> createState() => _GameResultDialogState();
+  ConsumerState<GameResultDialog> createState() => _GameResultDialogState();
 }
 
-class _GameResultDialogState extends State<GameResultDialog>
+class _GameResultDialogState extends ConsumerState<GameResultDialog>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1200),
-  )..forward();
+  )
+    ..addListener(_maybePlayStarSfx)
+    ..forward();
+
+  // เล่นเสียง Right02 (kSfxRight) ทีละครั้งตามจังหวะดาวที่ "เริ่มเด้งขึ้น" — เฉพาะดาวที่ได้จริง.
+  // จังหวะ begin ของดาวใบที่ i = 0.4 + i*0.18 ต้องตรงกับ _StarsRow ด้านล่าง (แหล่งเดียวกัน)
+  int _starSfxPlayed = 0;
+  void _maybePlayStarSfx() {
+    while (_starSfxPlayed < widget.stars) {
+      final begin = _kStarPopBegin + _starSfxPlayed * _kStarPopStagger;
+      if (_c.value < begin) break;
+      ref.read(sfxPlayerProvider).play(kSfxRight);
+      _starSfxPlayed++;
+    }
+  }
 
   @override
   void dispose() {
@@ -175,8 +197,8 @@ class _StarsRow extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: List.generate(3, (i) {
         final filled = i < stars;
-        // ดาวเริ่มโผล่หลังกล่องเด้งเสร็จ (0.4) ไล่ทีละ 0.18
-        final begin = 0.4 + i * 0.18;
+        // ดาวเริ่มโผล่หลังกล่องเด้งเสร็จ ไล่ทีละใบ (ค่าเดียวกับที่ใช้ trigger เสียง)
+        final begin = _kStarPopBegin + i * _kStarPopStagger;
         final t = seg(begin, begin + 0.4, Curves.elasticOut);
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: kSpace1),
