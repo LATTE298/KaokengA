@@ -82,20 +82,9 @@ class ModeSelectScreen extends ConsumerWidget {
       context.push('$kRouteDashboard?view=progress');
     }
 
-    void comingSoon(String label) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: kBlueDark,
-            duration: const Duration(seconds: 2),
-            content: Text(
-              '$label กำลังจะมาเร็ว ๆ นี้นะ',
-              style: kTextSm.copyWith(color: kWarmWhite),
-            ),
-          ),
-        );
+    // เมนู "รางวัล" (ปุ่ม 🏆 ขวาบน) → หน้าสมุดสะสมสติกเกอร์ + เหรียญรางวัล
+    void openRewards() {
+      context.push(kRouteRewards);
     }
 
     const modes = <_ModeData>[
@@ -164,7 +153,7 @@ class ModeSelectScreen extends ConsumerWidget {
                   children: [
                     _TopBar(
                       streakDays: ref.watch(streakProvider),
-                      onRewards: () => comingSoon('รางวัล'),
+                      onRewards: openRewards,
                       onSettings:
                           () => showDialog<void>(
                             context: context,

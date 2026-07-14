@@ -14,6 +14,7 @@ const String kRouteModuleC = '/module-c';
 const String kRouteSoundBoard = '/module-c/sound-board';
 const String kRouteVocabQuiz = '/module-c/quiz';
 const String kRouteFamilyGame = '/family-game';
+const String kRouteRewards = '/rewards'; // สมุดสะสมสติกเกอร์ + เหรียญรางวัล (ฝั่งเด็ก)
 
 // Parent routes
 const String kRouteParentGate = '/parent-gate';

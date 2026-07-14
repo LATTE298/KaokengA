@@ -11,6 +11,7 @@ import '../../l10n/tts_strings_th.dart';
 import '../../models/app_types.dart';
 import '../../models/memory_pack.dart';
 import '../../providers/child_profile_provider.dart';
+import '../../providers/rewards_provider.dart';
 import '../../providers/content_providers.dart';
 import '../../providers/session_provider.dart';
 import '../../providers/sfx_provider.dart';
@@ -188,6 +189,7 @@ class _MemoryBoardState extends ConsumerState<_MemoryBoard> {
     final score = _controller.score;
 
     ref.read(totalStarsProvider.notifier).award(stars);
+    ref.read(rewardsStatsProvider.notifier).recordCompletion(kModuleMemory);
     HapticService.success();
 
     showDialog<void>(

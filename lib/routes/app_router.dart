@@ -8,6 +8,7 @@ import '../screens/child/mode_select_screen.dart';
 import '../screens/child/module_a_screen.dart';
 import '../screens/child/module_b_screen.dart';
 import '../screens/child/module_c_screen.dart';
+import '../screens/child/rewards_screen.dart';
 import '../screens/child/scenario_game_screen.dart';
 import '../screens/child/sound_board_screen.dart';
 import '../screens/child/splash_screen.dart';
@@ -139,6 +140,10 @@ GoRouter buildAppRouter() {
       GoRoute(
         path: kRouteFamilyGame,
         pageBuilder: (_, state) => _fadePage(state, const FamilyGameScreen()),
+      ),
+      GoRoute(
+        path: kRouteRewards,
+        pageBuilder: (_, state) => _fadePage(state, const RewardsScreen()),
       ),
       GoRoute(
         path: kRouteParentGate,
