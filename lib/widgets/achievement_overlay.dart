@@ -126,88 +126,100 @@ class _AchievementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: kSpace3),
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 460),
-          padding: const EdgeInsets.fromLTRB(kSpace3, kSpace2, kSpace5, kSpace2),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [kWarmWhite, kYellowLight],
+    // ต้องครอบ Material — toast ลอยอยู่เหนือ Scaffold ของแต่ละหน้า จึง "ไม่มี Material
+    // ancestor" ถ้าไม่ครอบ Text ทุกตัว (emoji/title/subtitle) จะถูกวาดด้วยสไตล์ error ของ
+    // Flutter = ขีดเส้นใต้เหลืองคู่ใต้ข้อความ. type.transparency = ให้ Material semantics
+    // โดยไม่วาดพื้นหลังทับการ์ดที่จัดสไตล์เอง
+    return Material(
+      type: MaterialType.transparency,
+      child: Padding(
+        padding: const EdgeInsets.only(top: kSpace3),
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 460),
+            padding: const EdgeInsets.fromLTRB(
+              kSpace3,
+              kSpace2,
+              kSpace5,
+              kSpace2,
             ),
-            borderRadius: kRadiusFull,
-            border: Border.all(color: kYellowPrimary, width: 2),
-            boxShadow: const [kShadowLg],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // ตราวงกลมทองพร้อม emoji ของรางวัล + ประกายรอบ
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: kYellowPrimary,
-                  boxShadow: [
-                    BoxShadow(
-                      color: kYellowPrimary.withValues(alpha: 0.55),
-                      blurRadius: 14,
-                      spreadRadius: 1,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [kWarmWhite, kYellowLight],
+              ),
+              borderRadius: kRadiusFull,
+              border: Border.all(color: kYellowPrimary, width: 2),
+              boxShadow: const [kShadowLg],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ตราวงกลมทองพร้อม emoji ของรางวัล + ประกายรอบ
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: kYellowPrimary,
+                    boxShadow: [
+                      BoxShadow(
+                        color: kYellowPrimary.withValues(alpha: 0.55),
+                        blurRadius: 14,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      notice.emoji,
+                      style: const TextStyle(fontSize: 26),
                     ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    notice.emoji,
-                    style: const TextStyle(fontSize: 26),
                   ),
                 ),
-              ),
-              const SizedBox(width: kSpace3),
-              Flexible(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.emoji_events_rounded,
-                          color: kYellowDark,
-                          size: 15,
-                        ),
-                        const SizedBox(width: kSpace1),
-                        Flexible(
-                          child: Text(
-                            notice.title,
-                            style: kTextXs.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: kYellowDark,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                const SizedBox(width: kSpace3),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.emoji_events_rounded,
+                            color: kYellowDark,
+                            size: 15,
                           ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      notice.subtitle,
-                      style: kTextMd.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: kTextPrimary,
+                          const SizedBox(width: kSpace1),
+                          Flexible(
+                            child: Text(
+                              notice.title,
+                              style: kTextXs.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: kYellowDark,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      Text(
+                        notice.subtitle,
+                        style: kTextMd.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: kTextPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
