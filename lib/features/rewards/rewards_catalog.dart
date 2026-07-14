@@ -7,11 +7,20 @@ import 'package:flutter/foundation.dart';
 // ปลดล็อกอัตโนมัติเมื่อถึงหลักไมล์ เดาได้ล่วงหน้า เห็นความคืบหน้าเป็นรูปธรรม
 
 // ---------------------------------------------------------------------------
-// A. สมุดสะสมสติกเกอร์ — ดาวสะสมรวมปลดล็อกทีละใบ (ทุก [kStarsPerSticker] ดาว = 1 ใบ)
+// A. สมุดสะสมสติกเกอร์ — ดาวสะสมรวมปลดล็อกทีละใบตามเกณฑ์ขั้นบันได (ดู [stickerThreshold])
 // ---------------------------------------------------------------------------
 
-/// จำนวนดาวสะสมต่อสติกเกอร์ 1 ใบ
-const int kStarsPerSticker = 10;
+/// เกณฑ์ดาวสะสมของสติกเกอร์ใบที่ 1..6 (index 0..5). ใบที่ 7 เป็นต้นไปเพิ่มทีละ [_kStickerStep]
+/// (ผู้ใช้กำหนด 2026-07-14: 10, 25, 40, 70, 100, 130 แล้ว +30 ไปเรื่อยๆ จนครบ)
+const List<int> _kStickerThresholds = [10, 25, 40, 70, 100, 130];
+const int _kStickerStep = 30;
+
+/// ดาวสะสมที่ต้องมีเพื่อปลดสติกเกอร์ [index] (0-based). index >= 6 = 130 + (index-5)*30
+int stickerThreshold(int index) {
+  if (index < _kStickerThresholds.length) return _kStickerThresholds[index];
+  final extra = index - (_kStickerThresholds.length - 1);
+  return _kStickerThresholds.last + extra * _kStickerStep;
+}
 
 @immutable
 class StickerDef {
@@ -53,19 +62,34 @@ const List<StickerDef> kStickers = [
   StickerDef(id: 'gift', emoji: '🎁', name: 'กล่องของขวัญ'),
 ];
 
-/// จำนวนสติกเกอร์ที่ปลดล็อกแล้วจากดาวสะสม — clamp ไม่ให้เกินจำนวนใบทั้งหมด
+/// จำนวนสติกเกอร์ที่ปลดล็อกแล้วจากดาวสะสม (clamp ไม่ให้เกินจำนวนใบทั้งหมด)
 int stickersUnlockedCount(int totalStars) {
   if (totalStars <= 0) return 0;
-  final n = totalStars ~/ kStarsPerSticker;
-  return n > kStickers.length ? kStickers.length : n;
+  var n = 0;
+  while (n < kStickers.length && stickerThreshold(n) <= totalStars) {
+    n++;
+  }
+  return n;
 }
 
 /// ดาวที่ยังต้องเก็บอีกเพื่อปลดใบถัดไป — 0 เมื่อครบทุกใบแล้ว
 int starsToNextSticker(int totalStars) {
   final unlocked = stickersUnlockedCount(totalStars);
   if (unlocked >= kStickers.length) return 0;
-  final nextThreshold = (unlocked + 1) * kStarsPerSticker;
-  return nextThreshold - (totalStars < 0 ? 0 : totalStars);
+  final s = totalStars < 0 ? 0 : totalStars;
+  return stickerThreshold(unlocked) - s;
+}
+
+/// ความคืบหน้า 0..1 ภายในช่วงปัจจุบันสู่สติกเกอร์ใบถัดไป (1.0 = ครบทุกใบ) — สำหรับแถบ progress
+double stickerProgress(int totalStars) {
+  final unlocked = stickersUnlockedCount(totalStars);
+  if (unlocked >= kStickers.length) return 1.0;
+  final prev = unlocked == 0 ? 0 : stickerThreshold(unlocked - 1);
+  final next = stickerThreshold(unlocked);
+  final seg = next - prev;
+  if (seg <= 0) return 1.0;
+  final s = totalStars < prev ? prev : totalStars;
+  return ((s - prev) / seg).clamp(0.0, 1.0);
 }
 
 // ---------------------------------------------------------------------------

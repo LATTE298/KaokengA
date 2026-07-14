@@ -28,40 +28,76 @@ void main() {
     });
   });
 
+  group('สติกเกอร์: stickerThreshold (เกณฑ์ขั้นบันได)', () {
+    test('ใบที่ 1..6 = 10/25/40/70/100/130', () {
+      expect(
+        [for (var i = 0; i < 6; i++) stickerThreshold(i)],
+        [10, 25, 40, 70, 100, 130],
+      );
+    });
+
+    test('ใบที่ 7 เป็นต้นไป +30 ต่อใบ', () {
+      expect(stickerThreshold(6), 160);
+      expect(stickerThreshold(7), 190);
+      expect(stickerThreshold(8), 220);
+    });
+  });
+
   group('สติกเกอร์: stickersUnlockedCount', () {
     test('ดาว 0/ติดลบ → 0 ใบ', () {
       expect(stickersUnlockedCount(0), 0);
       expect(stickersUnlockedCount(-5), 0);
     });
 
-    test('ปลดทีละใบทุก kStarsPerSticker ดาว', () {
-      expect(stickersUnlockedCount(kStarsPerSticker - 1), 0);
-      expect(stickersUnlockedCount(kStarsPerSticker), 1);
-      expect(stickersUnlockedCount(kStarsPerSticker * 2 + 3), 2);
+    test('ปลดตามเกณฑ์ (>= threshold ของใบนั้น)', () {
+      expect(stickersUnlockedCount(9), 0);
+      expect(stickersUnlockedCount(10), 1);
+      expect(stickersUnlockedCount(24), 1);
+      expect(stickersUnlockedCount(25), 2);
+      expect(stickersUnlockedCount(40), 3);
+      expect(stickersUnlockedCount(69), 3);
+      expect(stickersUnlockedCount(70), 4);
+      expect(stickersUnlockedCount(100), 5);
+      expect(stickersUnlockedCount(130), 6);
+      expect(stickersUnlockedCount(159), 6);
+      expect(stickersUnlockedCount(160), 7);
     });
 
     test('ไม่เกินจำนวนใบทั้งหมด (clamp)', () {
-      expect(
-        stickersUnlockedCount(kStarsPerSticker * (kStickers.length + 50)),
-        kStickers.length,
-      );
+      expect(stickersUnlockedCount(100000), kStickers.length);
     });
   });
 
   group('สติกเกอร์: starsToNextSticker', () {
-    test('เริ่มต้นต้องการครบ 1 ช่วง', () {
-      expect(starsToNextSticker(0), kStarsPerSticker);
+    test('เริ่มต้น → ถึงเกณฑ์ใบแรก (10)', () {
+      expect(starsToNextSticker(0), 10);
+      expect(starsToNextSticker(7), 3);
     });
 
-    test('เหลือระยะที่ถูกต้องระหว่างช่วง', () {
-      expect(starsToNextSticker(3), kStarsPerSticker - 3);
-      expect(starsToNextSticker(kStarsPerSticker), kStarsPerSticker);
-      expect(starsToNextSticker(kStarsPerSticker + 4), kStarsPerSticker - 4);
+    test('ระหว่างช่วง = เกณฑ์ถัดไป - ดาวปัจจุบัน', () {
+      expect(starsToNextSticker(10), 15); // ถัดไป 25
+      expect(starsToNextSticker(40), 30); // ถัดไป 70
+      expect(starsToNextSticker(130), 30); // ถัดไป 160
     });
 
     test('ครบทุกใบแล้ว → 0 (ไม่มีใบถัดไป)', () {
-      expect(starsToNextSticker(kStarsPerSticker * kStickers.length), 0);
-      expect(starsToNextSticker(kStarsPerSticker * kStickers.length + 99), 0);
+      expect(starsToNextSticker(100000), 0);
+    });
+  });
+
+  group('สติกเกอร์: stickerProgress', () {
+    test('กลางช่วงแรก 0..10', () {
+      expect(stickerProgress(0), 0.0);
+      expect(stickerProgress(5), closeTo(0.5, 1e-9));
+    });
+
+    test('เพิ่งปลดใบ → เริ่มนับช่วงถัดไปที่ 0', () {
+      expect(stickerProgress(10), closeTo(0.0, 1e-9)); // เข้าใบ 2 (10..25)
+      expect(stickerProgress(55), closeTo(0.5, 1e-9)); // ใบ 4 ช่วง 40..70
+    });
+
+    test('ครบทุกใบ = 1.0', () {
+      expect(stickerProgress(100000), 1.0);
     });
   });
 

@@ -59,7 +59,7 @@ void main() {
     expect(find.text('สมุดสะสมสติกเกอร์'), findsOneWidget);
     expect(find.text('เหรียญรางวัล'), findsOneWidget);
     // ยังไม่ได้ดาว → ชวนเก็บอีก 1 ช่วง + เหรียญแรกยังล็อกโชว์ความคืบหน้า 0/1
-    expect(find.text('อีก $kStarsPerSticker ดาว ได้สติกเกอร์ใบใหม่!'),
+    expect(find.text('อีก ${stickerThreshold(0)} ดาว ได้สติกเกอร์ใบใหม่!'),
         findsOneWidget);
     expect(find.text('เล่นเกมแรก'), findsOneWidget);
   });

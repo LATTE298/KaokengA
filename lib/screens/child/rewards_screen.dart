@@ -14,7 +14,7 @@ import '../../widgets/fade_slide_in.dart';
 import '../../widgets/orientation_lock.dart';
 
 // หน้า "รางวัลของฉัน" (เข้าจากปุ่ม 🏆 มุมขวาบนหน้าเลือกเล่น) — 2 ส่วน:
-//   A. สมุดสะสมสติกเกอร์ — ดาวสะสมปลดล็อกทีละใบ (kStarsPerSticker ดาว/ใบ)
+//   A. สมุดสะสมสติกเกอร์ — ดาวสะสมปลดล็อกทีละใบ (เกณฑ์ขั้นบันได 10/25/40/70/100/130 แล้ว +30)
 //   B. เหรียญความสำเร็จ — ปลดล็อกอัตโนมัติเมื่อถึงหลักไมล์ (ดาว/จำนวนครั้ง/ครบทุกเกม/สตรีค)
 // ทั้งคู่ "สะสมอย่างเดียว ไม่มีวันเสีย" (ดู rewards_catalog.dart) เหมาะกับกลุ่มเป้าหมาย
 class RewardsScreen extends ConsumerWidget {
@@ -117,9 +117,8 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final toNext = starsToNextSticker(totalStars);
     final allStickers = stickersUnlocked >= kStickers.length;
-    // ความคืบหน้าภายในช่วง 10 ดาวปัจจุบัน (0..1) — เต็มแถบเมื่อสะสมครบทุกใบ
-    final progress =
-        allStickers ? 1.0 : (kStarsPerSticker - toNext) / kStarsPerSticker;
+    // ความคืบหน้าภายในช่วงปัจจุบันสู่ใบถัดไป (0..1) — เต็มแถบเมื่อสะสมครบทุกใบ (เกณฑ์ขั้นบันได)
+    final progress = stickerProgress(totalStars);
 
     return Padding(
       // เว้นซ้าย 72 ให้พ้นปุ่มย้อนกลับที่ลอยมุมบนซ้าย (8 + 64)
