@@ -70,11 +70,117 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    const SizedBox(height: kSpace4),
+                    const _Footer(),
                   ],
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ลิงก์ footer (Privacy / Safety / Support / Terms) — แตะเปิด dialog ข้อมูลสั้นๆ.
+// เนื้อหา (title/body) แก้/เพิ่มฉบับเต็มได้ที่ [_kFooterItems]
+const List<({String label, String title, String body})> _kFooterItems = [
+  (
+    label: 'Privacy',
+    title: 'ความเป็นส่วนตัว',
+    body:
+        'ก้าวเก่งให้ความสำคัญกับความเป็นส่วนตัว — เด็กเล่นแบบไม่ระบุตัวตน '
+        'ไม่เก็บข้อมูลส่วนบุคคลของเด็ก และข้อมูลการเล่นเก็บในเครื่องเป็นหลัก\n\n'
+        '(เพิ่มรายละเอียดนโยบายฉบับเต็มได้ภายหลัง)',
+  ),
+  (
+    label: 'Safety',
+    title: 'ความปลอดภัย',
+    body:
+        'ออกแบบสำหรับเด็กพิเศษ — มีตัวเตือนพักสายตาระหว่างเล่น '
+        'ไม่มีโฆษณา และไม่มีการซื้อในแอป',
+  ),
+  (
+    label: 'Support',
+    title: 'ติดต่อเรา',
+    body:
+        'มีคำถามหรือข้อเสนอแนะ ติดต่อทีมพัฒนาได้ที่\n'
+        '(ใส่อีเมล/ช่องทางติดต่อภายหลัง)',
+  ),
+  (
+    label: 'Terms',
+    title: 'เงื่อนไขการใช้งาน',
+    body: 'เงื่อนไขการใช้งานแอปก้าวเก่ง\n(เพิ่มเนื้อหาฉบับเต็มได้ภายหลัง)',
+  ),
+];
+
+void _showFooterInfo(BuildContext context, String title, String body) {
+  showDialog<void>(
+    context: context,
+    builder:
+        (ctx) => AlertDialog(
+          backgroundColor: kWarmWhite,
+          shape: RoundedRectangleBorder(borderRadius: kRadiusLg),
+          title: Text(
+            title,
+            style: kTextLg.copyWith(fontWeight: FontWeight.w800),
+          ),
+          content: Text(
+            body,
+            style: kTextBase.copyWith(color: kTextSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('ปิด'),
+            ),
+          ],
+        ),
+  );
+}
+
+// แถบลิงก์ด้านล่างหน้าเริ่ม — 4 ลิงก์คั่นด้วยจุด (ตามภาพตัวอย่าง)
+class _Footer extends StatelessWidget {
+  const _Footer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        for (var i = 0; i < _kFooterItems.length; i++) ...[
+          if (i > 0)
+            Text('·', style: kTextSm.copyWith(color: kTextHint)),
+          _FooterLink(item: _kFooterItems[i]),
+        ],
+      ],
+    );
+  }
+}
+
+class _FooterLink extends StatelessWidget {
+  const _FooterLink({required this.item});
+
+  final ({String label, String title, String body}) item;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _showFooterInfo(context, item.title, item.body),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpace3,
+          vertical: kSpace1,
+        ),
+        child: Text(
+          item.label,
+          style: kTextSm.copyWith(
+            color: kTextSecondary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
