@@ -21,6 +21,9 @@ class DropZoneComponent extends PositionComponent with CollisionCallbacks {
     this.visible = true,
     this.wantedIds,
     this.swallowItems = false,
+    this.acceptCheck,
+    this.multiAccept = false,
+    this.returnItems = false,
   }) : super(position: position, size: size, priority: 1);
 
   final void Function(InteractableComponent item) onItemAccepted;
@@ -37,6 +40,16 @@ class DropZoneComponent extends PositionComponent with CollisionCallbacks {
 
   /// true = ชิ้นที่รับแล้ว "ถูกดูดหายเข้าโซน" (ทิ้งขยะลงถัง) แทนการวางค้างไว้
   final bool swallowItems;
+
+  /// เกมซื้อของ: เงื่อนไขรับชิ้น (คุมโดยเกม เช่น ยังต้องการชนิด/จำนวนนี้อยู่) —
+  /// null = ใช้เกณฑ์เดิม (target/zone_id)
+  final bool Function(InteractableComponent obj)? acceptCheck;
+
+  /// รับได้หลายชิ้นเรื่อยๆ (ไม่ล็อกโซนหลังชิ้นแรก) — เกมซื้อของ (ตะกร้าใส่ได้หลายชิ้น)
+  final bool multiAccept;
+
+  /// รับแล้วให้ชิ้น "เด้งกลับชั้น" (ลากซ้ำได้) แทนวางค้าง/ดูดหาย — เกมซื้อของ
+  final bool returnItems;
 
   bool _activated = false;
 
@@ -101,6 +114,7 @@ class DropZoneComponent extends PositionComponent with CollisionCallbacks {
   /// โซนนี้รับชิ้นนี้ไหม — โหมดเดิมรับ target, โหมด sort-all รับชิ้นของโซนตัวเอง
   /// (ถ้ามีโจทย์สุ่ม ต้องเป็นชิ้นในโจทย์ด้วย)
   bool _accepts(InteractableComponent obj) {
+    if (acceptCheck != null) return acceptCheck!(obj);
     if (zoneId == null) return obj.isTarget;
     if (obj.config.zoneId != zoneId) return false;
     return wantedIds?.contains(obj.config.id) ?? true;
@@ -108,11 +122,14 @@ class DropZoneComponent extends PositionComponent with CollisionCallbacks {
 
   void onInteractableEntered(InteractableComponent obj) {
     if (obj.settled) return;
-    // โหมดเดิมล็อกโซนหลังรับชิ้นแรก — โหมด sort-all รับต่อได้จนครบของโซนตัวเอง
-    if (zoneId == null && _activated) return;
-    if (!_accepts(obj)) return; // ชิ้นผิดโซน: ปล่อยให้เด้งกลับเอง (นับ mistake)
+    // โหมดเดิมล็อกโซนหลังรับชิ้นแรก — sort-all/ซื้อของ (multiAccept) รับต่อได้เรื่อยๆ
+    if (!multiAccept && zoneId == null && _activated) return;
+    if (!_accepts(obj)) return; // ชิ้นไม่ผ่านเงื่อนไข: ปล่อยให้เด้งกลับเอง (นับ mistake)
     _activated = true;
-    if (swallowItems) {
+    if (returnItems) {
+      // เกมซื้อของ: นับแล้วเด้งกลับชั้น (ลากซ้ำได้)
+      obj.returnToShelf();
+    } else if (swallowItems) {
       // ดูดเข้า "ปากถัง" (แถบบนของโซน) แล้วหายไป — เหมือนทิ้งขยะจริง
       obj.consumeInZone(position + Vector2(size.x / 2, size.y * 0.15));
     } else {

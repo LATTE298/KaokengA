@@ -48,9 +48,15 @@ void main() {
           hasLength(expectedZones),
           reason: summary.scenarioId,
         );
+        // โหมดซื้อของสุ่มโชว์แค่ display_count ชิ้นจาก pool — โหมดอื่นโชว์ครบทุกชิ้น
+        final expectedItems =
+            loaded.config.shopMode
+                ? (loaded.config.displayCount ??
+                    loaded.config.interactables.length)
+                : loaded.config.interactables.length;
         expect(
           game.children.whereType<InteractableComponent>(),
-          hasLength(loaded.config.interactables.length),
+          hasLength(expectedItems),
           reason: summary.scenarioId,
         );
         // PlaceholderComponent เกิดเฉพาะรูปที่ประกาศใน placeholder manifest —

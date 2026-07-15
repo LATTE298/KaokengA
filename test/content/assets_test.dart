@@ -44,7 +44,10 @@ void main() {
         final interactables = config['interactables'] as List<dynamic>;
         final zones = (config['zones'] as List<dynamic>?) ?? const [];
 
-        if (zones.isEmpty) {
+        if (config['shop_mode'] == true) {
+          // โหมดซื้อของ: สุ่มโจทย์จาก pool (ไม่มี target เดี่ยว) — ต้องมีตะกร้า (target_zone)
+          expect(config['target_zone'], isNotNull, reason: scenarioId);
+        } else if (zones.isEmpty) {
           // โหมดโจทย์ชิ้นเดียว: ต้องมี target 1 ชิ้น + target_zone
           final targets = interactables.where(
             (rawItem) => (rawItem as Map<String, dynamic>)['is_target'] == true,

@@ -974,7 +974,12 @@ mixin _$ScenarioConfig {
   bool get coverFit => throw _privateConstructorUsedError; // ชิ้นที่วางถูกโซนแล้ว "ถูกดูดหายเข้าโซน" (เช่น ทิ้งขยะลงถัง) + เสียงเอฟเฟกต์
   // — ต่างจากค่าเริ่มต้นที่ชิ้นวางค้างในโซน (เช่น ผลไม้เรียงในถ้วย)
   @JsonKey(name: 'swallow_items')
-  bool get swallowItems => throw _privateConstructorUsedError;
+  bool get swallowItems => throw _privateConstructorUsedError; // โหมดซื้อของ: สุ่มโชว์ [displayCount] ชิ้นจาก pool แล้วสั่งซื้อ 1-2 ชนิด รวม ≤4 ชิ้น
+  // (นับจำนวนต่อชนิด, ของบนชั้นลากซ้ำได้). ใช้กับ target_zone (ตะกร้า) — ดู DailyLifeGame
+  @JsonKey(name: 'shop_mode')
+  bool get shopMode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'display_count')
+  int? get displayCount => throw _privateConstructorUsedError;
 
   /// Serializes this ScenarioConfig to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1009,6 +1014,8 @@ abstract class $ScenarioConfigCopyWith<$Res> {
     @JsonKey(name: 'pick_count') int? pickCount,
     @JsonKey(name: 'cover_fit') bool coverFit,
     @JsonKey(name: 'swallow_items') bool swallowItems,
+    @JsonKey(name: 'shop_mode') bool shopMode,
+    @JsonKey(name: 'display_count') int? displayCount,
   });
 
   $TargetZoneCopyWith<$Res>? get targetZone;
@@ -1044,6 +1051,8 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
     Object? pickCount = freezed,
     Object? coverFit = null,
     Object? swallowItems = null,
+    Object? shopMode = null,
+    Object? displayCount = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -1122,6 +1131,16 @@ class _$ScenarioConfigCopyWithImpl<$Res, $Val extends ScenarioConfig>
                     ? _value.swallowItems
                     : swallowItems // ignore: cast_nullable_to_non_nullable
                         as bool,
+            shopMode:
+                null == shopMode
+                    ? _value.shopMode
+                    : shopMode // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            displayCount:
+                freezed == displayCount
+                    ? _value.displayCount
+                    : displayCount // ignore: cast_nullable_to_non_nullable
+                        as int?,
           )
           as $Val,
     );
@@ -1167,6 +1186,8 @@ abstract class _$$ScenarioConfigImplCopyWith<$Res>
     @JsonKey(name: 'pick_count') int? pickCount,
     @JsonKey(name: 'cover_fit') bool coverFit,
     @JsonKey(name: 'swallow_items') bool swallowItems,
+    @JsonKey(name: 'shop_mode') bool shopMode,
+    @JsonKey(name: 'display_count') int? displayCount,
   });
 
   @override
@@ -1202,6 +1223,8 @@ class __$$ScenarioConfigImplCopyWithImpl<$Res>
     Object? pickCount = freezed,
     Object? coverFit = null,
     Object? swallowItems = null,
+    Object? shopMode = null,
+    Object? displayCount = freezed,
   }) {
     return _then(
       _$ScenarioConfigImpl(
@@ -1280,6 +1303,16 @@ class __$$ScenarioConfigImplCopyWithImpl<$Res>
                 ? _value.swallowItems
                 : swallowItems // ignore: cast_nullable_to_non_nullable
                     as bool,
+        shopMode:
+            null == shopMode
+                ? _value.shopMode
+                : shopMode // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        displayCount:
+            freezed == displayCount
+                ? _value.displayCount
+                : displayCount // ignore: cast_nullable_to_non_nullable
+                    as int?,
       ),
     );
   }
@@ -1304,6 +1337,8 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     @JsonKey(name: 'pick_count') this.pickCount,
     @JsonKey(name: 'cover_fit') this.coverFit = false,
     @JsonKey(name: 'swallow_items') this.swallowItems = false,
+    @JsonKey(name: 'shop_mode') this.shopMode = false,
+    @JsonKey(name: 'display_count') this.displayCount,
   }) : _interactables = interactables,
        _zones = zones;
 
@@ -1373,10 +1408,18 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
   @override
   @JsonKey(name: 'swallow_items')
   final bool swallowItems;
+  // โหมดซื้อของ: สุ่มโชว์ [displayCount] ชิ้นจาก pool แล้วสั่งซื้อ 1-2 ชนิด รวม ≤4 ชิ้น
+  // (นับจำนวนต่อชนิด, ของบนชั้นลากซ้ำได้). ใช้กับ target_zone (ตะกร้า) — ดู DailyLifeGame
+  @override
+  @JsonKey(name: 'shop_mode')
+  final bool shopMode;
+  @override
+  @JsonKey(name: 'display_count')
+  final int? displayCount;
 
   @override
   String toString() {
-    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone, zones: $zones, pickCount: $pickCount, coverFit: $coverFit, swallowItems: $swallowItems)';
+    return 'ScenarioConfig(scenarioId: $scenarioId, version: $version, category: $category, module: $module, titleTh: $titleTh, backgroundImage: $backgroundImage, ttsInstruction: $ttsInstruction, ttsCelebration: $ttsCelebration, ttsHint: $ttsHint, interactables: $interactables, targetZone: $targetZone, zones: $zones, pickCount: $pickCount, coverFit: $coverFit, swallowItems: $swallowItems, shopMode: $shopMode, displayCount: $displayCount)';
   }
 
   @override
@@ -1410,7 +1453,11 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
             (identical(other.coverFit, coverFit) ||
                 other.coverFit == coverFit) &&
             (identical(other.swallowItems, swallowItems) ||
-                other.swallowItems == swallowItems));
+                other.swallowItems == swallowItems) &&
+            (identical(other.shopMode, shopMode) ||
+                other.shopMode == shopMode) &&
+            (identical(other.displayCount, displayCount) ||
+                other.displayCount == displayCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1432,6 +1479,8 @@ class _$ScenarioConfigImpl implements _ScenarioConfig {
     pickCount,
     coverFit,
     swallowItems,
+    shopMode,
+    displayCount,
   );
 
   /// Create a copy of ScenarioConfig
@@ -1468,6 +1517,8 @@ abstract class _ScenarioConfig implements ScenarioConfig {
     @JsonKey(name: 'pick_count') final int? pickCount,
     @JsonKey(name: 'cover_fit') final bool coverFit,
     @JsonKey(name: 'swallow_items') final bool swallowItems,
+    @JsonKey(name: 'shop_mode') final bool shopMode,
+    @JsonKey(name: 'display_count') final int? displayCount,
   }) = _$ScenarioConfigImpl;
 
   factory _ScenarioConfig.fromJson(Map<String, dynamic> json) =
@@ -1516,7 +1567,14 @@ abstract class _ScenarioConfig implements ScenarioConfig {
   // — ต่างจากค่าเริ่มต้นที่ชิ้นวางค้างในโซน (เช่น ผลไม้เรียงในถ้วย)
   @override
   @JsonKey(name: 'swallow_items')
-  bool get swallowItems;
+  bool get swallowItems; // โหมดซื้อของ: สุ่มโชว์ [displayCount] ชิ้นจาก pool แล้วสั่งซื้อ 1-2 ชนิด รวม ≤4 ชิ้น
+  // (นับจำนวนต่อชนิด, ของบนชั้นลากซ้ำได้). ใช้กับ target_zone (ตะกร้า) — ดู DailyLifeGame
+  @override
+  @JsonKey(name: 'shop_mode')
+  bool get shopMode;
+  @override
+  @JsonKey(name: 'display_count')
+  int? get displayCount;
 
   /// Create a copy of ScenarioConfig
   /// with the given fields replaced by the non-null parameter values.

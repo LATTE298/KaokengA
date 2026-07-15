@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,14 +22,29 @@ import '../../theme/typography.dart';
 import '../../widgets/child/game_result_dialog.dart';
 import '../../widgets/child_back_button.dart';
 
-class ScenarioGameScreen extends ConsumerWidget {
+class ScenarioGameScreen extends ConsumerStatefulWidget {
   const ScenarioGameScreen({super.key, required this.scenarioId});
 
   final String scenarioId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncConfig = ref.watch(loadedScenarioConfigProvider(scenarioId));
+  ConsumerState<ScenarioGameScreen> createState() =>
+      _ScenarioGameScreenState();
+}
+
+class _ScenarioGameScreenState extends ConsumerState<ScenarioGameScreen> {
+  // สุ่ม target + สร้าง game "ครั้งเดียว" ต่อ instance หน้าจอ (cache ไว้) — เดิมสุ่มใน build()
+  // ด้วย Random() ทุก build ทำให้ target ที่ game พูด (เสียงพากย์) กับที่แถบโจทย์โชว์เพี้ยน
+  // กันตอน build ซ้ำ (เห็นชัดตอนกด "เล่นอีกครั้ง"). replay = State ใหม่ = สุ่มใหม่ แต่เสถียร
+  // ตลอดการเล่นรอบนั้น
+  LoadedScenarioConfig? _randomized;
+  DailyLifeGame? _game;
+
+  @override
+  Widget build(BuildContext context) {
+    final asyncConfig = ref.watch(
+      loadedScenarioConfigProvider(widget.scenarioId),
+    );
     final tts = ref.watch(ttsServiceProvider);
     final reduceMotion = MediaQuery.of(context).disableAnimations;
 
@@ -48,9 +64,9 @@ class ScenarioGameScreen extends ConsumerWidget {
               ),
             ),
         data: (LoadedScenarioConfig loadedScenario) {
-          // สุ่ม target ใหม่ทุกครั้งที่โหลดด่าน (เฉพาะโหมดโจทย์ชิ้นเดียว —
-          // ฉาก sort-all ไม่มี target เดี่ยว เด็กต้องเก็บครบทุกชิ้น)
-          final randomized = _randomizeTarget(loadedScenario);
+          // สุ่ม target ครั้งเดียว (cache) — โหมดโจทย์ชิ้นเดียวเท่านั้น; ฉาก sort-all
+          // ไม่มี target เดี่ยว (_randomizeTarget คืน original ให้)
+          final randomized = _randomized ??= _randomizeTarget(loadedScenario);
           final config = randomized.config;
           final sortAll = config.zones.isNotEmpty;
           final targetItem =
@@ -67,7 +83,7 @@ class ScenarioGameScreen extends ConsumerWidget {
             ),
           );
 
-          final game = DailyLifeGame(
+          final game = _game ??= DailyLifeGame(
             loadedScenario: randomized,
             tts: tts,
             sfx: ref.watch(sfxPlayerProvider),
@@ -126,22 +142,40 @@ class ScenarioGameScreen extends ConsumerWidget {
                 right: 0,
                 child: SafeArea(
                   bottom: false,
-                  child: _ObjectiveBar(
-                    label:
-                        targetItem == null
-                            ? config.titleTh
-                            : 'หยิบ: ${scenarioItemNameTh(targetItem.id)}',
-                    wanted: [
-                      for (final id in game.wantedIds ?? const <String>[])
-                        (
-                          image:
-                              config.interactables
-                                  .firstWhere((i) => i.id == id)
-                                  .image,
-                          name: scenarioItemNameTh(id),
-                        ),
-                    ],
-                  ),
+                  child:
+                      game.shopOrder == null
+                          ? _ObjectiveBar(
+                            label:
+                                targetItem == null
+                                    ? config.titleTh
+                                    : 'หยิบ: ${scenarioItemNameTh(targetItem.id)}',
+                            wanted: [
+                              for (final id
+                                  in game.wantedIds ?? const <String>[])
+                                (
+                                  image:
+                                      config.interactables
+                                          .firstWhere((i) => i.id == id)
+                                          .image,
+                                  name: scenarioItemNameTh(id),
+                                ),
+                            ],
+                          )
+                          : _ShopObjectiveBar(
+                            items: [
+                              for (final o in game.shopOrder!)
+                                (
+                                  id: o.id,
+                                  name: scenarioItemNameTh(o.id),
+                                  image:
+                                      config.interactables
+                                          .firstWhere((i) => i.id == o.id)
+                                          .image,
+                                  need: o.count,
+                                ),
+                            ],
+                            basket: game.basketNotifier,
+                          ),
                 ),
               ),
 
@@ -287,6 +321,127 @@ class _WantedChip extends StatelessWidget {
           style: kTextMd.copyWith(
             fontWeight: FontWeight.w700,
             color: kTextPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// แถบโจทย์เกมซื้อของ — โชว์ทุกชนิด+จำนวน พร้อมความคืบหน้า "ใส่แล้ว/ต้องการ" อัปเดตเรียลไทม์
+// (ฟัง basketNotifier จากเกม). ชนิดที่ครบแล้วป้ายเปลี่ยนเป็นเขียว
+class _ShopObjectiveBar extends StatelessWidget {
+  const _ShopObjectiveBar({required this.items, required this.basket});
+
+  final List<({String id, String name, String image, int need})> items;
+  final ValueListenable<Map<String, int>> basket;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        kTouchTargetMin + kSpace4,
+        kSpace2,
+        kSpace4,
+        0,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: kSpace4,
+        vertical: kSpace2,
+      ),
+      decoration: BoxDecoration(
+        color: kYellowPrimary.withValues(alpha: 0.92),
+        borderRadius: kRadiusFull,
+        boxShadow: const [kShadowSm],
+      ),
+      child: ValueListenableBuilder<Map<String, int>>(
+        valueListenable: basket,
+        builder: (context, counts, _) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.shopping_basket_rounded,
+                size: 20,
+                color: kTextPrimary,
+              ),
+              const SizedBox(width: kSpace2),
+              Text(
+                'หยิบ: ',
+                style: kTextMd.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: kTextPrimary,
+                ),
+              ),
+              for (var i = 0; i < items.length; i++) ...[
+                if (i > 0)
+                  Text(' กับ ', style: kTextMd.copyWith(color: kTextPrimary)),
+                _ShopChip(
+                  image: items[i].image,
+                  name: items[i].name,
+                  current: counts[items[i].id] ?? 0,
+                  need: items[i].need,
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ShopChip extends StatelessWidget {
+  const _ShopChip({
+    required this.image,
+    required this.name,
+    required this.current,
+    required this.need,
+  });
+
+  final String image;
+  final String name;
+  final int current;
+  final int need;
+
+  @override
+  Widget build(BuildContext context) {
+    final done = current >= need;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(color: kWarmWhite, borderRadius: kRadiusSm),
+          child: Image.asset(
+            image,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+        ),
+        const SizedBox(width: kSpace1),
+        Text(
+          '$name ',
+          style: kTextMd.copyWith(
+            fontWeight: FontWeight.w700,
+            color: kTextPrimary,
+          ),
+        ),
+        // ป้ายจำนวน current/need — เขียวเมื่อครบ
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: kSpace2, vertical: 1),
+          decoration: BoxDecoration(
+            color: done ? kSuccess : kWarmWhite,
+            borderRadius: kRadiusFull,
+          ),
+          child: Text(
+            '$current/$need',
+            style: kTextSm.copyWith(
+              fontWeight: FontWeight.w800,
+              color: done ? kWarmWhite : kTextPrimary,
+            ),
           ),
         ),
       ],

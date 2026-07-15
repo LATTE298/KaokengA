@@ -250,6 +250,27 @@ class InteractableComponent extends PositionComponent
     );
   }
 
+  /// เกมซื้อของ: วางลงตะกร้าถูก → เด้งกลับตำแหน่งเดิมบนชั้น (ลากซ้ำได้) แทนวางค้าง/หาย.
+  /// ตั้ง _settledInZone=true ชั่วคราวกัน onDragEnd นับ mistake แล้วปลดล็อกเมื่อกลับถึงชั้น
+  void returnToShelf() {
+    _isBeingDragged = false;
+    priority = 2;
+    _settledInZone = true;
+    if (reduceMotion) {
+      position = _startPosition.clone();
+      scale = Vector2.all(1.0);
+      _settledInZone = false;
+    } else {
+      scale = Vector2.all(1.0);
+      add(
+        MoveEffect.to(
+          _startPosition,
+          EffectController(duration: 0.3, curve: Curves.easeOut),
+        )..onComplete = () => _settledInZone = false,
+      );
+    }
+  }
+
   @override
   void onCollisionStart(
     Set<Vector2> intersectionPoints,

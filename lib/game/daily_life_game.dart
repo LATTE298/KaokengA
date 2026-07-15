@@ -1,7 +1,9 @@
 import 'dart:async' as async;
 import 'dart:math';
 
+import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart' show ValueNotifier;
 
 import '../l10n/tts_strings_th.dart';
 import '../models/loaded_scenario_config.dart';
@@ -28,10 +30,15 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     this.sfx = const NoOpSfxPlayer(),
     Random? random,
   }) : config = loadedScenario.config,
-       _placeholderImagePaths = loadedScenario.placeholderImagePaths {
-    wantedIds = _pickWanted(random ?? Random());
+       _placeholderImagePaths = loadedScenario.placeholderImagePaths,
+       _random = random ?? Random() {
+    wantedIds = _pickWanted(_random);
+    // สร้างโจทย์ซื้อของตั้งแต่ตอนสร้าง (ไม่ใช่ onLoad) — แถบโจทย์ Flutter build ก่อน onLoad
+    // จบ ถ้าสร้างใน onLoad จะได้ order ว่าง (ข้อความโจทย์หาย)
+    if (config.shopMode) _initShop();
   }
 
+  final Random _random;
   final ScenarioConfig config;
   final TtsSpeaker tts;
 
@@ -48,6 +55,9 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
   final Set<String> _placeholderImagePaths;
 
   static final Vector2 _authoringSpace = Vector2(1920, 1080);
+
+  /// รูปตะกร้าจริงในเกมซื้อของ (แทนกรอบเหลือง)
+  static const String _kBasketImage = 'assets/images/basket.png';
 
   // cover-fit transform (ใช้เมื่อ config.coverFit) — คำนวณครั้งเดียวใน onLoad
   double _bgScale = 1;
@@ -80,6 +90,19 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
   int get _requiredCount => wantedIds?.length ?? config.interactables.length;
 
+  // -------------------- โหมดซื้อของ (shop) --------------------
+  bool get isShop => config.shopMode;
+  final List<InteractableConfig> _shopItems = []; // ชิ้นที่สุ่มโชว์บนชั้น
+  List<({String id, int count})> _orderList = []; // โจทย์: ชนิด+จำนวน (ลำดับคงที่)
+  final Map<String, int> _shopOrder = {}; // id → จำนวนที่ต้องซื้อ
+  final Map<String, int> _basket = {}; // id → จำนวนที่ใส่ตะกร้าแล้ว
+
+  /// แจ้ง UI (แถบโจทย์) อัปเดตจำนวนในตะกร้าแบบเรียลไทม์
+  final ValueNotifier<Map<String, int>> basketNotifier = ValueNotifier({});
+
+  /// โจทย์ซื้อของรอบนี้ (ชนิด+จำนวน) — null ถ้าไม่ใช่โหมดซื้อของ (ให้แถบโจทย์อ่าน)
+  List<({String id, int count})>? get shopOrder => isShop ? _orderList : null;
+
   List<String>? _pickWanted(Random random) {
     final pickCount = config.pickCount;
     if (!isSortAll ||
@@ -99,6 +122,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
   /// ประโยคสั่งของรอบนี้ — โหมดสุ่มผลไม้ประกอบจากชื่อ 2 ชิ้นที่สุ่มได้
   /// นอกนั้นใช้ประโยคของฉากจาก JSON ตรงๆ
   String get instructionText {
+    if (isShop) return shopOrderAsk(_orderList);
     final wanted = wantedIds;
     if (wanted != null && wanted.length == 2) {
       return ttsFruitPickAsk(
@@ -127,7 +151,10 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
       ),
     );
 
-    if (isSortAll) {
+    if (isShop) {
+      await _loadShopContent();
+    } else {
+      if (isSortAll) {
       // โซนตามภาพพื้นหลัง (ถัง/ถ้วยวาดอยู่ในภาพแล้ว) — ไม่วาดกรอบทับ
       final wanted = wantedIds?.toSet();
       for (final zone in config.zones) {
@@ -218,6 +245,7 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
       );
       _items.add(component);
       await add(component);
+      }
     }
 
     if (enablePromptTimers) {
@@ -260,10 +288,145 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
     tts.speak(kTtsQuizCorrect);
   }
 
+  // -------------------- โหลด/ตรรกะโหมดซื้อของ --------------------
+  /// เลือกของที่โชว์ + สร้างโจทย์ ตอน constructor (ให้ shopOrder พร้อมก่อน UI build)
+  void _initShop() {
+    final pool = [...config.interactables]..shuffle(_random);
+    final count = config.displayCount ?? pool.length;
+    _shopItems
+      ..clear()
+      ..addAll(pool.take(count));
+    _orderList = _generateOrder(_shopItems);
+    _shopOrder
+      ..clear()
+      ..addEntries(_orderList.map((o) => MapEntry(o.id, o.count)));
+  }
+
+  Future<void> _loadShopContent() async {
+    _basket.clear();
+    basketNotifier.value = {};
+
+    final target = config.targetZone!;
+    final rawPos = _toCanvas(Vector2(target.x, target.y));
+    final rawSize = _toCanvasSize(Vector2(target.width, target.height));
+    // ขยายตะกร้า (รูป + พื้นที่รับ) ~1.4 เท่า รอบจุดกึ่งกลางเดิม
+    const basketScale = 1.4;
+    final zoneSize = rawSize * basketScale;
+    final zonePos = rawPos + (rawSize - zoneSize) / 2;
+
+    // รูปตะกร้าจริง (basketNOBG) วางตรงโซน — contain-fit กันเบี้ยว, อยู่ใต้ไอเทม
+    final basketImg = await images.load(flameImageKey(_kBasketImage));
+    final bAspect = basketImg.width / basketImg.height;
+    final bSize =
+        bAspect >= zoneSize.x / zoneSize.y
+            ? Vector2(zoneSize.x, zoneSize.x / bAspect)
+            : Vector2(zoneSize.y * bAspect, zoneSize.y);
+    await add(
+      SpriteComponent(
+        sprite: Sprite(basketImg),
+        size: bSize,
+        position: zonePos + (zoneSize - bSize) / 2,
+        priority: 0,
+      ),
+    );
+
+    // โซนรับ (มองไม่เห็น — ใช้รูปตะกร้าแทนกรอบเหลือง) รับหลายชิ้น เด้งกลับชั้น นับจำนวน
+    await add(
+      DropZoneComponent(
+        position: zonePos,
+        size: zoneSize,
+        visible: false,
+        onItemAccepted: _handleShopItem,
+        acceptCheck: _shopAccepts,
+        multiAccept: true,
+        returnItems: true,
+      ),
+    );
+
+    // จัดของบนชั้น — ตำแหน่งเดิมของฉากเซเว่นดั้งเดิม (x 300/600/900, y 500) ให้ก้นของ
+    // วางพอดีบนชั้น (y=700 ก่อนหน้าต่ำไป ของล้นหน้าชั้น)
+    const itemSize = 120.0;
+    const shelfY = 500.0;
+    const slotXs = [300.0, 600.0, 900.0];
+    final n = _shopItems.length;
+    for (var i = 0; i < n; i++) {
+      final item = _shopItems[i];
+      final ax = i < slotXs.length ? slotXs[i] : 300.0 + i * 300.0;
+      final pos = _toCanvas(Vector2(ax, shelfY));
+      final component = InteractableComponent(
+        config: item,
+        position: pos,
+        reduceMotion: reduceMotion,
+        placeholderImagePaths: _placeholderImagePaths,
+        displaySize: itemSize,
+        showCard: true, // การ์ดขาวรองให้เด่นบนฉากชั้นวาง
+        entryDelay: i * 0.07,
+        onPathSample: (p) {
+          _dragPath.add(GamePosition(x: p.x, y: p.y));
+          _resetIdleTimer();
+        },
+        onMistake: () {
+          mistakeCount++;
+          if (_completed) return;
+          sfx.play(kSfxWrong);
+        },
+      );
+      _items.add(component);
+      await add(component);
+    }
+  }
+
+  /// สุ่มโจทย์ซื้อของ: 1-2 ชนิด รวม ≤ 4 ชิ้น (แต่ละชนิด 1-3)
+  List<({String id, int count})> _generateOrder(List<InteractableConfig> items) {
+    const maxTypes = 2;
+    const maxTotal = 4;
+    final shuffled = [...items]..shuffle(_random);
+    final typeCount = items.length >= 2 ? _random.nextInt(maxTypes) + 1 : 1;
+    final chosen = shuffled.take(typeCount).toList();
+    final order = <({String id, int count})>[];
+    var remaining = maxTotal;
+    for (var i = 0; i < chosen.length; i++) {
+      final slotsLeft = chosen.length - i - 1; // เผื่ออย่างน้อย 1 ให้ชนิดที่เหลือ
+      var maxForThis = remaining - slotsLeft;
+      if (maxForThis < 1) maxForThis = 1;
+      if (maxForThis > 3) maxForThis = 3;
+      final c = _random.nextInt(maxForThis) + 1; // 1..maxForThis
+      order.add((id: chosen[i].id, count: c));
+      remaining -= c;
+    }
+    return order;
+  }
+
+  /// ตะกร้ารับชิ้นนี้ไหม — ต้องอยู่ในโจทย์ + ยังไม่ครบจำนวน
+  bool _shopAccepts(InteractableComponent obj) {
+    final need = _shopOrder[obj.config.id];
+    if (need == null) return false;
+    return (_basket[obj.config.id] ?? 0) < need;
+  }
+
+  void _handleShopItem(InteractableComponent obj) {
+    if (_completed) return;
+    final id = obj.config.id;
+    _basket[id] = (_basket[id] ?? 0) + 1;
+    basketNotifier.value = Map.of(_basket);
+    sfx.play(kSfxRight);
+    _resetIdleTimer();
+    // ครบทุกชนิดตามจำนวน → จบเกม
+    final done = _shopOrder.entries.every(
+      (e) => (_basket[e.key] ?? 0) >= e.value,
+    );
+    if (done) {
+      _handleSuccess(obj);
+      return;
+    }
+    HapticService.memoryMatch();
+  }
+
   @override
   void onRemove() {
     _idleTimer?.cancel();
     tts.cancel();
+    basketNotifier.dispose();
     super.onRemove();
   }
 
@@ -309,8 +472,8 @@ class DailyLifeGame extends FlameGame with HasCollisionDetection {
 
   void _onIdle() {
     if (_completed) return;
-    // โหมดสุ่มโจทย์: ทวนประโยคโจทย์เดิม (ใบ้ที่ตรงที่สุด) — โหมดอื่นใช้ hint ฉาก
-    tts.speak(wantedIds != null ? instructionText : config.ttsHint);
+    // โหมดสุ่มโจทย์/ซื้อของ: ทวนประโยคโจทย์เดิม (ใบ้ตรงสุด) — โหมดอื่นใช้ hint ฉาก
+    tts.speak(isShop || wantedIds != null ? instructionText : config.ttsHint);
     _showHintArrow();
     _idleTimer = async.Timer(const Duration(seconds: 15), _onIdle);
   }

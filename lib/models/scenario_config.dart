@@ -86,6 +86,10 @@ class ScenarioConfig with _$ScenarioConfig {
     // ชิ้นที่วางถูกโซนแล้ว "ถูกดูดหายเข้าโซน" (เช่น ทิ้งขยะลงถัง) + เสียงเอฟเฟกต์
     // — ต่างจากค่าเริ่มต้นที่ชิ้นวางค้างในโซน (เช่น ผลไม้เรียงในถ้วย)
     @JsonKey(name: 'swallow_items') @Default(false) bool swallowItems,
+    // โหมดซื้อของ: สุ่มโชว์ [displayCount] ชิ้นจาก pool แล้วสั่งซื้อ 1-2 ชนิด รวม ≤4 ชิ้น
+    // (นับจำนวนต่อชนิด, ของบนชั้นลากซ้ำได้). ใช้กับ target_zone (ตะกร้า) — ดู DailyLifeGame
+    @JsonKey(name: 'shop_mode') @Default(false) bool shopMode,
+    @JsonKey(name: 'display_count') int? displayCount,
   }) = _ScenarioConfig;
 
   factory ScenarioConfig.fromJson(Map<String, dynamic> json) =>

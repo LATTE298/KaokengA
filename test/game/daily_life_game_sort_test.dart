@@ -283,6 +283,62 @@ void main() {
       expect(order.indexOf(wanted[0]) < order.indexOf(wanted[1]), isTrue);
     },
   );
+
+  test('เกมซื้อของ: โชว์สุ่ม 3, โจทย์ ≤2 ชนิด ≤4 ชิ้น, ซื้อครบจบเกม', () async {
+    final loaded = await load('711_milk_001');
+    final completer = Completer<(int, int)>();
+    final game = DailyLifeGame(
+      loadedScenario: loaded,
+      tts: _FakeSpeaker(),
+      reduceMotion: true,
+      enablePromptTimers: false,
+      random: Random(1),
+      onComplete: (_, score, stars) => completer.complete((score, stars)),
+    );
+    game.onGameResize(Vector2(800, 450));
+    await game.onLoad();
+
+    expect(game.isShop, isTrue);
+    // สุ่มโชว์ 3 ชิ้นจาก pool 10
+    final items = game.children.whereType<InteractableComponent>().toList();
+    expect(items, hasLength(3));
+
+    // โจทย์: 1-2 ชนิด รวม ≤ 4 ชิ้น (แต่ละชนิด 1-3)
+    final order = game.shopOrder!;
+    expect(order.length, inInclusiveRange(1, 2));
+    expect(order.fold<int>(0, (s, o) => s + o.count), lessThanOrEqualTo(4));
+    for (final o in order) {
+      expect(o.count, inInclusiveRange(1, 3));
+    }
+
+    final basket = game.children.whereType<DropZoneComponent>().first;
+    final orderIds = order.map((o) => o.id).toSet();
+
+    // ชิ้นนอกโจทย์ → ตะกร้าไม่รับ (ไม่นับ)
+    final notNeeded = items.where((i) => !orderIds.contains(i.config.id));
+    if (notNeeded.isNotEmpty) {
+      final x = notNeeded.first;
+      basket.onInteractableEntered(x);
+      expect(game.basketNotifier.value[x.config.id] ?? 0, 0);
+    }
+
+    // ซื้อครบตามจำนวน + เกินจำนวนโดนปฏิเสธ
+    for (final o in order) {
+      final item = itemById(game, o.id);
+      for (var k = 0; k < o.count; k++) {
+        basket.onInteractableEntered(item);
+      }
+      basket.onInteractableEntered(item); // เกิน → ปฏิเสธ
+      expect(game.basketNotifier.value[o.id], o.count);
+    }
+
+    final (score, stars) = await completer.future.timeout(
+      const Duration(seconds: 5),
+    );
+    expect(score, 10); // ไม่มี mistake
+    expect(stars, 3);
+    game.onRemove();
+  });
 }
 
 class _FakeSpeaker implements TtsSpeaker {

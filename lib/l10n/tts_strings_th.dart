@@ -69,9 +69,9 @@ String ttsQuizQuestion(String category) {
 // ชื่อไทยของ interactable ทุกฉาก — ใช้ทั้งประกอบประโยค TTS และหัวข้อโจทย์บนจอ
 // ⚠️ เพิ่ม id ใหม่ในไฟล์ฉากเมื่อไหร่ต้องเพิ่มที่นี่ + คลิปเสียงที่เกี่ยวใน manifest
 const Map<String, String> kScenarioItemNamesTh = {
-  'milk_carton_blue': 'นมกล่องสีน้ำเงิน',
+  'milk_carton_blue': 'นม',
   'bread_loaf': 'ขนมปัง',
-  'potato_chips': 'ขนมกรุบกรอบ',
+  'potato_chips': 'ขนม',
   'plastic_bottle': 'ขวดพลาสติก',
   'food_waste': 'เศษอาหาร',
   'paper_ball': 'กระดาษ',
@@ -80,10 +80,38 @@ const Map<String, String> kScenarioItemNamesTh = {
   'orange': 'ส้ม',
   'apple': 'แอปเปิ้ล',
   'grapes': 'องุ่น',
+  // ของเพิ่มในเกมซื้อของ (ใช้รูปหมวดอาหารจากคลัง vocab)
+  'candy': 'ลูกอม',
+  'pizza': 'พิซซ่า',
+  'burger': 'เบอร์เกอร์',
+  'sushi': 'ซูชิ',
+  'boiled_egg': 'ไข่ต้ม',
+  'pie': 'พาย',
+  'fried_chicken': 'ไก่ทอด',
 };
 
 /// ชื่อไทยของไอเทมในฉาก Module A (fallback = id ถ้ายังไม่ลงทะเบียน)
 String scenarioItemNameTh(String id) => kScenarioItemNamesTh[id] ?? id;
+
+/// ลักษณนามของไอเทม (เกมซื้อของ) — fallback 'ชิ้น'
+const Map<String, String> kScenarioItemCountersTh = {
+  'milk_carton_blue': 'กล่อง',
+  'bread_loaf': 'ถุง',
+  'potato_chips': 'ห่อ',
+  'candy': 'ห่อ',
+  'boiled_egg': 'ฟอง',
+};
+
+String scenarioItemCounterTh(String id) => kScenarioItemCountersTh[id] ?? 'ชิ้น';
+
+/// ประโยคโจทย์เกมซื้อของ — รวมทุกชนิด+จำนวน เช่น "หยิบนม 3 กล่อง กับ ขนม 2 ห่อ ใส่ตะกร้า"
+String shopOrderAsk(List<({String id, int count})> order) {
+  final parts = [
+    for (final o in order)
+      '${scenarioItemNameTh(o.id)} ${o.count} ${scenarioItemCounterTh(o.id)}',
+  ];
+  return 'น้องช่วยหยิบ${parts.join(' กับ ')} ใส่ตะกร้าให้หน่อยนะครับ';
+}
 
 /// โจทย์เกมจัดผลไม้โหมดสุ่ม 2 ชนิด — ประโยคเดียวบอกครบทั้งคู่ (กติกา TTS:
 /// หนึ่งเหตุการณ์พูดครั้งเดียว). เป็น key คลิปใน manifest — เรียงชื่อตามลำดับ

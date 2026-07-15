@@ -98,6 +98,8 @@ _$ScenarioConfigImpl _$$ScenarioConfigImplFromJson(
   pickCount: (json['pick_count'] as num?)?.toInt(),
   coverFit: json['cover_fit'] as bool? ?? false,
   swallowItems: json['swallow_items'] as bool? ?? false,
+  shopMode: json['shop_mode'] as bool? ?? false,
+  displayCount: (json['display_count'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$$ScenarioConfigImplToJson(
@@ -118,6 +120,8 @@ Map<String, dynamic> _$$ScenarioConfigImplToJson(
   'pick_count': instance.pickCount,
   'cover_fit': instance.coverFit,
   'swallow_items': instance.swallowItems,
+  'shop_mode': instance.shopMode,
+  'display_count': instance.displayCount,
 };
 
 _$ScenarioSummaryImpl _$$ScenarioSummaryImplFromJson(
