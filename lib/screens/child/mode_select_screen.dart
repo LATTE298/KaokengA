@@ -826,6 +826,17 @@ class _BgmSettingsDialogState extends State<_BgmSettingsDialog> {
                 ),
               ),
               const SizedBox(height: kSpace4),
+              // กลับไปหน้าเริ่ม (มี footer Privacy/Safety/Support/Terms ให้อ่าน)
+              OutlinedButton.icon(
+                onPressed: () {
+                  final router = GoRouter.of(context);
+                  Navigator.of(context).pop(); // ปิดแผงตั้งค่า
+                  router.go(kRouteHome);
+                },
+                icon: const Icon(Icons.home_rounded),
+                label: const Text('กลับไปที่หน้าหลัก'),
+              ),
+              const SizedBox(height: kSpace2),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text('เสร็จ'),
